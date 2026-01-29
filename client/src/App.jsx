@@ -1,18 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import OtpLogin from "./pages/OtpLogin";
 import Dashboard from "./pages/Dashboard";
-import Report from "./pages/Report";
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<OtpLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/report" element={<Report />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
 export default App;
+
