@@ -64,10 +64,10 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
         try {
             const pdf = new jsPDF("p", "mm", "a4");
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const margin = 15; // Further reduced for better width utilization
-            let currentY = 12; // Start even higher
+            const margin = 15; 
+            let currentY = 12; 
 
-            // 1. HEADER (LOGOS)
+            
             const logoY = 7;
             if (foreseBase64) {
                 pdf.addImage(foreseBase64, "PNG", margin, logoY, 26, 26);
@@ -77,7 +77,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             }
             currentY = logoY + 28;
 
-            // 2. TITLE
+
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(26); // Increased size
             pdf.setTextColor(0, 0, 0);
@@ -89,7 +89,6 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.text("Performance Overview", pageWidth / 2, currentY, { align: "center" });
             currentY += 8;
 
-            // 3. STUDENT INFORMATION CARD
             pdf.setDrawColor(226, 232, 240);
             pdf.setFillColor(255, 255, 255);
             pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 42, 4, 4, "FD"); // Taller card
@@ -136,19 +135,18 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.setTextColor(30, 41, 59);
             pdf.text(String(user.dept || "-"), midPoint + 10 + labelWidth, currentY + 34);
 
-            currentY += 52; // Increased gap to prevent overlap with General Aptitude title
+            currentY += 52; 
 
-            // 4. APTITUDE TABLE
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(15); // Larger size
             pdf.setTextColor(30, 41, 59);
-            pdf.text("General Aptitude", margin + 5, currentY);
+            pdf.text("General Aptitude", margin + 1, currentY);
             currentY += 6;
 
             const drawTable = (title, rows, total, y) => {
                 const tableW = pageWidth - (margin * 2);
                 const headerH = 9;
-                const rowH = 9.5;    // Increased slightly as requested
+                const rowH = 9.5;    
                 const footerH = 10;
                 const tableH = headerH + (rows.length * rowH) + footerH;
 
@@ -157,7 +155,6 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 pdf.setLineWidth(0.2);
                 pdf.roundedRect(margin, y, tableW, tableH, 3, 3, "S");
 
-                // Header Background (Rounded Top Only)
                 pdf.setFillColor(248, 250, 252);
                 pdf.roundedRect(margin, y, tableW, headerH, 3, 3, "F");
                 pdf.rect(margin, y + 5, tableW, 5, "F");
@@ -185,7 +182,6 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                     rowY += rowH;
                 });
 
-                // Footer Background (Rounded Bottom Only)
                 pdf.setFillColor(241, 245, 249);
                 pdf.roundedRect(margin, rowY, tableW, footerH, 3, 3, "F");
                 pdf.rect(margin, rowY, tableW, 5, "F");
@@ -207,13 +203,12 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 ["Comprehension", aptitudeScores.comprehension, 5]
             ];
             currentY = drawTable("Aptitude Scores", aptRows, totalApt, currentY);
-            currentY += 10; // Gap match before General Aptitude text
+            currentY += 10; 
 
-            // 5. GD TABLE
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(15);
             pdf.setTextColor(30, 41, 59);
-            pdf.text("Group Discussion", margin + 5, currentY);
+            pdf.text("Group Discussion", margin + 1, currentY);
             currentY += 6;
 
             const gdRows = [
@@ -226,16 +221,13 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             currentY = drawTable("Group Discussion", gdRows, totalGD, currentY);
             currentY += 4;
 
-            // 6. OVERALL SCORE CARD
-            const scoreCardH = 28; // Slightly more compact to fit
+            const scoreCardH = 28; 
             const scoreCardW = pageWidth - (margin * 2);
 
 
-            // Background fill
             pdf.setFillColor(248, 250, 252);
             pdf.roundedRect(margin, currentY, scoreCardW, scoreCardH, 4, 4, "F");
 
-            // Border
             pdf.setDrawColor(226, 232, 240);
             pdf.setLineWidth(0.4);
             pdf.roundedRect(margin, currentY, scoreCardW, scoreCardH, 4, 4, "S");
@@ -248,8 +240,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.setTextColor(15, 23, 42);
             pdf.setFontSize(28);
             pdf.text(`${overall} / 100`, pageWidth / 2, currentY + 20, { align: "center" });
-            // 7. FOOTER
-            pdf.setTextColor(148, 163, 184); // #94a3b8
+            pdf.setTextColor(148, 163, 184); 
             pdf.setFontSize(7);
             //pdf.text(`© 2026 SVCE • Mock Examination Report • Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 282, { align: "center" });
 
@@ -289,7 +280,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                             width: "210mm",
                             minHeight: "297mm",
                             backgroundColor: "#ffffff",
-                            padding: "8mm 20mm 20mm 20mm", // Lifted further from 12mm
+                            padding: "8mm 20mm 20mm 20mm", 
                             boxSizing: "border-box",
                             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
                             display: "flex",

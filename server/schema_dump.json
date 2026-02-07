@@ -1,0 +1,90 @@
+{
+  "users": [
+    {
+      "column_name": "id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "regno",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "name",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "email",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "password",
+      "data_type": "text"
+    },
+    {
+      "column_name": "dept",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "role",
+      "data_type": "character varying"
+    }
+  ],
+  "results": [
+    {
+      "column_name": "id",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "comprehension",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "programming",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "verbal",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "core",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "aptitude",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "totalpoints",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "sessionid",
+      "data_type": "character varying"
+    },
+    {
+      "column_name": "userid",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "subject_knowledge",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "communication_skills",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "body_language",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "listening_skills",
+      "data_type": "integer"
+    },
+    {
+      "column_name": "active_participation",
+      "data_type": "integer"
+    }
+  ]
+}

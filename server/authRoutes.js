@@ -11,15 +11,24 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false }),
-  (req, res) => {
-    const token = jwt.sign(req.user, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+  (req, res, next) => {
+    passport.authenticate("google", { session: false }, (err, user, info) => {
+      if (err) {
+        console.error("Google Auth Error:", err);
+        return res.redirect("http://localhost:5173/?error=Authentication failed");
+      }
+      if (!user) {
+        return res.redirect("http://localhost:5173/?error=User not registered");
+      }
 
-    res.redirect(
-      `http://localhost:5173/oauth-success?token=${token}`
-    );
+      const token = jwt.sign(user, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      res.redirect(
+        `http://localhost:5173/oauth-success?token=${token}`
+      );
+    })(req, res, next);
   }
 );
 

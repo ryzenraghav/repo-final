@@ -1,7 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const error = searchParams.get("error");
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth
@@ -33,22 +35,28 @@ export default function Login() {
           Performance Overview
         </p>
 
+        {error && (
+          <div className="mb-4 bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm border border-red-200">
+            {error}
+          </div>
+        )}
+
         {/* Google Sign-in Button */}
         <button
-  onClick={handleGoogleLogin}
-  className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500
+          onClick={handleGoogleLogin}
+          className="w-full bg-gradient-to-r from-indigo-600 to-indigo-500
              text-white py-3 rounded-xl font-semibold
              flex items-center justify-center gap-2
              shadow-md hover:from-indigo-700 hover:to-indigo-600
              transition-all"
->
-  <img
-    src="https://www.svgrepo.com/show/355037/google.svg"
-    alt="google"
-    className="w-4 h-4 bg-white rounded-full p-0.5"
-  />
-  Sign in with Google →
-</button>
+        >
+          <img
+            src="https://www.svgrepo.com/show/355037/google.svg"
+            alt="google"
+            className="w-4 h-4 bg-white rounded-full p-0.5"
+          />
+          Login with Google
+        </button>
 
       </div>
     </div>

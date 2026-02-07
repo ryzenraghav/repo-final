@@ -50,7 +50,7 @@ export default function Actionbutton({ onDownload }) {
             </div>
 
             <p className="text-sm text-gray-500 mb-4 leading-relaxed">
-              Download your complete mock interview report as a printable PDF for your records.
+              Download your complete aptitude and group discussion report as a printable PDF for your records.
             </p>
 
             <button
