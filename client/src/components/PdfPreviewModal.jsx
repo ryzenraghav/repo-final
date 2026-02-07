@@ -19,11 +19,19 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
     useEffect(() => {
         if (!isOpen) return;
         const toBase64 = async (url, setter) => {
-            const res = await fetch(url);
-            const blob = await res.blob();
-            const reader = new FileReader();
-            reader.onloadend = () => setter(reader.result);
-            reader.readAsDataURL(blob);
+            try {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    console.warn(`Failed to fetch image: ${url}`, res.status);
+                    return;
+                }
+                const blob = await res.blob();
+                const reader = new FileReader();
+                reader.onloadend = () => setter(reader.result);
+                reader.readAsDataURL(blob);
+            } catch (err) {
+                console.error(`Error loading image ${url}:`, err);
+            }
         };
         toBase64(foreselogo, setForeseBase64);
         toBase64(svcelogo, setSvceBase64);
@@ -99,14 +107,14 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.text("Name:", margin + 6, currentY + 18);
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(user.name, margin + 45, currentY + 18);
+            pdf.text(String(user.name || "-"), margin + 45, currentY + 18);
 
             pdf.setFont("helvetica", "normal");
             pdf.setTextColor(100, 116, 139);
             pdf.text("Reg No:", midPoint + 10, currentY + 18);
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(user.regno, pageWidth - margin - 6, currentY + 18, { align: "right" });
+            pdf.text(String(user.regno || "-"), pageWidth - margin - 6, currentY + 18, { align: "right" });
 
             // Info Row 2
             pdf.setFont("helvetica", "normal");
@@ -114,14 +122,14 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.text("Email:", margin + 6, currentY + 28);
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(user.email || "-", margin + 45, currentY + 28);
+            pdf.text(String(user.email || "-"), margin + 45, currentY + 28);
 
             pdf.setFont("helvetica", "normal");
             pdf.setTextColor(100, 116, 139);
             pdf.text("Dept:", midPoint + 10, currentY + 28);
             pdf.setFont("helvetica", "bold");
             pdf.setTextColor(30, 41, 59);
-            pdf.text(user.dept, pageWidth - margin - 6, currentY + 28, { align: "right" });
+            pdf.text(String(user.dept || "-"), pageWidth - margin - 6, currentY + 28, { align: "right" });
 
             currentY += 40;
 
@@ -151,9 +159,9 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 rows.forEach(([label, score]) => {
                     pdf.setDrawColor(241, 245, 249);
                     pdf.line(margin, rowY, pageWidth - margin, rowY);
-                    pdf.text(label, margin + 4, rowY + 6);
+                    pdf.text(String(label || ""), margin + 4, rowY + 6);
                     pdf.setFont("helvetica", "bold");
-                    pdf.text(`${score} / 10`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+                    pdf.text(`${Number(score || 0)} / 10`, pageWidth - margin - 4, rowY + 6, { align: "right" });
                     pdf.setFont("helvetica", "normal");
                     rowY += 8;
                 });
@@ -162,7 +170,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 pdf.rect(margin, rowY, tableW, 9, "F");
                 pdf.setFont("helvetica", "bold");
                 pdf.text("Section Total", margin + 4, rowY + 6);
-                pdf.text(`${total} / 50`, pageWidth - margin - 4, rowY + 6, { align: "right" });
+                pdf.text(`${Number(total || 0)} / 50`, pageWidth - margin - 4, rowY + 6, { align: "right" });
 
                 return rowY + 9;
             };
@@ -195,9 +203,9 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             currentY += 2;
 
             // 6. OVERALL SCORE CARD
-            pdf.setDrawColor(0, 0, 0);
+            pdf.setDrawColor(0, 0,0);
             pdf.setLineWidth(0.8);
-            pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 22, 2, 2, "D");
+            pdf.roundedRect(margin, currentY, pageWidth - (margin * 2), 22, 2, 2, "S");
 
             pdf.setTextColor(0, 0, 0);
             pdf.setFont("helvetica", "bold");
@@ -208,7 +216,6 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.text(`${overall}`, pageWidth / 2 - 4, currentY + 16, { align: "center" });
             pdf.setFontSize(10);
             pdf.text("/ 100", pageWidth / 2 + 10, currentY + 16);
-
             // 7. FOOTER
             pdf.setTextColor(148, 163, 184); // #94a3b8
             pdf.setFontSize(7);
@@ -217,6 +224,13 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.save(`Mock_Report_${user.regno}.pdf`);
         } catch (err) {
             console.error("PDF generation failed:", err);
+            console.error("Error details:", {
+                message: err.message,
+                stack: err.stack,
+                user: user ? { name: user.name, regno: user.regno } : null,
+                foreseLoaded: !!foreseBase64,
+                svceLoaded: !!svceBase64
+            });
             alert("Failed to generate PDF. Please try again.");
         } finally {
             setIsGenerating(false);

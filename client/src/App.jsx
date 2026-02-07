@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import OAuthSuccess from "./pages/OAuthSuccess";
 import Report from "./pages/Report";
 
 function App() {
@@ -8,8 +8,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/oauth-success" element={<OAuthSuccess />} />
         <Route path="/report" element={<Report />} />
+        
+        
+        
       </Routes>
     </Router>
   );

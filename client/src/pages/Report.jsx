@@ -6,37 +6,36 @@ import Aptitude from "../components/Aptitude";
 import Group from "../components/Group";
 import Actionbutton from "../components/Actionbutton";
 import PdfPreviewModal from "../components/PdfPreviewModal";
+import { jwtDecode } from "jwt-decode";
+
 
 export default function Report() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [user, setUser] = useState(location.state);
-  const [loading, setLoading] = useState(!location.state);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
-      const token = sessionStorage.getItem("token");
-      if (!token) {
-        navigate("/");
-        return;
-      }
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    navigate("/");
+    return;
+  }
 
-      import("axios").then((axios) => {
-        axios.default
-          .get("http://localhost:5000/api/auth/dashboard", {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then((res) => {
-            setUser({ ...res.data.user, ...res.data.results });
-            setLoading(false);
-          })
-          .catch((err) => {
-            console.error(err);
-            navigate("/");
-          });
-      });
-    }
+  try {
+    const decoded = jwtDecode(token);
+    setUser(decoded);
+    setLoading(false);
+  } catch (err) {
+    console.error("Invalid token", err);
+    navigate("/");
+  }
+}
+
   }, [user, navigate]);
 
   if (loading) {
