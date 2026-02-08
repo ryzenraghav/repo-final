@@ -250,15 +250,18 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 </div>
 
                 {/* CONTENT */}
-                <div className="bg-gray-100 p-4 overflow-auto flex-1 flex justify-center">
+                <div className="bg-gray-100 p-2 sm:p-4 overflow-auto flex-1 flex justify-center items-start">
                     <div
                         ref={pdfRef}
+                        className = "w-full sm:w-auto"
                         style={{
-                            width: "210mm",
-                            height: "297mm",
+                            maxwidth: "210mm",
+                            minheight: "297mm",
                             backgroundColor: "#ffffff",
-                            padding: "20mm",
+                            padding: "10mm",
                             boxSizing: "border-box",
+                            transform: "scale(1)",
+                            transformOrigin: "top center"
                         }}
                     >
                         {/* LOGOS (LIFTED UP) */}
