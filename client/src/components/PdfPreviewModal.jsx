@@ -273,10 +273,24 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 </div>
 
                 {/* CONTENT */}
+<<<<<<< HEAD
+                <div className="bg-gray-100 p-2 sm:p-4 overflow-auto flex-1 flex justify-center items-start">
+=======
                 <div className="bg-gray-200/50 p-8 overflow-auto flex-1 flex justify-center">
+>>>>>>> 04deeb3864372def2518b1cfba334efc2afc1a8e
                     <div
                         ref={pdfRef}
+                        className = "w-full sm:w-auto"
                         style={{
+<<<<<<< HEAD
+                            maxwidth: "210mm",
+                            minheight: "297mm",
+                            backgroundColor: "#ffffff",
+                            padding: "10mm",
+                            boxSizing: "border-box",
+                            transform: "scale(1)",
+                            transformOrigin: "top center"
+=======
                             width: "210mm",
                             minHeight: "297mm",
                             backgroundColor: "#ffffff",
@@ -285,6 +299,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
                             display: "flex",
                             flexDirection: "column",
+>>>>>>> 04deeb3864372def2518b1cfba334efc2afc1a8e
                         }}
                     >
                         {/* LOGOS (Aligned and balanced) */}
