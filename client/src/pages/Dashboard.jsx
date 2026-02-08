@@ -250,11 +250,9 @@ export default function Dashboard() {
           Engineering Student • {user.dept}
         </p>
 
-        <div className="flex justify-center mt-4 text-xs font-semibold tracking-wide">
-          <span className="px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 uppercase">
-            Reg No: {user.regno}
-          </span>
-        </div>
+        <p className="text-gray-500 text-sm mt-1 font-medium">
+          Reg No: {user.regno}
+        </p>
 
         {/* Logout */}
         <button

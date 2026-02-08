@@ -41,9 +41,9 @@ export default function TopSection({ profile, user }) {
                   {profile.dept}
                 </p>
 
-                <span className="inline-block mt-1 px-2 py-[2px] text-[10px] rounded-full bg-green-500 text-white shadow-sm">
+                <p className="text-xs text-white/90 mt-1">
                   Reg: {profile.regNo}
-                </span>
+                </p>
               </div>
             </div>
           </div>

@@ -31,11 +31,11 @@ export default function Group({ data: gdData }) {
           gdData.active_participation || 0
         ],
         backgroundColor: [
-          "#34d399",
-          "#818cf8",
-          "#fcd34d",
-          "#f87171",
-          "#0ea5e9",
+          "#6366f1",
+          "#3b82f6",
+          "#14b8a6",
+          "#f59e0b",
+          "#ec4899",
         ],
         borderRadius: 6,
         barThickness: 30,
