@@ -107,7 +107,7 @@ export default function Report() {
                 <p className="text-sm text-gray-500 mt-1 font-medium">
                   {data.profile.dept}
                 </p>
-                <span className="mt-3 px-4 py-1.5 text-[11px] font-bold rounded-full bg-green-500 text-white shadow-sm uppercase tracking-wider">
+                <span className="mt-3 px-4 py-1.5 text-[11px] font-bold rounded-full text-black shadow-sm uppercase tracking-wider">
                   Reg: {data.profile.regNo}
                 </span>
               </div>
