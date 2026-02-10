@@ -15,10 +15,11 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [foreseBase64, setForeseBase64] = useState("");
     const [svceBase64, setSvceBase64] = useState("");
+    const [svceDims, setSvceDims] = useState(null);
 
     useEffect(() => {
         if (!isOpen) return;
-        const toBase64 = async (url, setter) => {
+        const toBase64 = async (url, setter, setDims = null) => {
             try {
                 const res = await fetch(url);
                 if (!res.ok) {
@@ -27,14 +28,23 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 }
                 const blob = await res.blob();
                 const reader = new FileReader();
-                reader.onloadend = () => setter(reader.result);
+                reader.onloadend = () => {
+                    setter(reader.result);
+                    if (setDims) {
+                        const img = new Image();
+                        img.onload = () => {
+                            setDims({ w: img.width, h: img.height });
+                        };
+                        img.src = reader.result;
+                    }
+                };
                 reader.readAsDataURL(blob);
             } catch (err) {
                 console.error(`Error loading image ${url}:`, err);
             }
         };
         toBase64(foreselogo, setForeseBase64);
-        toBase64(svcelogo, setSvceBase64);
+        toBase64(svcelogo, setSvceBase64, setSvceDims);
     }, [isOpen]);
 
     if (!isOpen || !user) return null;
@@ -64,16 +74,24 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
         try {
             const pdf = new jsPDF("p", "mm", "a4");
             const pageWidth = pdf.internal.pageSize.getWidth();
-            const margin = 15; 
-            let currentY = 12; 
+            const margin = 15;
+            let currentY = 12;
 
-            
+
             const logoY = 7;
             if (foreseBase64) {
                 pdf.addImage(foreseBase64, "PNG", margin, logoY, 26, 26);
             }
             if (svceBase64) {
-                pdf.addImage(svceBase64, "PNG", pageWidth - margin - 50, logoY + 6, 50, 14);
+                let svceW = 50;
+                let svceH = 14;
+                if (svceDims) {
+                    // Convert px to mm (assuming 96 DPI: 1 px = 0.264583 mm)
+                    const pxToMm = 0.264583;
+                    svceW = svceDims.w * pxToMm;
+                    svceH = svceDims.h * pxToMm;
+                }
+                pdf.addImage(svceBase64, "PNG", pageWidth - margin - svceW, logoY + 6, svceW, svceH);
             }
             currentY = logoY + 28;
 
@@ -135,7 +153,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.setTextColor(30, 41, 59);
             pdf.text(String(user.dept || "-"), midPoint + 10 + labelWidth, currentY + 34);
 
-            currentY += 52; 
+            currentY += 52;
 
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(15); // Larger size
@@ -146,7 +164,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             const drawTable = (title, rows, total, y) => {
                 const tableW = pageWidth - (margin * 2);
                 const headerH = 9;
-                const rowH = 9.5;    
+                const rowH = 9.5;
                 const footerH = 10;
                 const tableH = headerH + (rows.length * rowH) + footerH;
 
@@ -203,7 +221,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 ["Comprehension", aptitudeScores.comprehension, 5]
             ];
             currentY = drawTable("Aptitude Scores", aptRows, totalApt, currentY);
-            currentY += 10; 
+            currentY += 10;
 
             pdf.setFont("helvetica", "bold");
             pdf.setFontSize(15);
@@ -221,7 +239,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             currentY = drawTable("Group Discussion", gdRows, totalGD, currentY);
             currentY += 4;
 
-            const scoreCardH = 28; 
+            const scoreCardH = 28;
             const scoreCardW = pageWidth - (margin * 2);
 
 
@@ -240,7 +258,7 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
             pdf.setTextColor(15, 23, 42);
             pdf.setFontSize(28);
             pdf.text(`${overall} / 100`, pageWidth / 2, currentY + 20, { align: "center" });
-            pdf.setTextColor(148, 163, 184); 
+            pdf.setTextColor(148, 163, 184);
             pdf.setFontSize(7);
             //pdf.text(`© 2026 SVCE • Mock Examination Report • Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 282, { align: "center" });
 
@@ -276,12 +294,12 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                 <div className="bg-gray-200/50 p-8 overflow-auto flex-1 flex justify-center">
                     <div
                         ref={pdfRef}
-                        className = "w-full sm:w-auto"
+                        className="w-full sm:w-auto"
                         style={{
                             width: "210mm",
                             minHeight: "297mm",
                             backgroundColor: "#ffffff",
-                            padding: "8mm 20mm 20mm 20mm", 
+                            padding: "8mm 20mm 20mm 20mm",
                             boxSizing: "border-box",
                             boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
                             display: "flex",
@@ -291,7 +309,11 @@ export default function PdfPreviewModal({ isOpen, onClose, user }) {
                         {/* LOGOS (Aligned and balanced) */}
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "5mm" }}>
                             <img src={foreseBase64 || foreselogo} alt="Forese" style={{ height: "16mm", width: "auto", objectFit: "contain" }} />
-                            <img src={svceBase64 || svcelogo} alt="SVCE" style={{ height: "10mm", width: "auto", objectFit: "contain" }} />
+                            <img src={svceBase64 || svcelogo} alt="SVCE" style={{
+                                height: svceDims ? `${svceDims.h * 0.264583}mm` : "auto",
+                                width: svceDims ? `${svceDims.w * 0.264583}mm` : "auto",
+                                objectFit: "contain"
+                            }} />
                         </div>
 
                         {/* TITLE (TIGHTER) */}
