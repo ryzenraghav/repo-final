@@ -4,8 +4,6 @@ dotenv.config();
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
-
-
 import db from "./utils/db.js";
 
 passport.use(
@@ -22,10 +20,10 @@ passport.use(
           `SELECT u.*, r.aptitude, r.core, r.verbal, r.programming, r.comprehension, 
                   r.subject_knowledge, r.communication_skills, r.body_language, 
                   r.listening_skills, r.active_participation
-           FROM users u
-           LEFT JOIN results r ON u.id = r.userid
+           FROM "User" u
+           LEFT JOIN "Result" r ON u.id = r."userId"
            WHERE u.email = $1`,
-          [userEmail]
+          [userEmail],
         );
 
         if (result.rows.length === 0) {
@@ -37,8 +35,8 @@ passport.use(
       } catch (err) {
         return done(err);
       }
-    }
-  )
+    },
+  ),
 );
 
 export default passport;

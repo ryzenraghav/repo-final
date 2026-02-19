@@ -10,6 +10,16 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+pool
+  .query("SELECT 1")
+  .then(() => {
+    console.log("DB connected successfully ✅");
+  })
+  .catch((err) => {
+    console.error("DB connection failed ❌", err);
+  });
+
+console.log(pool);
 export default {
   query: (text, params) => pool.query(text, params),
 };

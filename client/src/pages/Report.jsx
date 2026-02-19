@@ -8,13 +8,11 @@ import Actionbutton from "../components/Actionbutton";
 import PdfPreviewModal from "../components/PdfPreviewModal";
 import { jwtDecode } from "jwt-decode";
 
-
 export default function Report() {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
 
   const [showPdfModal, setShowPdfModal] = useState(false);
 
@@ -35,7 +33,6 @@ export default function Report() {
         navigate("/");
       }
     }
-
   }, [user, navigate]);
 
   if (loading) {
@@ -55,11 +52,16 @@ export default function Report() {
     profile: {
       username: user.name,
       email: user.email,
-      regNo: user.regno,
+      regNo: user.regNo,
       dept: user.dept,
     },
     aptitude: {
-      total: (user.aptitude || 0) + (user.core || 0) + (user.verbal || 0) + (user.programming || 0) + (user.comprehension || 0),
+      total:
+        (user.aptitude || 0) +
+        (user.core || 0) +
+        (user.verbal || 0) +
+        (user.programming || 0) +
+        (user.comprehension || 0),
       aptitude: user.aptitude,
       core: user.core,
       verbal: user.verbal,
@@ -67,14 +69,31 @@ export default function Report() {
       comprehension: user.comprehension,
     },
     gd: {
-      total: user.gd_total || ((user.subject_knowledge || 0) + (user.communication_skills || 0) + (user.body_language || 0) + (user.listening_skills || 0) + (user.active_participation || 0)),
+      total:
+        user.gd_total ||
+        (user.subject_knowledge || 0) +
+          (user.communication_skills || 0) +
+          (user.body_language || 0) +
+          (user.listening_skills || 0) +
+          (user.active_participation || 0),
       subject_knowledge: user.subject_knowledge,
       communication_skills: user.communication_skills,
       body_language: user.body_language,
       listening_skills: user.listening_skills,
       active_participation: user.active_participation,
     },
-    overallTotal: user.overall_total || ((user.aptitude || 0) + (user.core || 0) + (user.verbal || 0) + (user.programming || 0) + (user.comprehension || 0) + (user.subject_knowledge || 0) + (user.communication_skills || 0) + (user.body_language || 0) + (user.listening_skills || 0) + (user.active_participation || 0)),
+    overallTotal:
+      user.overall_total ||
+      (user.aptitude || 0) +
+        (user.core || 0) +
+        (user.verbal || 0) +
+        (user.programming || 0) +
+        (user.comprehension || 0) +
+        (user.subject_knowledge || 0) +
+        (user.communication_skills || 0) +
+        (user.body_language || 0) +
+        (user.listening_skills || 0) +
+        (user.active_participation || 0),
   };
 
   return (
@@ -141,3 +160,4 @@ export default function Report() {
     </div>
   );
 }
+
