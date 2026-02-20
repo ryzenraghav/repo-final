@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: conste
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: aptitude_local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    ports:
+      - "5433:5432" # remove this in production if not needed
+
+  app:
+    build: .
+    container_name: node_backend
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "5002:5002"
+    env_file:
+      - .env
+
+volumes:
+  pgdata:

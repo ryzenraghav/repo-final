@@ -14,6 +14,6 @@ app.use(passport.initialize());
 
 app.use("/auth", authRoutes);
 
-app.listen(5001, () => {
+app.listen(5002, () => {
   console.log("Backend running on http://localhost:5001");
 });
