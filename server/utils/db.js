@@ -1,5 +1,6 @@
 import "dotenv/config";
 import pg from "pg";
+
 const { Pool } = pg;
 
 const pool = new Pool({
@@ -10,16 +11,19 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-pool
-  .query("SELECT 1")
-  .then(() => {
-    console.log("DB connected successfully ✅");
-  })
-  .catch((err) => {
-    console.error("DB connection failed ❌", err);
-  });
+async function waitForDB() {
+  while (true) {
+    try {
+      await pool.query("SELECT 1");
+      console.log("DB connected successfully ✅");
+      break;
+    } catch (err) {
+      console.log("Waiting for DB... ⏳");
+      await new Promise((res) => setTimeout(res, 2000));
+    }
+  }
+}
 
-console.log(pool);
-export default {
-  query: (text, params) => pool.query(text, params),
-};
+await waitForDB();
+
+export default pool;

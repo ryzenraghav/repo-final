@@ -7,13 +7,12 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth
-    window.location.href = "http://localhost:5001/auth/google";
+    window.location.href = "http://localhost:5002/auth/google";
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
-
         {/* Logos */}
         <div className="flex justify-between items-center mb-6">
           <img src="/forese-logo.png" alt="Forese" className="h-18" />
@@ -57,8 +56,8 @@ export default function Login() {
           />
           Login with Google
         </button>
-
       </div>
     </div>
   );
 }
+
