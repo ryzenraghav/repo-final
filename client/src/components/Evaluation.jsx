@@ -1,15 +1,4 @@
 import { useState } from "react";
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Tooltip,
-    Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const CRITERIA = [
     { key: "appearance_attitude", label: "Appearance & Attitude", max: 10 },
@@ -21,15 +10,6 @@ const CRITERIA = [
     { key: "self_confidence", label: "Self Confidence", max: 10 },
 ];
 
-const BAR_COLORS = [
-    "#6366f1",
-    "#3b82f6",
-    "#14b8a6",
-    "#f59e0b",
-    "#ec4899",
-    "#8b5cf6",
-    "#10b981",
-];
 
 function NotEvaluated() {
     return (
@@ -71,38 +51,6 @@ function ScoreRow({ label, value, max }) {
 }
 
 function EvaluationCard({ evalData }) {
-    const chartData = {
-        labels: CRITERIA.map((c) =>
-            c.label
-                .split(" ")
-                .map((w) => w.slice(0, 4) + ".")
-                .join(" ")
-        ),
-        datasets: [
-            {
-                data: CRITERIA.map((c) => evalData[c.key] ?? 0),
-                backgroundColor: BAR_COLORS,
-                borderRadius: 6,
-                barThickness: 28,
-            },
-        ],
-    };
-
-    const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                max: 10,
-                ticks: { stepSize: 2 },
-                grid: { color: "rgba(0,0,0,0.05)" },
-            },
-            x: { grid: { display: false } },
-        },
-    };
-
     const date = evalData.evaluation_date
         ? new Date(evalData.evaluation_date).toLocaleDateString("en-IN", {
             day: "numeric",
@@ -148,65 +96,61 @@ function EvaluationCard({ evalData }) {
                     </div>
                 </div>
 
-                {/* Chart + score rows */}
-                <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-                    <div className="h-48 lg:h-56">
-                        <Bar data={chartData} options={options} />
-                    </div>
-                    <div className="mt-4 lg:mt-0 space-y-3">
-                        {CRITERIA.map((c) => (
-                            <ScoreRow
-                                key={c.key}
-                                label={c.label}
-                                value={evalData[c.key] ?? 0}
-                                max={c.max}
-                            />
-                        ))}
-                    </div>
+                {/* Score rows */}
+                <div className="space-y-3">
+                    {CRITERIA.map((c) => (
+                        <ScoreRow
+                            key={c.key}
+                            label={c.label}
+                            value={evalData[c.key] ?? 0}
+                            max={c.max}
+                        />
+                    ))}
                 </div>
             </div>
 
-            {/* Feedback card */}
-            {(evalData.strengths || evalData.improvements || evalData.comments) && (
-                <div className="bg-white rounded-2xl shadow-sm p-4 lg:p-6 space-y-4">
-                    <h4 className="font-semibold text-sm lg:text-base flex items-center gap-2">
-                        <span className="material-icons text-indigo-500 text-base">
-                            comment
-                        </span>
-                        Interviewer Feedback
-                    </h4>
-                    {evalData.strengths && (
-                        <div>
-                            <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
-                                Strengths
-                            </p>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                {evalData.strengths}
-                            </p>
-                        </div>
-                    )}
-                    {evalData.improvements && (
-                        <div>
-                            <p className="text-xs font-semibold text-amber-500 uppercase tracking-wide mb-1">
-                                Areas to Improve
-                            </p>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                {evalData.improvements}
-                            </p>
-                        </div>
-                    )}
-                    {evalData.comments && (
-                        <div>
-                            <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-1">
-                                Additional Comments
-                            </p>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                {evalData.comments}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            )}
+            {/* Feedback card — always visible */}
+            <div className="bg-white rounded-2xl shadow-sm p-4 lg:p-6 space-y-4">
+                <h4 className="font-semibold text-sm lg:text-base flex items-center gap-2">
+                    <span className="material-icons text-indigo-500 text-base">
+                        comment
+                    </span>
+                    Interviewer Feedback
+                </h4>
+                {!evalData.strengths && !evalData.improvements && !evalData.comments && (
+                    <p className="text-sm text-gray-400 italic">No written feedback provided for this interview.</p>
+                )}
+                {evalData.strengths && (
+                    <div>
+                        <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
+                            Strengths
+                        </p>
+                        <p className="text-base text-gray-600 leading-relaxed">
+                            {evalData.strengths}
+                        </p>
+                    </div>
+                )}
+                {evalData.improvements && (
+                    <div>
+                        <p className="text-xs font-semibold text-amber-500 uppercase tracking-wide mb-1">
+                            Areas to Improve
+                        </p>
+                        <p className="text-base text-gray-600 leading-relaxed">
+                            {evalData.improvements}
+                        </p>
+                    </div>
+                )}
+                {evalData.comments && (
+                    <div>
+                        <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-1">
+                            Additional Comments
+                        </p>
+                        <p className="text-base text-gray-600 leading-relaxed">
+                            {evalData.comments}
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

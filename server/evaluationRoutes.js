@@ -48,14 +48,16 @@ router.get("/evaluation", requireAuth, async (req, res) => {
          e.evaluation_date,
          hp.name        AS hr_name,
          hp.company_name
-       FROM public.student_scores ss
-       LEFT JOIN public."Student" st
-         ON st."registerNumber" = ss."regNo"
-       LEFT JOIN public.evaluations e
+       FROM public."Student" st
+       JOIN public.evaluations e
          ON e."studentId" = st.id
        LEFT JOIN public.hr_profiles hp
          ON hp.id = e."hrId"
-       WHERE LOWER(ss.email) = LOWER($1)
+       WHERE st."registerNumber" = (
+         SELECT "regNo" FROM public.student_scores
+         WHERE LOWER(email) = LOWER($1)
+         LIMIT 1
+       )
          AND e.overall_score IS NOT NULL
        ORDER BY e.evaluation_date DESC, e.id DESC`,
             [email]
