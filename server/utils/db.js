@@ -8,7 +8,7 @@ const pool = new Pool({
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  port: Number(process.env.DB_PORT),
 });
 
 async function waitForDB() {
@@ -18,7 +18,7 @@ async function waitForDB() {
       console.log("DB connected successfully ✅");
       break;
     } catch (err) {
-      console.log("Waiting for DB... ⏳");
+      console.log("Waiting for DB... ⏳",err.message);
       await new Promise((res) => setTimeout(res, 2000));
     }
   }
