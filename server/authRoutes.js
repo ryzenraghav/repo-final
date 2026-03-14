@@ -15,10 +15,10 @@ router.get(
     passport.authenticate("google", { session: false }, (err, user, info) => {
       if (err) {
         console.error("Google Auth Error:", err);
-        return res.redirect("http://localhost:5173/?error=Authentication failed");
+        return res.redirect("https://www.report.forese.co.in/?error=Authentication failed");
       }
       if (!user) {
-        return res.redirect("http://localhost:5173/?error=User not registered");
+        return res.redirect("https://www.report.forese.co.in/?error=User not registered");
       }
 
       const token = jwt.sign(user, process.env.JWT_SECRET, {
@@ -26,7 +26,7 @@ router.get(
       });
 
       res.redirect(
-        `http://localhost:5173/oauth-success?token=${token}`
+        `https://report.forese.co.in/oauth-success?token=${token}`
       );
     })(req, res, next);
   }

@@ -11,11 +11,11 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:5002/auth/google/callback",
+      callbackURL: "https://reportbackend.forese.co.in/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const userEmail = profile.emails[0].value;
+        const userEmail = profile.emails[0].value.toLowerCase();
         const result = await db.query(
           `SELECT u.*, r.aptitude, r.core, r.verbal, r.programming, r.comprehension, 
                   r.subject_knowledge, r.communication_skills, r.body_language, 
