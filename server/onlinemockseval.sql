@@ -1,0 +1,5610 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 16.4
+-- Dumped by pg_dump version 16.4
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: AttendanceStatus; Type: TYPE; Schema: public; Owner: user123
+--
+
+CREATE TYPE public."AttendanceStatus" AS ENUM (
+    'PRESENT',
+    'ABSENT'
+);
+
+
+ALTER TYPE public."AttendanceStatus" OWNER TO user123;
+
+--
+-- Name: InterviewStatus; Type: TYPE; Schema: public; Owner: user123
+--
+
+CREATE TYPE public."InterviewStatus" AS ENUM (
+    'PENDING',
+    'COMPLETED',
+    'CANCELLED',
+    'NO_SHOW'
+);
+
+
+ALTER TYPE public."InterviewStatus" OWNER TO user123;
+
+--
+-- Name: NotificationType; Type: TYPE; Schema: public; Owner: user123
+--
+
+CREATE TYPE public."NotificationType" AS ENUM (
+    'TRANSFER',
+    'EVALUATION',
+    'GENERAL'
+);
+
+
+ALTER TYPE public."NotificationType" OWNER TO user123;
+
+--
+-- Name: Role; Type: TYPE; Schema: public; Owner: user123
+--
+
+CREATE TYPE public."Role" AS ENUM (
+    'ADMIN',
+    'HR',
+    'VOLUNTEER',
+    'PIPELINE',
+    'STUDENT'
+);
+
+
+ALTER TYPE public."Role" OWNER TO user123;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: HrAssignment; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public."HrAssignment" (
+    id integer NOT NULL,
+    "hrId" uuid NOT NULL,
+    "studentId" uuid NOT NULL,
+    "order" integer NOT NULL,
+    status public."InterviewStatus" DEFAULT 'PENDING'::public."InterviewStatus" NOT NULL,
+    "assignedAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public."HrAssignment" OWNER TO user123;
+
+--
+-- Name: HrAssignment_id_seq; Type: SEQUENCE; Schema: public; Owner: user123
+--
+
+CREATE SEQUENCE public."HrAssignment_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."HrAssignment_id_seq" OWNER TO user123;
+
+--
+-- Name: HrAssignment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user123
+--
+
+ALTER SEQUENCE public."HrAssignment_id_seq" OWNED BY public."HrAssignment".id;
+
+
+--
+-- Name: Student; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public."Student" (
+    id uuid NOT NULL,
+    name text,
+    "registerNumber" text NOT NULL,
+    department text,
+    section text,
+    "resumeUrl" text,
+    "aptitudeScore" integer DEFAULT 0 NOT NULL,
+    "gdScore" integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public."Student" OWNER TO user123;
+
+--
+-- Name: User; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public."User" (
+    id uuid NOT NULL,
+    username text NOT NULL,
+    "passwordHash" text NOT NULL,
+    role public."Role" NOT NULL,
+    "createdAt" timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    plain_password text
+);
+
+
+ALTER TABLE public."User" OWNER TO user123;
+
+--
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public._prisma_migrations (
+    id character varying(36) NOT NULL,
+    checksum character varying(64) NOT NULL,
+    finished_at timestamp with time zone,
+    migration_name character varying(255) NOT NULL,
+    logs text,
+    rolled_back_at timestamp with time zone,
+    started_at timestamp with time zone DEFAULT now() NOT NULL,
+    applied_steps_count integer DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public._prisma_migrations OWNER TO user123;
+
+--
+-- Name: evaluations; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.evaluations (
+    id integer NOT NULL,
+    "studentId" uuid NOT NULL,
+    "hrId" uuid NOT NULL,
+    appearance_attitude integer DEFAULT 0 NOT NULL,
+    managerial_aptitude integer DEFAULT 0 NOT NULL,
+    general_awareness integer DEFAULT 0 NOT NULL,
+    technical_knowledge integer DEFAULT 0 NOT NULL,
+    communication_skills integer DEFAULT 0 NOT NULL,
+    ambition integer DEFAULT 0 NOT NULL,
+    self_confidence integer DEFAULT 0 NOT NULL,
+    strengths text,
+    improvements text,
+    comments text,
+    overall_score numeric(4,2),
+    evaluation_date date DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.evaluations OWNER TO user123;
+
+--
+-- Name: evaluations_id_seq; Type: SEQUENCE; Schema: public; Owner: user123
+--
+
+CREATE SEQUENCE public.evaluations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.evaluations_id_seq OWNER TO user123;
+
+--
+-- Name: evaluations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user123
+--
+
+ALTER SEQUENCE public.evaluations_id_seq OWNED BY public.evaluations.id;
+
+
+--
+-- Name: feedbacks; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.feedbacks (
+    id integer NOT NULL,
+    "hrId" uuid NOT NULL,
+    "technicalKnowledge" integer NOT NULL,
+    service_and_coordination integer NOT NULL,
+    communication_skills integer NOT NULL,
+    future_participation integer NOT NULL,
+    punctuality_and_interest integer NOT NULL,
+    suggestions text,
+    issues_faced text,
+    improvement_suggestions text,
+    submitted_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.feedbacks OWNER TO user123;
+
+--
+-- Name: feedbacks_id_seq; Type: SEQUENCE; Schema: public; Owner: user123
+--
+
+CREATE SEQUENCE public.feedbacks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.feedbacks_id_seq OWNER TO user123;
+
+--
+-- Name: feedbacks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user123
+--
+
+ALTER SEQUENCE public.feedbacks_id_seq OWNED BY public.feedbacks.id;
+
+
+--
+-- Name: hr_profiles; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.hr_profiles (
+    id uuid NOT NULL,
+    name character varying(255),
+    company_name character varying(255)
+);
+
+
+ALTER TABLE public.hr_profiles OWNER TO user123;
+
+--
+-- Name: notifications; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.notifications (
+    id uuid NOT NULL,
+    receiver_id uuid NOT NULL,
+    message text NOT NULL,
+    type public."NotificationType" DEFAULT 'GENERAL'::public."NotificationType" NOT NULL,
+    is_read boolean DEFAULT false NOT NULL,
+    created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    title text
+);
+
+
+ALTER TABLE public.notifications OWNER TO user123;
+
+--
+-- Name: pipeline_profiles; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.pipeline_profiles (
+    id uuid NOT NULL,
+    name character varying(255)
+);
+
+
+ALTER TABLE public.pipeline_profiles OWNER TO user123;
+
+--
+-- Name: student_scores; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.student_scores (
+    name character varying(50),
+    email character varying(50),
+    "regNo" character varying,
+    dept character varying(50),
+    totalpoints character varying(50),
+    aptitude integer,
+    core integer,
+    verbal integer,
+    programming integer,
+    comprehension integer,
+    subject_knowledge integer,
+    communication_skills integer,
+    body_language integer,
+    listening_skills integer,
+    active_participation integer,
+    "GD" integer,
+    "Apt" integer
+);
+
+
+ALTER TABLE public.student_scores OWNER TO user123;
+
+--
+-- Name: student_transfers; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.student_transfers (
+    id integer NOT NULL,
+    student_id uuid NOT NULL,
+    from_hr_id uuid,
+    to_hr_id uuid,
+    admin_id uuid,
+    transfer_reason text,
+    transferred_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.student_transfers OWNER TO user123;
+
+--
+-- Name: student_transfers_id_seq; Type: SEQUENCE; Schema: public; Owner: user123
+--
+
+CREATE SEQUENCE public.student_transfers_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.student_transfers_id_seq OWNER TO user123;
+
+--
+-- Name: student_transfers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user123
+--
+
+ALTER SEQUENCE public.student_transfers_id_seq OWNED BY public.student_transfers.id;
+
+
+--
+-- Name: volunteer_feedbacks; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.volunteer_feedbacks (
+    id integer NOT NULL,
+    volunteer_id uuid NOT NULL,
+    clarity_of_instructions integer NOT NULL,
+    hr_cooperation integer NOT NULL,
+    organization_of_schedule integer NOT NULL,
+    software_ease integer NOT NULL,
+    workload_management integer NOT NULL,
+    overall_experience integer NOT NULL,
+    issues_faced text,
+    improvement_suggestions text,
+    additional_comments text,
+    submitted_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+ALTER TABLE public.volunteer_feedbacks OWNER TO user123;
+
+--
+-- Name: volunteer_feedbacks_id_seq; Type: SEQUENCE; Schema: public; Owner: user123
+--
+
+CREATE SEQUENCE public.volunteer_feedbacks_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.volunteer_feedbacks_id_seq OWNER TO user123;
+
+--
+-- Name: volunteer_feedbacks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: user123
+--
+
+ALTER SEQUENCE public.volunteer_feedbacks_id_seq OWNED BY public.volunteer_feedbacks.id;
+
+
+--
+-- Name: volunteer_profiles; Type: TABLE; Schema: public; Owner: user123
+--
+
+CREATE TABLE public.volunteer_profiles (
+    id uuid NOT NULL,
+    name character varying(255),
+    assigned_hr_id uuid
+);
+
+
+ALTER TABLE public.volunteer_profiles OWNER TO user123;
+
+--
+-- Name: HrAssignment id; Type: DEFAULT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."HrAssignment" ALTER COLUMN id SET DEFAULT nextval('public."HrAssignment_id_seq"'::regclass);
+
+
+--
+-- Name: evaluations id; Type: DEFAULT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.evaluations ALTER COLUMN id SET DEFAULT nextval('public.evaluations_id_seq'::regclass);
+
+
+--
+-- Name: feedbacks id; Type: DEFAULT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.feedbacks ALTER COLUMN id SET DEFAULT nextval('public.feedbacks_id_seq'::regclass);
+
+
+--
+-- Name: student_transfers id; Type: DEFAULT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers ALTER COLUMN id SET DEFAULT nextval('public.student_transfers_id_seq'::regclass);
+
+
+--
+-- Name: volunteer_feedbacks id; Type: DEFAULT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_feedbacks ALTER COLUMN id SET DEFAULT nextval('public.volunteer_feedbacks_id_seq'::regclass);
+
+
+--
+-- Data for Name: HrAssignment; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public."HrAssignment" (id, "hrId", "studentId", "order", status, "assignedAt") FROM stdin;
+1	1222491e-2d54-48f0-9552-8d2a28af1c4f	2f90df91-adfe-49e4-9598-52a7a6414cbb	1	PENDING	2026-03-07 18:28:15.801
+2	1222491e-2d54-48f0-9552-8d2a28af1c4f	9a91245b-5335-4ccf-82e7-4fb245d9da8e	2	PENDING	2026-03-07 18:30:00.895
+1224	6f127d1b-9a45-41d4-9fcb-da121c576e16	7f103da6-43e0-4e2d-b119-878d1591b62d	10	PENDING	2026-03-08 08:08:50.784
+4	1222491e-2d54-48f0-9552-8d2a28af1c4f	0e8d6d22-baa3-4b56-8e7c-42d6459c039e	4	PENDING	2026-03-07 18:31:31.152
+92	d6a31449-5393-444e-89c7-f8ba9d35545a	6147b941-97d6-4163-8128-ac0be61591a2	10	COMPLETED	2026-03-07 19:28:19.023
+8	1222491e-2d54-48f0-9552-8d2a28af1c4f	17a520b1-b8d1-4d10-9a53-b61030713f9b	7	PENDING	2026-03-07 18:38:49.033
+1251	5cd29d5a-169e-41db-87a2-997e5fd5301f	48646124-2c77-4b4b-86df-6a49ee43c5cb	5	PENDING	2026-03-08 08:15:10.605
+1252	5cd29d5a-169e-41db-87a2-997e5fd5301f	5269c469-3b49-4bbd-ac19-10823c1adcdb	6	PENDING	2026-03-08 08:15:10.612
+18	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	c46ed7ec-d481-487c-a3dc-25ed666421d6	4	PENDING	2026-03-07 18:44:49.028
+19	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	0bc5e4c9-1d5d-4dc2-a871-00797f5bbb27	5	PENDING	2026-03-07 18:45:33.317
+26	9b408827-9730-414a-a9ae-c8638060695c	f507760b-d64d-4513-a2a2-14ad98107f53	2	PENDING	2026-03-07 18:51:01.514
+28	9b408827-9730-414a-a9ae-c8638060695c	50381fa0-99ff-4580-b3cc-c4ba4eeb21f9	4	PENDING	2026-03-07 18:52:19.734
+29	9b408827-9730-414a-a9ae-c8638060695c	e94b7290-f968-4d27-aaa7-4f344240fd6b	5	PENDING	2026-03-07 18:52:41.664
+1270	5cd29d5a-169e-41db-87a2-997e5fd5301f	f7cc4817-a6d6-4043-9d83-f098b225792f	14	PENDING	2026-03-08 08:26:21.067
+37	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	76b5ed92-8fb0-40af-b2a2-c74f713da496	6	PENDING	2026-03-07 18:56:39.914
+40	8ef5450c-442e-440e-b14f-9b98542fd9bf	40c288c8-ba89-4043-b3d6-b4e5e06d10b5	1	PENDING	2026-03-07 18:59:50.208
+41	8ef5450c-442e-440e-b14f-9b98542fd9bf	d1813b21-d52d-469e-978d-8f257c2710cc	2	PENDING	2026-03-07 19:00:28.236
+48	8ef5450c-442e-440e-b14f-9b98542fd9bf	10ca2b13-3ed7-43a9-944f-24fb0dad93ff	9	PENDING	2026-03-07 19:03:19.854
+49	8ef5450c-442e-440e-b14f-9b98542fd9bf	4f9fffdc-8c61-4726-9b9b-c64720e7a3da	10	PENDING	2026-03-07 19:03:48.028
+50	8ef5450c-442e-440e-b14f-9b98542fd9bf	7c409ad2-a73f-439c-b395-c6ab113efafb	11	PENDING	2026-03-07 19:04:15.826
+51	8ef5450c-442e-440e-b14f-9b98542fd9bf	10e965a3-a6ec-4825-8358-a95707c31048	12	PENDING	2026-03-07 19:04:42.263
+58	5f1975ba-b40d-4a05-b28d-5195c0db7348	76aae8ff-e3e8-49a1-bee7-25f8e99831df	7	PENDING	2026-03-07 19:11:00.765
+70	0d77a15a-eaec-418e-93ba-7317ea498599	f35ac2f1-5556-4562-825c-d3960259b434	5	PENDING	2026-03-07 19:16:39.384
+72	0d77a15a-eaec-418e-93ba-7317ea498599	ebcba73e-925f-4557-808e-375e4ce22269	7	PENDING	2026-03-07 19:17:34.336
+73	0d77a15a-eaec-418e-93ba-7317ea498599	b9890359-1be9-4998-87c3-c685d846d348	8	PENDING	2026-03-07 19:18:27.362
+93	d6a31449-5393-444e-89c7-f8ba9d35545a	4e7c2d61-8ba3-4cfe-92ab-58042652ffce	11	COMPLETED	2026-03-07 19:28:38.281
+80	a0df520f-d839-4acf-b594-7cad857eeaa7	7ed08a96-2e2e-41d9-8002-1867736b95af	3	PENDING	2026-03-07 19:21:46.613
+81	a0df520f-d839-4acf-b594-7cad857eeaa7	9c309958-f36f-4a63-a3fb-df80102ac9f9	4	PENDING	2026-03-07 19:22:10.951
+65	5f1975ba-b40d-4a05-b28d-5195c0db7348	1ea59620-42fd-4d8e-8352-cd821d3e05bc	14	COMPLETED	2026-03-07 19:14:14.844
+82	a0df520f-d839-4acf-b594-7cad857eeaa7	ef918fbb-58e9-4568-8a53-4ed3c0d4de5b	5	COMPLETED	2026-03-07 19:23:08.21
+52	5f1975ba-b40d-4a05-b28d-5195c0db7348	f6b6db61-4577-4ffa-aed6-27cb51fb242a	1	COMPLETED	2026-03-07 19:05:35.294
+83	d6a31449-5393-444e-89c7-f8ba9d35545a	7ccc8ee0-b315-4142-ae09-df136038cf15	1	COMPLETED	2026-03-07 19:24:01.742
+66	0d77a15a-eaec-418e-93ba-7317ea498599	555d8c6d-2139-450e-a402-5a5393c0571e	1	COMPLETED	2026-03-07 19:15:02.992
+53	5f1975ba-b40d-4a05-b28d-5195c0db7348	a3d403e2-a31a-4bd6-9fad-da95b4b325ed	2	COMPLETED	2026-03-07 19:07:10.791
+55	5f1975ba-b40d-4a05-b28d-5195c0db7348	aa92afbe-cda2-4591-b885-b5b2906a2dd5	4	COMPLETED	2026-03-07 19:07:54.949
+45	8ef5450c-442e-440e-b14f-9b98542fd9bf	fc520f0e-74df-4416-ad21-64e639ea7663	6	COMPLETED	2026-03-07 19:02:09.997
+20	24421caf-3a14-4681-b9f9-f237f956d8d4	abe3babc-d4b0-438e-8bef-e392e210e482	1	COMPLETED	2026-03-07 18:46:50.336
+86	d6a31449-5393-444e-89c7-f8ba9d35545a	594f3a35-7849-4af8-bea5-22682bea7578	4	COMPLETED	2026-03-07 19:25:49.756
+56	5f1975ba-b40d-4a05-b28d-5195c0db7348	572ad245-64d4-450e-bae0-458367ea28c7	5	COMPLETED	2026-03-07 19:08:55.04
+78	a0df520f-d839-4acf-b594-7cad857eeaa7	8acb85d7-1da3-4d1e-8e2a-614924fdc441	1	COMPLETED	2026-03-07 19:20:46.508
+67	0d77a15a-eaec-418e-93ba-7317ea498599	c6efedd9-06b7-41b0-bbde-2d677d99ea6b	2	COMPLETED	2026-03-07 19:15:22.493
+47	8ef5450c-442e-440e-b14f-9b98542fd9bf	62de75f6-d302-443f-a7d7-2fbdb6afd7db	8	COMPLETED	2026-03-07 19:02:52.854
+57	5f1975ba-b40d-4a05-b28d-5195c0db7348	380856e2-e85b-45d5-9ee3-67a005e6436f	6	COMPLETED	2026-03-07 19:10:33.326
+21	24421caf-3a14-4681-b9f9-f237f956d8d4	9b4d7555-7433-422c-ac19-799a95467f1b	2	COMPLETED	2026-03-07 18:47:33.792
+17	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	d722a94d-417e-4b9b-bc02-67cc6059bc17	3	COMPLETED	2026-03-07 18:44:10.702
+85	d6a31449-5393-444e-89c7-f8ba9d35545a	bb876cd1-5922-437c-b6bc-4b1b4f9d51de	3	COMPLETED	2026-03-07 19:25:21.452
+32	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	0114fe5b-ec06-4567-848c-11e28fdb8824	1	COMPLETED	2026-03-07 18:54:10.661
+43	8ef5450c-442e-440e-b14f-9b98542fd9bf	68e6b815-d0ed-419d-91ca-f5f2daad27eb	4	COMPLETED	2026-03-07 19:01:22.764
+60	5f1975ba-b40d-4a05-b28d-5195c0db7348	8a7f3595-0f78-461e-9d60-5e9b9a11d3de	9	COMPLETED	2026-03-07 19:12:23.184
+22	24421caf-3a14-4681-b9f9-f237f956d8d4	5eb93ad0-aca0-4f2e-bb8c-e578ae152f01	3	COMPLETED	2026-03-07 18:48:28.966
+68	0d77a15a-eaec-418e-93ba-7317ea498599	2417e2e3-5f09-4195-87ec-24557ba3cde3	3	COMPLETED	2026-03-07 19:15:44.993
+87	d6a31449-5393-444e-89c7-f8ba9d35545a	aa6d3136-87d4-49bb-901a-0f758fda5bfa	5	COMPLETED	2026-03-07 19:26:08.571
+46	8ef5450c-442e-440e-b14f-9b98542fd9bf	522f00f6-aeb3-483f-91ac-b6647fc8dd8f	7	COMPLETED	2026-03-07 19:02:29.205
+33	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	3c6f2501-7404-40be-b2d2-15696486aaaa	2	COMPLETED	2026-03-07 18:54:38.73
+23	24421caf-3a14-4681-b9f9-f237f956d8d4	719adc50-7d3f-46b3-969c-dc9b9cbb67fa	4	COMPLETED	2026-03-07 18:48:50.311
+61	5f1975ba-b40d-4a05-b28d-5195c0db7348	6ef44bbc-1f86-4358-8887-913e6370ddf3	10	COMPLETED	2026-03-07 19:12:44.814
+88	d6a31449-5393-444e-89c7-f8ba9d35545a	74d96280-2a0f-41f1-8a40-c09872f47623	6	COMPLETED	2026-03-07 19:26:28.321
+69	0d77a15a-eaec-418e-93ba-7317ea498599	3a082634-ffab-49ca-88cf-a3f08638f042	4	COMPLETED	2026-03-07 19:16:08.23
+44	8ef5450c-442e-440e-b14f-9b98542fd9bf	b9b3c1ad-adb6-4e08-aaf2-4c949c40c569	5	COMPLETED	2026-03-07 19:01:43.755
+54	5f1975ba-b40d-4a05-b28d-5195c0db7348	accb1071-29d5-49f2-aa24-2a019b107e91	3	COMPLETED	2026-03-07 19:07:32.395
+15	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	01ae16e7-a847-4c13-bf1d-206b01ff79bc	1	COMPLETED	2026-03-07 18:42:51.898
+89	d6a31449-5393-444e-89c7-f8ba9d35545a	33cb2f15-2c22-4e9d-a574-97823977b9cb	7	COMPLETED	2026-03-07 19:27:04.781
+35	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	f17eb218-bdfd-406c-9a82-1b516e6f963e	4	COMPLETED	2026-03-07 18:55:31.155
+90	d6a31449-5393-444e-89c7-f8ba9d35545a	fb900dff-7928-46a8-8424-14a487867e6e	8	COMPLETED	2026-03-07 19:27:24.188
+59	5f1975ba-b40d-4a05-b28d-5195c0db7348	3f3b50c7-08b5-42b1-ba8e-05aa6f03859e	8	COMPLETED	2026-03-07 19:11:24.156
+71	0d77a15a-eaec-418e-93ba-7317ea498599	705b8c9d-5815-46c8-88ea-2b10be97ff1c	6	COMPLETED	2026-03-07 19:17:10.041
+91	d6a31449-5393-444e-89c7-f8ba9d35545a	2902d589-dd45-4a97-aace-b8643f323183	9	COMPLETED	2026-03-07 19:27:58.941
+16	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	738cf145-81dc-4961-9dc1-bbcd2c2f81b7	2	COMPLETED	2026-03-07 18:43:33.786
+36	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	17e77478-bad7-4a3b-b036-019ea8ededaf	5	COMPLETED	2026-03-07 18:56:02.513
+62	5f1975ba-b40d-4a05-b28d-5195c0db7348	8c9a886e-a3ef-4d30-98a8-556c4e5ff6c4	11	COMPLETED	2026-03-07 19:13:06.273
+75	0d77a15a-eaec-418e-93ba-7317ea498599	6a788949-c3c4-4fa3-be3a-a3ee9535c15a	10	COMPLETED	2026-03-07 19:19:19.837
+39	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	98d9c98c-68ec-4cb5-a1f9-2d267570eedd	8	COMPLETED	2026-03-07 18:57:40.986
+76	0d77a15a-eaec-418e-93ba-7317ea498599	406f091a-e23e-4fdf-bf38-07ed3bf967e4	11	COMPLETED	2026-03-07 19:19:40.649
+94	d6a31449-5393-444e-89c7-f8ba9d35545a	5445087d-4411-4ef9-8f7d-26be93329455	12	COMPLETED	2026-03-07 19:28:59.081
+77	0d77a15a-eaec-418e-93ba-7317ea498599	e357f846-8c30-41a7-86d0-d14e3931004d	12	COMPLETED	2026-03-07 19:20:05.697
+96	d6a31449-5393-444e-89c7-f8ba9d35545a	bc2c6c62-b374-4b84-be9d-09bff4b9b136	14	COMPLETED	2026-03-07 19:29:38.661
+74	0d77a15a-eaec-418e-93ba-7317ea498599	2c3347ea-4e52-464e-82cc-09bd9e4cd234	9	COMPLETED	2026-03-07 19:19:01.492
+63	5f1975ba-b40d-4a05-b28d-5195c0db7348	b26ed963-30c2-4c00-bce1-9522ebd37a85	12	COMPLETED	2026-03-07 19:13:28.608
+38	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	890e0d84-2cb3-44ec-bccc-61afc50410cd	7	COMPLETED	2026-03-07 18:57:14.416
+1247	5cd29d5a-169e-41db-87a2-997e5fd5301f	62dabc83-c2be-45ac-b1de-3abb143dc0d5	1	COMPLETED	2026-03-08 08:15:10.559
+97	d6a31449-5393-444e-89c7-f8ba9d35545a	9977c7f7-712d-4983-9cc2-3109b62b6803	15	COMPLETED	2026-03-07 19:29:56.645
+1248	5cd29d5a-169e-41db-87a2-997e5fd5301f	64e6390e-44e3-4b60-a29b-da402ffa4a8a	2	COMPLETED	2026-03-08 08:15:10.57
+24	24421caf-3a14-4681-b9f9-f237f956d8d4	7a2af654-b3e4-4fbf-ba95-f1fd2d707b31	5	NO_SHOW	2026-03-07 18:49:12.953
+98	42dbf0f4-4340-4d04-b344-a249cd2b25ba	25f66b04-a5f8-440d-963a-4445bdbba059	1	COMPLETED	2026-03-07 19:37:38.681
+64	5f1975ba-b40d-4a05-b28d-5195c0db7348	58a0270a-62de-4bf5-b720-b54571c13ede	13	COMPLETED	2026-03-07 19:13:50.639
+1250	5cd29d5a-169e-41db-87a2-997e5fd5301f	d18b5bba-3633-45e8-a583-b9d83a566ea2	4	COMPLETED	2026-03-08 08:15:10.588
+1306	4df9bf27-579a-4661-a2ea-703387a2bdaf	8045c512-1ad9-4021-baa6-b1ab33ab59e1	16	COMPLETED	2026-03-08 08:36:07.247
+1249	5cd29d5a-169e-41db-87a2-997e5fd5301f	0689d3ab-98b3-4b1f-84df-b0bdfa21de11	3	COMPLETED	2026-03-08 08:15:10.579
+102	42dbf0f4-4340-4d04-b344-a249cd2b25ba	35094eb1-6c96-49ef-97fc-7dee66ffa0d6	5	PENDING	2026-03-07 19:39:34.827
+103	42dbf0f4-4340-4d04-b344-a249cd2b25ba	e97776c0-bd1c-47de-8780-4720b2aac7ef	6	PENDING	2026-03-07 19:40:16.243
+104	42dbf0f4-4340-4d04-b344-a249cd2b25ba	e6e195e9-3a95-4b1b-9154-0ca5547d700c	7	PENDING	2026-03-07 19:41:08.593
+105	a0df520f-d839-4acf-b594-7cad857eeaa7	bb92de16-e8b9-4b99-b296-e740bdf01eeb	6	PENDING	2026-03-07 19:44:28.615
+107	42dbf0f4-4340-4d04-b344-a249cd2b25ba	c7f92bf3-bfba-4ebe-b01c-f112db793536	8	PENDING	2026-03-07 19:45:34.813
+108	42dbf0f4-4340-4d04-b344-a249cd2b25ba	9eb8bae3-f0ee-4d99-a6e6-ff55c9b538af	9	PENDING	2026-03-07 19:45:58.41
+109	42dbf0f4-4340-4d04-b344-a249cd2b25ba	3c42ca13-9f5f-472f-ac39-8187842552e2	10	PENDING	2026-03-07 19:46:18.952
+110	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	a484b78a-791a-4420-8ae9-05d8b05290f1	1	PENDING	2026-03-07 19:46:19.408
+111	42dbf0f4-4340-4d04-b344-a249cd2b25ba	f04cd2d9-9c54-4572-a770-070206e6b62a	11	PENDING	2026-03-07 19:46:39.102
+113	50fa6865-037c-451b-8ecc-c4fd9bdb0334	53f9c3e7-af26-4cc7-832f-9e91ffe2addd	1	PENDING	2026-03-07 19:48:03.408
+125	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	7f103da6-43e0-4e2d-b119-878d1591b62d	10	PENDING	2026-03-07 19:52:25.262
+129	50fa6865-037c-451b-8ecc-c4fd9bdb0334	9ea43a5b-3554-43fb-a838-87c3819a8616	5	PENDING	2026-03-07 19:53:41.782
+1225	246e2354-457e-4112-af52-025952cca149	1ee882b4-b855-4889-9864-ae050e2c6674	6	PENDING	2026-03-08 08:08:54.451
+159	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	3c6a274a-1bb2-4e33-87cf-32445b975b08	2	COMPLETED	2026-03-07 20:02:40.181
+153	39201be0-22a9-4afc-8bbf-9a7dd43637e6	b2173a57-43b5-49ea-97d0-9a792b1a5642	7	PENDING	2026-03-07 20:01:13.435
+157	39201be0-22a9-4afc-8bbf-9a7dd43637e6	a80fe26f-fd9a-48a2-92e9-c144bb6f03b2	10	PENDING	2026-03-07 20:02:11.818
+162	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	9eb8bae3-f0ee-4d99-a6e6-ff55c9b538af	3	PENDING	2026-03-07 20:03:20.75
+163	39201be0-22a9-4afc-8bbf-9a7dd43637e6	9fc3a1d2-ed3e-4e22-bb45-981f53923a8c	14	PENDING	2026-03-07 20:03:26.581
+172	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	049027f3-734f-42a4-aa11-543caca8629d	1	PENDING	2026-03-07 20:06:47.905
+177	c4e22006-3ed9-4250-91c8-6618d57253ed	11e58be4-dacc-4a99-8e1f-40634bd01ab4	2	PENDING	2026-03-07 20:08:13.608
+178	c4e22006-3ed9-4250-91c8-6618d57253ed	c297f3bb-14aa-4978-a02c-adcaa3837baa	3	PENDING	2026-03-07 20:08:29.993
+179	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	6627f1c0-5bf9-433e-bb0a-cfa64394bd0f	3	PENDING	2026-03-07 20:08:30.098
+180	c4e22006-3ed9-4250-91c8-6618d57253ed	3d9a9dd5-3386-4583-94ba-4a5c392706a6	4	PENDING	2026-03-07 20:08:49.749
+182	c4e22006-3ed9-4250-91c8-6618d57253ed	3a483c87-9f09-41d8-8e4b-3a2acc49699e	6	PENDING	2026-03-07 20:09:23.298
+183	c4e22006-3ed9-4250-91c8-6618d57253ed	1404ca08-8c2c-499b-be0b-7df146c60c95	7	PENDING	2026-03-07 20:09:44.369
+185	c4e22006-3ed9-4250-91c8-6618d57253ed	74e1cbe3-e416-458a-9872-0fe06eb6d553	9	PENDING	2026-03-07 20:10:29.72
+186	c4e22006-3ed9-4250-91c8-6618d57253ed	96588a04-c5d1-4a00-a114-a57767ee9bc8	10	PENDING	2026-03-07 20:10:44.786
+187	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	29f9cc44-d8b5-420e-ae7c-02e5bc611b2b	1	PENDING	2026-03-07 20:10:49.357
+188	c4e22006-3ed9-4250-91c8-6618d57253ed	4ac9b461-c380-4539-bcf7-f721b1579f87	11	PENDING	2026-03-07 20:10:59.416
+189	c4e22006-3ed9-4250-91c8-6618d57253ed	9d2b280c-9b22-41e3-ab77-8ca3377858f2	12	PENDING	2026-03-07 20:11:15.124
+190	c4e22006-3ed9-4250-91c8-6618d57253ed	4a85bcd7-28d3-403c-aa12-64facd5a4c7d	13	PENDING	2026-03-07 20:11:33.702
+191	c4e22006-3ed9-4250-91c8-6618d57253ed	79e7b7c4-a3a0-4ce6-be69-3a0be89fdbcc	14	PENDING	2026-03-07 20:11:50.706
+192	8c1d8564-6890-42e8-b25f-456e6ee88396	d8ce7dd1-6a12-400b-9fe3-d0ff97dfc0c8	1	PENDING	2026-03-07 20:11:55.583
+193	c4e22006-3ed9-4250-91c8-6618d57253ed	13747260-4500-407d-a22d-9edaf730391b	15	PENDING	2026-03-07 20:12:07.762
+194	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	00e02cc4-bd8e-401e-86c2-5f2ddbe473fb	1	PENDING	2026-03-07 20:12:37.908
+195	8c1d8564-6890-42e8-b25f-456e6ee88396	189bfc46-5338-4636-a2da-36baf745d551	2	PENDING	2026-03-07 20:12:46.351
+116	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	e2c9e952-7b86-4b7d-84b3-a1769e4fdee8	3	COMPLETED	2026-03-07 19:49:23.444
+154	39201be0-22a9-4afc-8bbf-9a7dd43637e6	7ad64e8a-6e2d-40cc-bf89-a06ce828dbe1	8	COMPLETED	2026-03-07 20:01:29.035
+119	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	96e81ee0-b055-41f5-88ff-36c74bd1b24f	5	COMPLETED	2026-03-07 19:50:25.412
+121	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	ce9fdd10-4d23-401c-9af8-64f10db56b21	6	COMPLETED	2026-03-07 19:51:00.52
+160	39201be0-22a9-4afc-8bbf-9a7dd43637e6	53f9c3e7-af26-4cc7-832f-9e91ffe2addd	12	COMPLETED	2026-03-07 20:02:51.786
+132	d631f416-b5af-4ca2-956f-da772aff5f6f	8bf9da40-3967-475a-997b-8f011f4765c0	2	COMPLETED	2026-03-07 19:54:15.627
+139	50fa6865-037c-451b-8ecc-c4fd9bdb0334	9a6473c7-d593-484b-9f0b-b663cb236edd	14	COMPLETED	2026-03-07 19:57:00.801
+131	50fa6865-037c-451b-8ecc-c4fd9bdb0334	b85a97f2-802d-4961-9068-19614c0567db	7	COMPLETED	2026-03-07 19:54:13.506
+155	39201be0-22a9-4afc-8bbf-9a7dd43637e6	5f410aa1-9d41-4f84-a300-12a76df36bbb	9	COMPLETED	2026-03-07 20:01:43.964
+134	50fa6865-037c-451b-8ecc-c4fd9bdb0334	5b439ef4-d685-4e7d-b797-221f281ab248	9	COMPLETED	2026-03-07 19:54:49.085
+166	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	d9a71c3f-dc83-4078-a11e-eee13b95f44b	5	COMPLETED	2026-03-07 20:04:52.911
+152	39201be0-22a9-4afc-8bbf-9a7dd43637e6	bda9954d-c4f0-4098-9540-1be6afbea1c2	6	COMPLETED	2026-03-07 20:00:57.604
+118	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	9da5810c-7e15-4ac3-9c44-92ced255d7d2	4	COMPLETED	2026-03-07 19:49:50.939
+135	50fa6865-037c-451b-8ecc-c4fd9bdb0334	1f971b7c-3cdb-477b-a69e-3e5218e7ea0a	10	COMPLETED	2026-03-07 19:55:46.175
+164	39201be0-22a9-4afc-8bbf-9a7dd43637e6	4e9357e0-bbc7-48f4-b629-17125f1053ff	15	COMPLETED	2026-03-07 20:03:52.986
+167	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	ee18151e-d43c-453b-8a7a-2a3c31be9f5c	6	COMPLETED	2026-03-07 20:05:21.145
+115	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	43456f5a-82c8-42d7-a00f-ef97682ee8cf	2	COMPLETED	2026-03-07 19:49:06.01
+136	50fa6865-037c-451b-8ecc-c4fd9bdb0334	6a128d4d-95d0-458e-8f12-aff8d84c513c	11	COMPLETED	2026-03-07 19:56:04.421
+144	d631f416-b5af-4ca2-956f-da772aff5f6f	48b1ad11-aadf-4b62-a9df-8ac7a81a438c	5	COMPLETED	2026-03-07 19:58:48.376
+122	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	5823a7ba-d544-4c36-a97f-6e75ba5eea57	7	COMPLETED	2026-03-07 19:51:25.706
+168	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	e11e1f9f-81b6-4410-bb12-48fc58cefd1b	7	COMPLETED	2026-03-07 20:05:40.756
+123	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8c924911-9a4f-4b17-8574-a10b3e3c358a	8	COMPLETED	2026-03-07 19:51:48.54
+137	50fa6865-037c-451b-8ecc-c4fd9bdb0334	5608f4ea-371d-40d2-b459-907909f2921c	12	COMPLETED	2026-03-07 19:56:21.063
+124	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	e8275e02-6e21-459a-881e-cc70d37299c7	9	COMPLETED	2026-03-07 19:52:07.375
+165	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	50b44118-7ce7-445b-aff6-ee2a805bca9a	4	COMPLETED	2026-03-07 20:03:54.595
+126	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	374d310c-614b-4a24-ba96-9a802b39f08b	11	COMPLETED	2026-03-07 19:52:51.951
+141	50fa6865-037c-451b-8ecc-c4fd9bdb0334	89d544af-e10a-4c06-a18f-a2dc42f21c48	15	COMPLETED	2026-03-07 19:57:23.981
+170	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	99427901-273e-4a96-a8f4-8337f1003d02	9	COMPLETED	2026-03-07 20:06:18.361
+127	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	e108daab-28fb-4b18-ae50-10ca49533c8c	12	COMPLETED	2026-03-07 19:53:12.476
+171	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	c889cbbc-49cd-43e6-b792-993b0e2aa41b	10	COMPLETED	2026-03-07 20:06:40.511
+147	d631f416-b5af-4ca2-956f-da772aff5f6f	5317e5ef-237c-4391-a797-d04938a63d7c	7	COMPLETED	2026-03-07 19:59:34.666
+133	50fa6865-037c-451b-8ecc-c4fd9bdb0334	28f78ec8-69ec-40c9-a80a-e805c018ab24	8	COMPLETED	2026-03-07 19:54:33.177
+161	39201be0-22a9-4afc-8bbf-9a7dd43637e6	a522b62e-a42a-46f4-a88a-6e574a544102	13	COMPLETED	2026-03-07 20:03:05.941
+173	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	f39dac84-18d9-44f1-85a0-1f9228bbaf7f	11	COMPLETED	2026-03-07 20:06:58.998
+143	39201be0-22a9-4afc-8bbf-9a7dd43637e6	a0f4fb74-73e5-45c5-8c61-5d71ad55806c	1	COMPLETED	2026-03-07 19:58:21.542
+174	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	f3e0c5c9-0ff2-4c17-ab8c-c914f3f46221	12	COMPLETED	2026-03-07 20:07:18.255
+158	39201be0-22a9-4afc-8bbf-9a7dd43637e6	8bf9da40-3967-475a-997b-8f011f4765c0	11	COMPLETED	2026-03-07 20:02:34.8
+156	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	9da5810c-7e15-4ac3-9c44-92ced255d7d2	1	COMPLETED	2026-03-07 20:01:59.284
+1271	bf71f55b-86ba-46b8-afa1-1aea09f829e1	cfc32444-9f5f-460e-9c8a-f97045dd4401	14	PENDING	2026-03-08 08:27:13.968
+142	d631f416-b5af-4ca2-956f-da772aff5f6f	e7d95a9c-9583-44fe-b52f-dd3b003a87f5	4	COMPLETED	2026-03-07 19:57:52.734
+145	d631f416-b5af-4ca2-956f-da772aff5f6f	f16421cd-7697-498e-87fc-c7b3325d01ee	6	COMPLETED	2026-03-07 19:59:10.646
+151	39201be0-22a9-4afc-8bbf-9a7dd43637e6	a809949e-4a73-45a2-b11b-2f0744571a8f	5	COMPLETED	2026-03-07 20:00:41.84
+176	c4e22006-3ed9-4250-91c8-6618d57253ed	8efa7788-bc3e-4ab0-bca9-5d044cf49b0b	1	COMPLETED	2026-03-07 20:07:51.114
+184	c4e22006-3ed9-4250-91c8-6618d57253ed	9c15faaa-8504-456b-a94f-b07b1f643286	8	COMPLETED	2026-03-07 20:10:13.831
+181	c4e22006-3ed9-4250-91c8-6618d57253ed	051982ff-cea9-4e77-8b15-8fa9f829dca4	5	COMPLETED	2026-03-07 20:09:06.085
+140	d631f416-b5af-4ca2-956f-da772aff5f6f	76b5ed92-8fb0-40af-b2a2-c74f713da496	3	COMPLETED	2026-03-07 19:57:14.155
+99	42dbf0f4-4340-4d04-b344-a249cd2b25ba	8f86c362-ed56-4a1c-bd86-a8f3548baeb0	2	COMPLETED	2026-03-07 19:38:13.094
+100	42dbf0f4-4340-4d04-b344-a249cd2b25ba	fe8510d1-d9a3-472d-b13b-9bde47186bee	3	COMPLETED	2026-03-07 19:38:44.528
+101	42dbf0f4-4340-4d04-b344-a249cd2b25ba	3c6a274a-1bb2-4e33-87cf-32445b975b08	4	COMPLETED	2026-03-07 19:39:12.398
+112	42dbf0f4-4340-4d04-b344-a249cd2b25ba	9be68bae-9772-4de8-a67a-d6c849f684eb	12	COMPLETED	2026-03-07 19:46:58.869
+128	d631f416-b5af-4ca2-956f-da772aff5f6f	d20da77c-7052-4712-aea6-0faf65371364	1	COMPLETED	2026-03-07 19:53:31.695
+148	d631f416-b5af-4ca2-956f-da772aff5f6f	47dd250f-ac31-40cf-9bd1-26f6460e7a7d	8	COMPLETED	2026-03-07 20:00:01.719
+197	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	0ee6e922-bc7c-47d2-a0c3-19a3f64c3347	3	PENDING	2026-03-07 20:13:08.66
+198	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	5df56423-f02d-450d-8bbd-19e9e8e8d6a5	4	PENDING	2026-03-07 20:13:22.555
+199	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	a19fd527-9d8a-4b07-9ed9-b65b089da329	5	PENDING	2026-03-07 20:13:36.538
+200	8c1d8564-6890-42e8-b25f-456e6ee88396	22b3d3ea-3796-467b-b963-fe1fe51f655f	3	PENDING	2026-03-07 20:13:38.134
+1254	565b69ae-c54e-4f96-9d46-a31e869eccbf	b9c66d8f-8572-4be6-8792-62cee7c13b47	16	PENDING	2026-03-08 08:16:07.178
+203	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	e6ce598c-450f-431a-9985-0dce3fdf7b7e	8	PENDING	2026-03-07 20:14:32.251
+204	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	5742405f-cb58-4ed6-9d16-66b29b7e5e87	9	PENDING	2026-03-07 20:14:48.141
+205	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	00df0dfd-b646-4698-9d67-f008dabfac30	10	PENDING	2026-03-07 20:15:05.992
+206	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	9436c480-79ff-40b4-9709-eed6ffa15957	11	PENDING	2026-03-07 20:15:21.688
+225	fcce01c3-007c-4299-a17f-9d5f4402c6ec	6d4cb6d7-08ac-4748-8b69-89460528c291	2	COMPLETED	2026-03-07 20:21:00.9
+213	8c1d8564-6890-42e8-b25f-456e6ee88396	469f9024-aa08-40ad-ab57-fe7cd9aa7e8a	6	PENDING	2026-03-07 20:17:21.84
+216	8c1d8564-6890-42e8-b25f-456e6ee88396	3cfa988f-f2fb-4680-b37f-da399bb1ccd1	7	PENDING	2026-03-07 20:18:49.47
+220	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	0db94485-72ad-4b42-9a20-8253c5230d8c	6	PENDING	2026-03-07 20:20:02.686
+222	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	2be214ec-4721-41f0-a5a0-52f12e1659f8	7	PENDING	2026-03-07 20:20:19.544
+223	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	f61924b8-ca98-4aca-95df-be4cd1b9237b	8	PENDING	2026-03-07 20:20:44.707
+224	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	a95db27f-172a-4122-8614-769c6748b290	9	PENDING	2026-03-07 20:21:00.783
+239	990d6c56-fa9b-4848-8696-21e832fbcfd3	ca7b2899-e2be-4d5b-b8ac-41a02e97492d	12	COMPLETED	2026-03-07 20:25:19.424
+1272	bf71f55b-86ba-46b8-afa1-1aea09f829e1	48e63db2-bb1c-4371-b574-a1cdcb3aad00	15	PENDING	2026-03-08 08:27:35.806
+228	fcce01c3-007c-4299-a17f-9d5f4402c6ec	d9ad2bc0-04ef-41e6-be61-d06c53525282	3	PENDING	2026-03-07 20:22:04.105
+240	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5742405f-cb58-4ed6-9d16-66b29b7e5e87	5	COMPLETED	2026-03-07 20:25:48.903
+1309	649453fd-ef30-42d1-8d2a-94c26237e814	2f90df91-adfe-49e4-9598-52a7a6414cbb	10	PENDING	2026-03-08 08:37:27.79
+237	fcce01c3-007c-4299-a17f-9d5f4402c6ec	374967ac-ad14-4bc0-9cb0-cac87fb4a794	4	PENDING	2026-03-07 20:24:40.879
+242	2920b45c-0ce6-4dec-8766-3892322ff1b0	493de048-87d5-47c6-8d0e-8dd10acdca04	1	PENDING	2026-03-07 20:28:17.092
+243	2920b45c-0ce6-4dec-8766-3892322ff1b0	0d3ed5ad-e4d5-4d45-bb0e-997b80673aef	2	PENDING	2026-03-07 20:29:05.193
+241	fcce01c3-007c-4299-a17f-9d5f4402c6ec	35a45c28-731f-4aa4-b1af-2a3b2a2271b1	6	COMPLETED	2026-03-07 20:26:34.635
+245	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	20f15a57-4c66-4ab4-b265-6c14a2d03bc9	2	PENDING	2026-03-07 20:34:25.461
+246	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	d20da77c-7052-4712-aea6-0faf65371364	3	PENDING	2026-03-07 20:34:48.92
+1327	920b5fba-b331-4010-8858-8a5b3fb29a02	4d01b614-4498-4332-ad23-eb89e9dc607d	15	PENDING	2026-03-08 08:45:05.024
+252	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	2466da94-3b2f-48db-bca3-517ac14198c9	9	PENDING	2026-03-07 20:38:53.463
+254	55fbdf9b-b4c7-4844-babc-bba452abf569	86f9e436-0d0e-4efa-9ef1-5b415b1f67c7	1	PENDING	2026-03-07 20:39:45.503
+255	55fbdf9b-b4c7-4844-babc-bba452abf569	3678a622-3c5d-477b-abab-89a3c3b33a16	2	PENDING	2026-03-07 20:40:02.217
+256	55fbdf9b-b4c7-4844-babc-bba452abf569	e21dbadd-ebc7-43a5-8d54-f6288592d881	3	PENDING	2026-03-07 20:40:20.652
+257	55fbdf9b-b4c7-4844-babc-bba452abf569	e61be007-bd54-4a84-87a6-365d82a1443a	4	PENDING	2026-03-07 20:40:40.592
+258	55fbdf9b-b4c7-4844-babc-bba452abf569	c8c41f49-f44f-452e-bed0-b84ad3a33013	5	PENDING	2026-03-07 20:41:17.817
+259	55fbdf9b-b4c7-4844-babc-bba452abf569	14b19f4b-1dd8-429e-81d4-b53c22a43de0	6	PENDING	2026-03-07 20:41:32.107
+260	55fbdf9b-b4c7-4844-babc-bba452abf569	fc951226-4cc0-4849-b9fa-4c33cf19b954	7	PENDING	2026-03-07 20:41:50.979
+1347	c4e22006-3ed9-4250-91c8-6618d57253ed	b32f14a5-bf79-461a-953f-52290bc0ee41	17	PENDING	2026-03-08 08:55:15.224
+266	55fbdf9b-b4c7-4844-babc-bba452abf569	f95b659a-8113-41e9-aeef-d03567889485	13	PENDING	2026-03-07 20:43:40.401
+269	8c1d8564-6890-42e8-b25f-456e6ee88396	88adbed3-9b39-4d9a-9456-e5a615f3602f	8	PENDING	2026-03-07 20:44:50.066
+1389	c4e22006-3ed9-4250-91c8-6618d57253ed	7e3bd57a-0d7a-4a39-a30b-27dc29058f1d	19	PENDING	2026-03-08 09:23:50.233
+271	8c1d8564-6890-42e8-b25f-456e6ee88396	30437db1-d67d-44c9-ba32-39c99ebf95c1	10	PENDING	2026-03-07 20:45:34.11
+273	8c1d8564-6890-42e8-b25f-456e6ee88396	0e28216e-61cc-41a4-b759-10632dc5b4b8	12	PENDING	2026-03-07 20:46:24.263
+274	8c1d8564-6890-42e8-b25f-456e6ee88396	edaedab4-0f80-466b-8fe6-14eb82284cda	13	PENDING	2026-03-07 20:46:46.103
+275	8c1d8564-6890-42e8-b25f-456e6ee88396	35b0fde1-ad84-442f-a68e-c5b183e6c680	14	PENDING	2026-03-07 20:47:05.753
+285	2920b45c-0ce6-4dec-8766-3892322ff1b0	fac8d228-c871-4ad6-98a5-dc5c4a9f7bcd	7	PENDING	2026-03-07 20:51:08.75
+289	2920b45c-0ce6-4dec-8766-3892322ff1b0	de857289-e368-4a9a-afc8-c7d596302ae9	11	PENDING	2026-03-07 20:52:48.081
+282	2920b45c-0ce6-4dec-8766-3892322ff1b0	0136fc99-d67d-4972-8d7e-aede2b1577e6	4	COMPLETED	2026-03-07 20:49:51.584
+277	fcce01c3-007c-4299-a17f-9d5f4402c6ec	14c7be43-3524-47b4-8b2c-0e62ecd15e1f	7	COMPLETED	2026-03-07 20:48:02.501
+211	a694622b-3ba8-4c82-bd05-08d8bfd5af50	3075d0f7-557e-4826-936d-efe20ab39229	2	COMPLETED	2026-03-07 20:16:51.957
+249	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	4d01b614-4498-4332-ad23-eb89e9dc607d	6	COMPLETED	2026-03-07 20:36:31.408
+283	2920b45c-0ce6-4dec-8766-3892322ff1b0	77ec1ce4-5bbf-4b88-a90a-6f0f6fea5826	5	COMPLETED	2026-03-07 20:50:10.693
+251	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	916f0a23-5484-493e-849b-0b6eaf408918	8	COMPLETED	2026-03-07 20:38:36.287
+284	2920b45c-0ce6-4dec-8766-3892322ff1b0	5f546c43-7153-478a-a597-25009f21b178	6	COMPLETED	2026-03-07 20:50:30.014
+212	a694622b-3ba8-4c82-bd05-08d8bfd5af50	91c696c6-919a-4a5a-8088-1ec2269501a5	3	COMPLETED	2026-03-07 20:17:11.613
+279	fcce01c3-007c-4299-a17f-9d5f4402c6ec	827958e8-0aa2-4a7a-a039-2eda28985b40	9	COMPLETED	2026-03-07 20:48:42.918
+231	990d6c56-fa9b-4848-8696-21e832fbcfd3	31fc7a75-e7f1-48cc-916e-f8d9e05c9d58	5	COMPLETED	2026-03-07 20:22:48.709
+280	fcce01c3-007c-4299-a17f-9d5f4402c6ec	8459b99f-a6d2-4738-a0f8-db738281fe36	10	COMPLETED	2026-03-07 20:49:03.121
+248	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	c706bd83-0ff7-4a76-84c6-47fb06f969b0	5	COMPLETED	2026-03-07 20:35:49.576
+286	2920b45c-0ce6-4dec-8766-3892322ff1b0	dc9fbe75-ada6-402e-a511-309b9138417e	8	COMPLETED	2026-03-07 20:51:39.768
+232	990d6c56-fa9b-4848-8696-21e832fbcfd3	a3f7387d-fd40-42ac-9cd1-670a21ea547c	6	COMPLETED	2026-03-07 20:23:09.583
+209	a694622b-3ba8-4c82-bd05-08d8bfd5af50	931ec1eb-a2ca-4741-9a47-90516a0018b7	1	COMPLETED	2026-03-07 20:16:27.911
+233	990d6c56-fa9b-4848-8696-21e832fbcfd3	52365878-f846-4c66-8ef2-205a7eab82f0	7	COMPLETED	2026-03-07 20:23:27.871
+281	fcce01c3-007c-4299-a17f-9d5f4402c6ec	4c8ee3ec-6087-4e18-a3e7-b20bbb68cdb9	11	COMPLETED	2026-03-07 20:49:20.077
+290	2920b45c-0ce6-4dec-8766-3892322ff1b0	edfee3c4-06d4-4ecc-bb4f-567642da43a9	12	COMPLETED	2026-03-07 20:53:10.008
+234	990d6c56-fa9b-4848-8696-21e832fbcfd3	ba84fd9d-d2a7-47f0-af0a-6ee538d891bf	8	COMPLETED	2026-03-07 20:23:43.067
+253	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	21f94e64-3391-466d-994c-c2f32e3a2822	10	COMPLETED	2026-03-07 20:39:12.08
+215	a694622b-3ba8-4c82-bd05-08d8bfd5af50	1d8dfce9-e556-40ff-81a9-62fb99ffdd75	5	COMPLETED	2026-03-07 20:18:32.723
+235	990d6c56-fa9b-4848-8696-21e832fbcfd3	1a61a996-00b2-4caf-b268-2d3c952b64be	9	COMPLETED	2026-03-07 20:24:03.754
+247	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	04f1394b-fe36-4409-9696-356955e9d010	4	COMPLETED	2026-03-07 20:35:15.957
+291	2920b45c-0ce6-4dec-8766-3892322ff1b0	27309d23-1de4-40d4-a448-eafe3dcb127a	13	COMPLETED	2026-03-07 20:53:27.029
+236	990d6c56-fa9b-4848-8696-21e832fbcfd3	f036a6d6-c2d2-4e3f-ab25-a17fed5bd228	10	COMPLETED	2026-03-07 20:24:21.593
+214	a694622b-3ba8-4c82-bd05-08d8bfd5af50	720ffb17-f674-4701-bc09-b053cc4bd440	4	COMPLETED	2026-03-07 20:17:56.128
+218	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	6d4cb6d7-08ac-4748-8b69-89460528c291	4	COMPLETED	2026-03-07 20:19:28.725
+219	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	4a7ae7d3-2e24-4b59-9424-05dc02c16507	5	COMPLETED	2026-03-07 20:19:47.318
+238	990d6c56-fa9b-4848-8696-21e832fbcfd3	9a20421b-0f1b-4692-b5fa-8e9936aa635b	11	COMPLETED	2026-03-07 20:24:53.707
+217	a694622b-3ba8-4c82-bd05-08d8bfd5af50	f889fe75-2cbd-41aa-bf26-65a01bc45dc3	6	COMPLETED	2026-03-07 20:19:00.358
+221	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5f49a1a9-39f5-413f-848e-995b9d09551c	1	COMPLETED	2026-03-07 20:20:04.886
+1350	104e34a6-fd53-4012-a0f0-41df6842c833	2449271b-9f19-4464-b2eb-f6acbd045dfa	10	COMPLETED	2026-03-08 08:55:43.079
+1348	81f895c5-36b8-4d09-8241-80e64868fe56	e6d680f8-d4fd-409b-8bef-edc6a6814471	14	COMPLETED	2026-03-08 08:55:31.359
+1417	c34851b2-fce1-4c90-b896-3a1a666a841a	4a45f5b3-531b-4d4d-8f8c-22dafad93229	12	COMPLETED	2026-03-08 10:01:20.663
+1419	539ff319-c98a-440f-9541-c0e736fe44b3	6cb101f4-05e5-4a39-b29a-b0f16c1cfed9	16	COMPLETED	2026-03-08 10:02:28.112
+1420	539ff319-c98a-440f-9541-c0e736fe44b3	fc36cc60-f4a2-4b57-aefb-d7f8c6a083d4	17	COMPLETED	2026-03-08 10:02:28.124
+1421	539ff319-c98a-440f-9541-c0e736fe44b3	e934297b-ff88-4426-bc7b-7096c31d1030	18	COMPLETED	2026-03-08 10:02:28.131
+1422	539ff319-c98a-440f-9541-c0e736fe44b3	679c898d-9455-46d6-8893-6bdfc5dfc618	19	COMPLETED	2026-03-08 10:02:28.141
+1446	4df9bf27-579a-4661-a2ea-703387a2bdaf	75fa97e5-674a-452a-b506-edb4b706ea3c	18	COMPLETED	2026-03-08 10:53:00.484
+1431	d631f416-b5af-4ca2-956f-da772aff5f6f	2779e96d-ab5a-44c5-adef-e5557a3843de	9	COMPLETED	2026-03-08 10:32:20.584
+1432	d631f416-b5af-4ca2-956f-da772aff5f6f	e806bf21-c4bf-4e45-9b28-38bb6bc5114f	10	COMPLETED	2026-03-08 10:32:20.605
+1433	d631f416-b5af-4ca2-956f-da772aff5f6f	126fe1fe-2052-490c-bbf2-ad0de6d0b79d	11	COMPLETED	2026-03-08 10:32:20.616
+1434	d631f416-b5af-4ca2-956f-da772aff5f6f	23259f1d-418b-4d20-b658-e65abc871bdc	12	COMPLETED	2026-03-08 10:32:20.623
+1435	d631f416-b5af-4ca2-956f-da772aff5f6f	09b435e0-dd2e-4875-8017-465133c1e7b7	13	COMPLETED	2026-03-08 10:32:20.63
+1436	d631f416-b5af-4ca2-956f-da772aff5f6f	3aa60d21-a753-4480-a5e7-ba5115d17c80	14	COMPLETED	2026-03-08 10:32:20.637
+146	39201be0-22a9-4afc-8bbf-9a7dd43637e6	e91db852-72c8-4767-a136-e4f3497ef032	2	COMPLETED	2026-03-07 19:59:12.594
+1255	458250d8-e65f-4171-9e11-3a6dff72a848	ea65df8f-57d8-4c98-b8d5-f0e7231e0c54	13	PENDING	2026-03-08 08:17:21.876
+300	0ac45005-84e5-4b25-ad6c-1e998e94a611	b9760d23-1dcc-4a42-8211-833f5d45916f	1	PENDING	2026-03-07 20:56:54.973
+301	0ac45005-84e5-4b25-ad6c-1e998e94a611	c8388555-2e5f-4329-bd90-f966b94d1389	2	PENDING	2026-03-07 20:57:21.467
+302	0ac45005-84e5-4b25-ad6c-1e998e94a611	1fda308e-0428-43be-ab55-32a1a8e232eb	3	PENDING	2026-03-07 20:57:42.271
+303	0ac45005-84e5-4b25-ad6c-1e998e94a611	26462040-10a9-4d94-aba6-43b88de4be63	4	PENDING	2026-03-07 20:57:59.939
+304	0ac45005-84e5-4b25-ad6c-1e998e94a611	76d9dc51-8924-4faa-baa0-79b5a2502b7f	5	PENDING	2026-03-07 20:58:19.425
+306	0ac45005-84e5-4b25-ad6c-1e998e94a611	dec78d09-5642-491c-b319-f4a527bf39b4	6	PENDING	2026-03-07 21:02:21.993
+307	0ac45005-84e5-4b25-ad6c-1e998e94a611	abec54d8-a30e-46f7-8b2f-6d60890c89bb	7	PENDING	2026-03-07 21:02:45.093
+308	0ac45005-84e5-4b25-ad6c-1e998e94a611	6099798e-25a5-4c55-81c0-5ffb13294c9b	8	PENDING	2026-03-07 21:03:19.383
+310	0ac45005-84e5-4b25-ad6c-1e998e94a611	8a422961-feee-450b-a455-716d71e041de	10	PENDING	2026-03-07 21:04:05.418
+311	0ac45005-84e5-4b25-ad6c-1e998e94a611	12cf3c64-1ea2-4665-985b-7cc784fddf2d	11	PENDING	2026-03-07 21:04:28.476
+312	eee239d8-0363-488a-80c3-0c415c7b2217	fb942579-879b-4cc9-8f18-df45cb144123	1	PENDING	2026-03-07 21:05:10.997
+319	eee239d8-0363-488a-80c3-0c415c7b2217	20394d07-6d5a-4d6e-a328-ffa9f50f2bd3	7	PENDING	2026-03-07 21:09:45.842
+320	eee239d8-0363-488a-80c3-0c415c7b2217	49582330-db2f-4df8-ac75-65452143ef48	8	PENDING	2026-03-07 21:10:07.662
+322	eee239d8-0363-488a-80c3-0c415c7b2217	617842e4-70f0-4bbb-8f46-5ccf0a0efb2d	10	PENDING	2026-03-07 21:10:57.516
+323	eee239d8-0363-488a-80c3-0c415c7b2217	52661308-ca35-4237-942f-4b4665dd8b95	11	PENDING	2026-03-07 21:11:13.234
+1273	5cd29d5a-169e-41db-87a2-997e5fd5301f	61f10cf9-5a96-4e47-9711-1100baa71fce	15	PENDING	2026-03-08 08:27:42.94
+331	964b9c92-19e6-4140-8be6-a64973f93bfa	a6ac5b6e-a338-4c58-ab4b-e437d30429ea	7	PENDING	2026-03-07 21:13:52.055
+332	964b9c92-19e6-4140-8be6-a64973f93bfa	2008a9f1-f949-4a61-94f1-489cb40c308a	8	PENDING	2026-03-07 21:14:06.782
+333	cf6780cd-f597-4792-96f8-5e11206fae5e	d20a01f2-ef1d-4776-a180-32eb26947fd9	1	PENDING	2026-03-07 21:14:42.939
+336	cf6780cd-f597-4792-96f8-5e11206fae5e	f78e15ba-305d-4562-889e-4d909223cb00	4	PENDING	2026-03-07 21:15:33.865
+340	cf6780cd-f597-4792-96f8-5e11206fae5e	d3ee3f01-ad54-449c-98c0-187678402c2c	8	PENDING	2026-03-07 21:16:40.052
+343	cf6780cd-f597-4792-96f8-5e11206fae5e	d3c4aa28-5568-46c1-b182-5f4ecf0c0ca8	11	PENDING	2026-03-07 21:17:38.335
+344	cf6780cd-f597-4792-96f8-5e11206fae5e	3d3274fa-1c2f-487f-a398-792904bd338e	12	PENDING	2026-03-07 21:17:53.77
+345	cf6780cd-f597-4792-96f8-5e11206fae5e	832729d0-3036-4f08-9fba-636241118dfd	13	PENDING	2026-03-07 21:18:31.776
+351	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	187b4d97-78fe-4fd2-8ec3-99bc4de84672	1	PENDING	2026-03-07 21:21:33.405
+352	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	4cc7bef3-e654-439c-9816-9f208c7bb5a6	2	PENDING	2026-03-07 21:21:53.253
+353	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	50213a8c-0cab-46ad-92d9-31dcc8f58978	3	PENDING	2026-03-07 21:22:13.485
+355	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	baf4752f-7cc5-4399-9e3d-284d794abb4c	5	PENDING	2026-03-07 21:22:49.373
+356	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	b235fcfd-e97c-4047-bd07-08947b15d278	6	PENDING	2026-03-07 21:23:07.25
+357	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	e82d565b-3684-48df-b91a-066fed1b192b	7	PENDING	2026-03-07 21:23:26.726
+1329	920b5fba-b331-4010-8858-8a5b3fb29a02	0e8d6d22-baa3-4b56-8e7c-42d6459c039e	17	PENDING	2026-03-08 08:45:58.816
+1310	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	de74f68f-f05e-45c5-b8b5-4269dabac5ef	15	COMPLETED	2026-03-08 08:38:22.451
+363	0cc1387b-56c9-4ce6-a994-e1cf59c24632	bdec500d-37a8-4e91-9da8-0e972b2100f2	2	PENDING	2026-03-07 21:27:08.335
+364	0cc1387b-56c9-4ce6-a994-e1cf59c24632	518233eb-899a-4997-8204-4491e1e448ad	3	PENDING	2026-03-07 21:27:24.623
+1391	c4e22006-3ed9-4250-91c8-6618d57253ed	638dfc95-d701-4824-8e18-74135e91c599	21	PENDING	2026-03-08 09:24:49.114
+367	0cc1387b-56c9-4ce6-a994-e1cf59c24632	50b44118-7ce7-445b-aff6-ee2a805bca9a	6	PENDING	2026-03-07 21:28:26.293
+368	0cc1387b-56c9-4ce6-a994-e1cf59c24632	3d559d3c-4a8e-454a-9de0-7deec3e52366	7	PENDING	2026-03-07 21:28:46.607
+369	0cc1387b-56c9-4ce6-a994-e1cf59c24632	f1163c6a-25d2-4a51-b3d0-c2cf77ed792a	8	PENDING	2026-03-07 21:29:02.611
+370	0cc1387b-56c9-4ce6-a994-e1cf59c24632	1f935982-a071-4c62-af0d-e585385d676a	9	PENDING	2026-03-07 21:29:20.033
+372	db338578-8876-4dec-a6d5-2d0094828b16	17b558c1-4525-4e51-b265-e0916f039033	2	PENDING	2026-03-07 21:38:30.018
+374	db338578-8876-4dec-a6d5-2d0094828b16	d9ad2bc0-04ef-41e6-be61-d06c53525282	4	PENDING	2026-03-07 21:39:08.847
+375	db338578-8876-4dec-a6d5-2d0094828b16	3a563ca7-2d45-48b1-ac03-f54fafd4b153	5	PENDING	2026-03-07 21:39:28.171
+376	51c28633-94a9-4653-bbc8-47eca7fd98c2	97387603-6698-4b10-80b7-164d413e81e5	1	PENDING	2026-03-07 21:39:58.279
+377	51c28633-94a9-4653-bbc8-47eca7fd98c2	6b85aaab-1c46-48c4-8f37-f893bc930efb	2	PENDING	2026-03-07 21:40:18.221
+378	51c28633-94a9-4653-bbc8-47eca7fd98c2	da3d0984-1322-45e6-97d7-c77706524766	3	PENDING	2026-03-07 21:40:40.068
+1402	5c9635b4-b0e1-40ac-947e-93714df4d582	3a3f8598-6244-438e-9bd2-ad004d3d4b8f	11	PENDING	2026-03-08 09:41:17.404
+1403	5c9635b4-b0e1-40ac-947e-93714df4d582	c2217e7b-378a-4b09-b4c7-bc84ec1948ed	12	PENDING	2026-03-08 09:42:12.518
+383	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	877eeadb-3b26-4e23-8338-9b502a0abe1d	2	PENDING	2026-03-07 21:44:30.782
+382	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	3aa63746-5d60-4f3b-89b0-fc564e1f4c5e	1	COMPLETED	2026-03-07 21:43:59.321
+390	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	d9fe8497-24d7-4b60-93c5-35a498c21c03	9	COMPLETED	2026-03-07 21:46:56.621
+384	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	2cf23dd3-fb4e-4c9b-a2a1-6ee081a4a129	3	COMPLETED	2026-03-07 21:44:53.805
+295	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	64134fd3-ba3f-4a1a-a242-c05028eebd58	3	COMPLETED	2026-03-07 20:54:44.481
+296	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	1b079f3b-04fc-43ee-85d3-e638f41f613b	4	COMPLETED	2026-03-07 20:55:03.962
+334	cf6780cd-f597-4792-96f8-5e11206fae5e	4ea704d8-1bfc-491f-a34c-231449103736	2	COMPLETED	2026-03-07 21:15:01.113
+388	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	f8aa2e65-f30b-4130-97be-d7061471137a	7	COMPLETED	2026-03-07 21:46:18.171
+371	db338578-8876-4dec-a6d5-2d0094828b16	2449271b-9f19-4464-b2eb-f6acbd045dfa	1	COMPLETED	2026-03-07 21:38:13.074
+294	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	85510a17-e022-4557-9dc1-a3b26646af08	2	COMPLETED	2026-03-07 20:54:26.443
+1437	458250d8-e65f-4171-9e11-3a6dff72a848	9436c480-79ff-40b4-9709-eed6ffa15957	16	COMPLETED	2026-03-08 10:35:20.208
+335	cf6780cd-f597-4792-96f8-5e11206fae5e	066842fa-7768-450b-beeb-d89c4e3e9b14	3	COMPLETED	2026-03-07 21:15:15.76
+297	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	d0d86feb-4639-4f63-9705-e3bf400959b5	5	COMPLETED	2026-03-07 20:55:20.784
+325	964b9c92-19e6-4140-8be6-a64973f93bfa	46e5d681-a70c-4d81-baa5-c4a367686176	1	COMPLETED	2026-03-07 21:12:06.48
+314	eee239d8-0363-488a-80c3-0c415c7b2217	0eac51f3-e454-4cba-9bba-15372ba4f166	3	COMPLETED	2026-03-07 21:06:19.9
+347	2a227454-03a0-441c-9b10-480f36a9d715	48be4361-9456-4745-9206-2b52f9362149	2	COMPLETED	2026-03-07 21:20:13.094
+346	2a227454-03a0-441c-9b10-480f36a9d715	0f11268b-0b4f-4e75-ab9e-4c4adb0a5986	1	COMPLETED	2026-03-07 21:19:56.753
+326	964b9c92-19e6-4140-8be6-a64973f93bfa	d7fffa7f-3970-4301-b3c9-8e6aa9432b68	2	COMPLETED	2026-03-07 21:12:20.244
+298	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	ca28ffb7-6bbc-4c94-8054-3e3d76127750	6	COMPLETED	2026-03-07 20:55:40.677
+315	eee239d8-0363-488a-80c3-0c415c7b2217	2f758b98-8e1c-4cca-a7bd-44e24eeab4ee	4	COMPLETED	2026-03-07 21:06:37.716
+349	2a227454-03a0-441c-9b10-480f36a9d715	6fac89a8-6b12-4ad4-a843-25787a65191c	4	COMPLETED	2026-03-07 21:20:48.382
+348	2a227454-03a0-441c-9b10-480f36a9d715	ea739780-6712-4a90-b489-8221729f109a	3	COMPLETED	2026-03-07 21:20:29.617
+337	cf6780cd-f597-4792-96f8-5e11206fae5e	aec7a705-57cc-4d41-b5ca-4ecf8c3ceaca	5	COMPLETED	2026-03-07 21:15:49.539
+391	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	44d45376-b401-444f-9a4b-2553cc2ad3b3	10	COMPLETED	2026-03-07 21:47:18.861
+350	2a227454-03a0-441c-9b10-480f36a9d715	31ed9ade-f540-4519-aa84-0b552bee05a3	5	COMPLETED	2026-03-07 21:21:05.416
+327	964b9c92-19e6-4140-8be6-a64973f93bfa	5acbd521-d3c7-4ca5-85eb-1d3623d9e3a1	3	COMPLETED	2026-03-07 21:12:37.942
+318	eee239d8-0363-488a-80c3-0c415c7b2217	7a866359-ddd5-4d92-a9c9-3e811aa732fb	6	COMPLETED	2026-03-07 21:09:21.452
+386	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	404aab0b-dd4e-4768-9b6c-a9551c16aaf6	5	COMPLETED	2026-03-07 21:45:40.534
+338	cf6780cd-f597-4792-96f8-5e11206fae5e	03dca943-4e3d-4ae4-9958-ce5b56d854d1	6	COMPLETED	2026-03-07 21:16:07.021
+385	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	aaaa1c88-0aa7-434c-990e-a366d21a9d10	4	COMPLETED	2026-03-07 21:45:18.169
+317	eee239d8-0363-488a-80c3-0c415c7b2217	f8ba3ae1-753b-4648-99d3-7d645ee5069f	5	COMPLETED	2026-03-07 21:08:59.694
+392	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	ca328ed9-29c1-4a6e-b784-11b375cd2d54	11	COMPLETED	2026-03-07 21:47:41.965
+329	964b9c92-19e6-4140-8be6-a64973f93bfa	2b48be84-3b07-4621-bd3e-7ecaa4be953d	5	COMPLETED	2026-03-07 21:13:17.36
+373	db338578-8876-4dec-a6d5-2d0094828b16	1d175cbd-6955-46e1-a02e-58efeb5f4a88	3	COMPLETED	2026-03-07 21:38:50.021
+389	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	335eb41c-c4a8-467b-a423-765852117267	8	COMPLETED	2026-03-07 21:46:37.578
+339	cf6780cd-f597-4792-96f8-5e11206fae5e	4ea3b42f-1ac6-45b1-87e5-ef808b71df0e	7	COMPLETED	2026-03-07 21:16:24.637
+330	964b9c92-19e6-4140-8be6-a64973f93bfa	3b2808c2-550c-430c-9a05-76c247677dae	6	COMPLETED	2026-03-07 21:13:31.769
+1371	e4d9b090-495e-4d82-9c3e-d8048154ccd6	9e8fe944-7dee-4c01-a117-d10fc0c8bc18	5	COMPLETED	2026-03-08 09:07:24.234
+1418	c34851b2-fce1-4c90-b896-3a1a666a841a	3eaa9ac6-be26-44d2-948d-7b72bec295f3	13	COMPLETED	2026-03-08 10:02:03.5
+393	674b5de7-296f-4f50-8359-9e337c508dd2	a2afc98d-59ac-4ea5-8d38-6c970c1708af	1	PENDING	2026-03-07 21:48:16.246
+394	674b5de7-296f-4f50-8359-9e337c508dd2	22318afb-352a-4ac5-9f84-9fe879e1c61c	2	PENDING	2026-03-07 21:48:39.04
+395	674b5de7-296f-4f50-8359-9e337c508dd2	954da0d1-3b4c-41b8-b270-7cf02297592a	3	PENDING	2026-03-07 21:49:01.267
+397	674b5de7-296f-4f50-8359-9e337c508dd2	18c87321-2bb1-48d1-9c81-bcd350d02bff	5	PENDING	2026-03-07 21:49:58.643
+398	674b5de7-296f-4f50-8359-9e337c508dd2	92145202-0a70-459b-9a07-15f113215bee	6	PENDING	2026-03-07 21:50:19.15
+399	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	87ff5b33-b204-4a41-a228-2e4cf7c83229	1	PENDING	2026-03-07 21:50:52.228
+400	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	72d44463-b270-4e8d-838f-eee6fce4da11	2	PENDING	2026-03-07 21:51:06.977
+401	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	3ffeba9a-cb3e-4903-b749-78111733bc45	3	PENDING	2026-03-07 21:51:22.8
+402	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	db1a988d-a721-4a0f-8f3c-1f3729802b62	4	PENDING	2026-03-07 21:51:39.402
+403	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	975fc7fa-6dc8-4999-be19-de354af57f2e	5	PENDING	2026-03-07 21:51:56.833
+415	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	c75c960f-0bf5-49e5-a7c2-9ae8226943c2	4	PENDING	2026-03-07 21:57:02.254
+418	6f127d1b-9a45-41d4-9fcb-da121c576e16	0e8156a3-36d1-4b01-9deb-bed8f404355f	3	PENDING	2026-03-07 21:58:29.532
+421	6f127d1b-9a45-41d4-9fcb-da121c576e16	f1f6b1de-e4c4-456d-98be-e21848fbd7ef	6	PENDING	2026-03-07 21:59:44.087
+422	6f127d1b-9a45-41d4-9fcb-da121c576e16	457003dd-60c6-4054-bad1-67a14e775717	7	PENDING	2026-03-07 22:00:13.415
+1228	6f127d1b-9a45-41d4-9fcb-da121c576e16	35094eb1-6c96-49ef-97fc-7dee66ffa0d6	12	PENDING	2026-03-08 08:09:41.482
+1230	6f127d1b-9a45-41d4-9fcb-da121c576e16	e0c83265-5a59-4cfd-99c9-dc5212bf9525	14	PENDING	2026-03-08 08:10:23.767
+428	458250d8-e65f-4171-9e11-3a6dff72a848	76ea3054-5739-435e-bed4-55df6682b0c5	6	PENDING	2026-03-07 22:02:23.831
+429	458250d8-e65f-4171-9e11-3a6dff72a848	3b9b89e6-d606-4889-bc90-766e44d78d13	7	PENDING	2026-03-07 22:02:45.581
+1275	4755002c-b849-46a3-8d7d-09a6f0244fe0	5be4642e-65f9-4b10-b9e7-02a1e62e58cf	12	PENDING	2026-03-08 08:28:22.074
+434	bf71f55b-86ba-46b8-afa1-1aea09f829e1	73a381b1-78bf-4ae7-b4a3-d874b96c6eb2	4	PENDING	2026-03-07 22:05:03.857
+435	bf71f55b-86ba-46b8-afa1-1aea09f829e1	40405d4d-8346-432d-ae65-a4193e929086	5	PENDING	2026-03-07 22:05:24.471
+1276	4755002c-b849-46a3-8d7d-09a6f0244fe0	14827cdb-3394-45bc-95d1-8c0b7dae743c	13	PENDING	2026-03-08 08:28:50.661
+439	bf71f55b-86ba-46b8-afa1-1aea09f829e1	12db54f3-145e-4752-90db-ccb6048cca3e	9	PENDING	2026-03-07 22:07:30.906
+1278	4755002c-b849-46a3-8d7d-09a6f0244fe0	128df9fe-d5be-43ab-958f-1d5088ffad39	14	PENDING	2026-03-08 08:29:14.902
+466	217ae2de-4843-400b-964c-30302c10965e	d8ce7dd1-6a12-400b-9fe3-d0ff97dfc0c8	1	COMPLETED	2026-03-07 22:19:01.108
+459	920b5fba-b331-4010-8858-8a5b3fb29a02	c11a4726-5dab-49e2-ab1b-d0e12c2772fe	3	PENDING	2026-03-07 22:16:16.578
+460	920b5fba-b331-4010-8858-8a5b3fb29a02	5e32fcb5-64dc-4ada-bbba-335edd7ab968	4	PENDING	2026-03-07 22:16:41.845
+461	920b5fba-b331-4010-8858-8a5b3fb29a02	46669730-b7e6-45cd-b77b-bdb93f4f1e30	5	PENDING	2026-03-07 22:17:01.129
+465	920b5fba-b331-4010-8858-8a5b3fb29a02	b239dfa7-0b62-48f8-b5a8-1bd418235318	9	PENDING	2026-03-07 22:18:21.739
+468	217ae2de-4843-400b-964c-30302c10965e	f32ca38e-8e1c-4ed7-b40a-0845c4b91b76	3	PENDING	2026-03-07 22:19:45.894
+472	217ae2de-4843-400b-964c-30302c10965e	00ca3a1a-7279-46af-a5e3-5b9e66e7a780	7	PENDING	2026-03-07 22:21:25.37
+1311	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	49e62352-4ddd-4285-a08b-275fd179918d	16	PENDING	2026-03-08 08:38:49.12
+486	c34851b2-fce1-4c90-b896-3a1a666a841a	27c4c674-04c4-4df3-954b-d0dbb3a617e8	6	COMPLETED	2026-03-07 22:27:51.412
+404	3bdac905-7cfa-4a31-85de-39ec2f854afd	70d286a0-d95b-4897-9fa0-7de70176b5b4	1	COMPLETED	2026-03-07 21:52:27.073
+405	3bdac905-7cfa-4a31-85de-39ec2f854afd	ab5fd830-6ffc-4bfe-8e43-d23c63f71293	2	COMPLETED	2026-03-07 21:52:45.185
+471	217ae2de-4843-400b-964c-30302c10965e	728aa099-3b5f-406f-aee9-c9429fef7e6a	6	COMPLETED	2026-03-07 22:21:01.476
+431	bf71f55b-86ba-46b8-afa1-1aea09f829e1	14940b5d-bcbc-42a6-9a47-6bbf2246066a	1	COMPLETED	2026-03-07 22:03:44.4
+406	3bdac905-7cfa-4a31-85de-39ec2f854afd	eb7a00a6-7516-44c4-a46e-462343ffce81	3	COMPLETED	2026-03-07 21:53:12.571
+453	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	06cc7ee7-933e-4b71-a952-fe4c5a2021ec	1	COMPLETED	2026-03-07 22:13:23.711
+407	3bdac905-7cfa-4a31-85de-39ec2f854afd	b965f962-07d0-476f-8f45-bc8dd781059f	4	COMPLETED	2026-03-07 21:53:34.708
+408	3bdac905-7cfa-4a31-85de-39ec2f854afd	5f4430f1-0e87-41f4-a65b-205808b37c38	5	NO_SHOW	2026-03-07 21:53:57.339
+443	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	7eebb759-a5d5-47f9-9c5a-03daa2411935	4	COMPLETED	2026-03-07 22:09:26.151
+467	217ae2de-4843-400b-964c-30302c10965e	06cec8df-84ca-4400-bc03-1171c063cd62	2	COMPLETED	2026-03-07 22:19:26
+412	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	5f49a1a9-39f5-413f-848e-995b9d09551c	1	COMPLETED	2026-03-07 21:55:50.427
+409	3bdac905-7cfa-4a31-85de-39ec2f854afd	2e6fd048-8246-4f9f-b9aa-b89f1306789f	6	COMPLETED	2026-03-07 21:54:37.571
+432	bf71f55b-86ba-46b8-afa1-1aea09f829e1	65790262-91ac-460f-8f04-fa6025015552	2	COMPLETED	2026-03-07 22:04:11.428
+454	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	32d30682-0493-4c13-8736-8859cdf18ac9	2	COMPLETED	2026-03-07 22:13:42.318
+410	3bdac905-7cfa-4a31-85de-39ec2f854afd	cb736e31-1f1f-4ff1-8a5d-4e1764056372	7	COMPLETED	2026-03-07 21:54:57.322
+469	217ae2de-4843-400b-964c-30302c10965e	cfac5947-64e2-434e-b2e0-daab571c4391	4	COMPLETED	2026-03-07 22:20:05.065
+414	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	0c9d2979-1569-4502-9e48-0008e7739608	3	COMPLETED	2026-03-07 21:56:40.31
+444	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	5b224001-de80-4367-853f-ef52854c195c	5	COMPLETED	2026-03-07 22:09:53.287
+441	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	34dba1d8-2998-4a89-9495-24140cbdacaf	2	COMPLETED	2026-03-07 22:08:35.837
+411	3bdac905-7cfa-4a31-85de-39ec2f854afd	19e4e252-39ed-4f68-8c28-e561ca54c784	8	COMPLETED	2026-03-07 21:55:20.291
+456	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	b89542cf-0da2-4900-9a1e-54bf311d5505	4	COMPLETED	2026-03-07 22:14:55.867
+445	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	f4a8afda-b740-4297-be95-2ff01b02a2ea	6	COMPLETED	2026-03-07 22:10:11.775
+474	217ae2de-4843-400b-964c-30302c10965e	92fff2a5-b37f-4501-a8f4-be87c3e0ceb7	9	COMPLETED	2026-03-07 22:22:08.679
+436	bf71f55b-86ba-46b8-afa1-1aea09f829e1	b3ad4528-a604-472f-a231-76d65f043297	6	COMPLETED	2026-03-07 22:05:50.46
+473	217ae2de-4843-400b-964c-30302c10965e	675d0f9c-86ed-421a-9052-c8c229dd7e48	8	COMPLETED	2026-03-07 22:21:45.794
+455	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	a9eba93b-ca4c-46d0-9909-7973a9b02955	3	COMPLETED	2026-03-07 22:14:32.103
+475	217ae2de-4843-400b-964c-30302c10965e	61799af7-e5bb-4976-8f7c-7066f06eda9f	10	COMPLETED	2026-03-07 22:22:37.384
+440	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	3e542768-002e-4e28-aeeb-53d8b492aec2	1	COMPLETED	2026-03-07 22:08:11.688
+433	bf71f55b-86ba-46b8-afa1-1aea09f829e1	097ab68a-caea-42b9-9629-e3a8632e30b1	3	COMPLETED	2026-03-07 22:04:39.132
+470	217ae2de-4843-400b-964c-30302c10965e	a759a3fc-f5ec-4a4b-b9b4-cca7fe539828	5	COMPLETED	2026-03-07 22:20:29.639
+437	bf71f55b-86ba-46b8-afa1-1aea09f829e1	3822a452-a328-4f7b-a8bd-524b4866722f	7	COMPLETED	2026-03-07 22:06:11.776
+481	c34851b2-fce1-4c90-b896-3a1a666a841a	f77194e9-7350-46a0-9f49-126e0cb352e6	1	COMPLETED	2026-03-07 22:25:35.521
+482	c34851b2-fce1-4c90-b896-3a1a666a841a	151e40f2-f9da-48f0-929c-c5a12e913f00	2	COMPLETED	2026-03-07 22:26:02.264
+483	c34851b2-fce1-4c90-b896-3a1a666a841a	27675e11-7f57-4733-b162-4b60e89b01dd	3	COMPLETED	2026-03-07 22:26:31.285
+484	c34851b2-fce1-4c90-b896-3a1a666a841a	037f969e-c3be-4dbb-9f6e-80ac8c98cd8d	4	COMPLETED	2026-03-07 22:27:03.065
+485	c34851b2-fce1-4c90-b896-3a1a666a841a	8199ea4a-671f-4386-a7ce-1151c4db2a87	5	COMPLETED	2026-03-07 22:27:28.929
+442	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	bbea4cee-54bd-480b-8367-dc1c42df510a	3	COMPLETED	2026-03-07 22:08:57.171
+1373	cd263764-71e2-4ead-87a3-0c5e9aff9828	abec54d8-a30e-46f7-8b2f-6d60890c89bb	29	PENDING	2026-03-08 09:07:58.364
+1375	cd263764-71e2-4ead-87a3-0c5e9aff9828	6099798e-25a5-4c55-81c0-5ffb13294c9b	30	PENDING	2026-03-08 09:08:23.56
+1377	e4d9b090-495e-4d82-9c3e-d8048154ccd6	edd60c5e-975c-4f87-b220-98b1388d0b7a	9	PENDING	2026-03-08 09:08:59.497
+1378	cd263764-71e2-4ead-87a3-0c5e9aff9828	12cf3c64-1ea2-4665-985b-7cc784fddf2d	31	PENDING	2026-03-08 09:09:18.08
+413	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	049027f3-734f-42a4-aa11-543caca8629d	2	COMPLETED	2026-03-07 21:56:20.242
+1256	458250d8-e65f-4171-9e11-3a6dff72a848	76211491-be7e-4a05-98f8-a3ef059fe1f3	14	COMPLETED	2026-03-08 08:18:50.058
+1279	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	dfe59bae-f2b7-4216-8476-dd764a8bb26b	9	COMPLETED	2026-03-08 08:29:30.605
+446	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	aa3327de-22c1-4c07-8c2a-db9f30261b94	7	COMPLETED	2026-03-07 22:10:27.922
+476	864fdade-0299-4871-a060-3c55442a1355	a2cf2141-d7d1-435a-b8e4-034af9ae9e96	1	COMPLETED	2026-03-07 22:23:14.654
+477	864fdade-0299-4871-a060-3c55442a1355	2bd49bce-fa3a-49d4-a618-39523ae71e57	2	COMPLETED	2026-03-07 22:23:39.851
+478	864fdade-0299-4871-a060-3c55442a1355	7857e076-b7bf-4d26-b7cc-197ba20c43d5	3	COMPLETED	2026-03-07 22:24:02.093
+479	864fdade-0299-4871-a060-3c55442a1355	b49fcc8c-afea-4041-8573-4c39d0d2778f	4	COMPLETED	2026-03-07 22:24:20.944
+480	864fdade-0299-4871-a060-3c55442a1355	80c60096-ac0f-4a14-8a72-e82b4af28f56	5	COMPLETED	2026-03-07 22:24:42.573
+1330	864fdade-0299-4871-a060-3c55442a1355	5bf4551d-4f10-4d59-8c0b-1deb7eaa6446	6	COMPLETED	2026-03-08 08:46:35.452
+1283	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	76d9dc51-8924-4faa-baa0-79b5a2502b7f	11	COMPLETED	2026-03-08 08:30:22.97
+447	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	fdcd5fe5-ddf6-414f-9f0a-5ad6f3f5f04b	8	COMPLETED	2026-03-07 22:10:45.098
+1352	104e34a6-fd53-4012-a0f0-41df6842c833	82e508e0-2233-4a71-9d2a-99fe3e51cd75	11	COMPLETED	2026-03-08 08:56:31.733
+457	920b5fba-b331-4010-8858-8a5b3fb29a02	471c590e-7a7a-4f13-ad1a-5c84b26068c5	1	COMPLETED	2026-03-07 22:15:37.094
+458	920b5fba-b331-4010-8858-8a5b3fb29a02	b3585119-d9be-44b5-9533-7e4e7de35f73	2	COMPLETED	2026-03-07 22:15:56.072
+462	920b5fba-b331-4010-8858-8a5b3fb29a02	e04fd488-1dd8-4680-9115-3b88dbd70ba5	6	COMPLETED	2026-03-07 22:17:20.371
+464	920b5fba-b331-4010-8858-8a5b3fb29a02	727f98ba-12c3-4c2b-9005-efe81f77cdf5	8	COMPLETED	2026-03-07 22:18:02.171
+1229	6f127d1b-9a45-41d4-9fcb-da121c576e16	74d96280-2a0f-41f1-8a40-c09872f47623	13	PENDING	2026-03-08 08:10:02.685
+1258	5cd29d5a-169e-41db-87a2-997e5fd5301f	d3018481-8b17-43c8-91b3-9cdbc74181dc	8	PENDING	2026-03-08 08:21:44.924
+1259	5cd29d5a-169e-41db-87a2-997e5fd5301f	2c5c5ea5-9b49-456f-8f9c-4c0a613d815f	9	PENDING	2026-03-08 08:21:44.931
+1282	4755002c-b849-46a3-8d7d-09a6f0244fe0	2c61b33c-5831-4137-8421-cb2895758729	16	PENDING	2026-03-08 08:30:08.873
+508	81f895c5-36b8-4d09-8241-80e64868fe56	b2e6ed6a-6161-4488-8922-4fad36c750a4	7	COMPLETED	2026-03-07 22:40:54.817
+501	6a497e8f-dd59-4675-b85e-34a93e32d4b0	824a7919-b727-44a1-84be-e3d933e2ad45	8	PENDING	2026-03-07 22:38:06.864
+516	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	458fc806-4674-409f-ace2-8ba8160ff333	6	PENDING	2026-03-07 22:44:32.509
+519	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	d9d838eb-9300-4ca5-9443-2511a20fbebe	1	PENDING	2026-03-07 22:46:03.944
+520	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	b67930e5-9a18-47cf-bdeb-8f2a70fe85e6	2	PENDING	2026-03-07 22:46:19.46
+521	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7ca3b870-f658-4be3-9391-841b1ea1f8cd	3	PENDING	2026-03-07 22:46:41.95
+523	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	8fd067c7-0258-4300-9ea1-799f8f55a68d	5	PENDING	2026-03-07 22:47:18.709
+1353	81f895c5-36b8-4d09-8241-80e64868fe56	e82d565b-3684-48df-b91a-066fed1b192b	15	PENDING	2026-03-08 08:57:27.813
+532	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	f9be71a0-5b3f-40e1-aa08-4a5b834c154e	6	PENDING	2026-03-07 22:51:08.468
+539	4df9bf27-579a-4661-a2ea-703387a2bdaf	e1a724db-ad29-4995-8706-0e51d6c90785	5	PENDING	2026-03-07 22:54:45.771
+540	4df9bf27-579a-4661-a2ea-703387a2bdaf	07c8122f-edfc-4540-b167-3c6e5558a073	6	PENDING	2026-03-07 22:55:07.85
+542	4df9bf27-579a-4661-a2ea-703387a2bdaf	d966cea9-872b-4e2d-86a1-ecf975d55b10	8	PENDING	2026-03-07 22:55:45.481
+543	4755002c-b849-46a3-8d7d-09a6f0244fe0	b9c66d8f-8572-4be6-8792-62cee7c13b47	1	PENDING	2026-03-07 22:56:39.596
+544	4755002c-b849-46a3-8d7d-09a6f0244fe0	75f57868-0484-40fb-9932-2804f5b46f89	2	PENDING	2026-03-07 22:56:59.644
+545	4755002c-b849-46a3-8d7d-09a6f0244fe0	571c3c25-0942-490e-a341-d17b99c58548	3	PENDING	2026-03-07 22:57:31.967
+546	4755002c-b849-46a3-8d7d-09a6f0244fe0	4cf1d39b-2600-4185-964c-f254ef4a682a	4	PENDING	2026-03-07 22:57:58.183
+547	4755002c-b849-46a3-8d7d-09a6f0244fe0	3a28b1ed-ae8d-42d6-8a98-9eb8d010b2aa	5	PENDING	2026-03-07 22:58:17.739
+548	4755002c-b849-46a3-8d7d-09a6f0244fe0	93bd7e43-b702-422a-bc0e-abefbd732515	6	PENDING	2026-03-07 22:58:42.314
+549	4755002c-b849-46a3-8d7d-09a6f0244fe0	4caf6862-1b6c-47b6-ae75-1c58a163046a	7	PENDING	2026-03-07 22:59:07.365
+550	4755002c-b849-46a3-8d7d-09a6f0244fe0	0e8156a3-36d1-4b01-9deb-bed8f404355f	8	PENDING	2026-03-07 22:59:28.915
+551	4755002c-b849-46a3-8d7d-09a6f0244fe0	fdcc6185-de94-40d7-9a7b-c32f1e57377b	9	PENDING	2026-03-07 22:59:53.405
+552	565b69ae-c54e-4f96-9d46-a31e869eccbf	6521583f-b680-45c4-ae72-16e9ae3b781b	1	PENDING	2026-03-07 23:00:22.92
+553	565b69ae-c54e-4f96-9d46-a31e869eccbf	e6c12135-0959-467c-965c-e4ae64ca74db	2	PENDING	2026-03-07 23:00:43.948
+554	565b69ae-c54e-4f96-9d46-a31e869eccbf	0e858322-6088-4b40-852f-ca2161dce50f	3	PENDING	2026-03-07 23:01:09.695
+555	565b69ae-c54e-4f96-9d46-a31e869eccbf	a6c53b46-1fb0-48dd-9a57-a663bf586902	4	PENDING	2026-03-07 23:01:29.479
+556	565b69ae-c54e-4f96-9d46-a31e869eccbf	e62f0331-7617-455e-98c2-ee93d9b8b96a	5	PENDING	2026-03-07 23:01:49.298
+557	565b69ae-c54e-4f96-9d46-a31e869eccbf	7c9249a2-8cec-4683-ba7c-23f95524e1d5	6	PENDING	2026-03-07 23:02:10.803
+558	565b69ae-c54e-4f96-9d46-a31e869eccbf	3e314d3d-6eb9-4f33-8a75-33f06c691ce6	7	PENDING	2026-03-07 23:02:28.214
+559	565b69ae-c54e-4f96-9d46-a31e869eccbf	991675e0-55c5-49d9-8237-e2ed0d6d9dde	8	PENDING	2026-03-07 23:03:11.264
+1376	e4d9b090-495e-4d82-9c3e-d8048154ccd6	fb942579-879b-4cc9-8f18-df45cb144123	8	PENDING	2026-03-08 09:08:35.941
+1312	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	76ea3054-5739-435e-bed4-55df6682b0c5	7	COMPLETED	2026-03-08 08:39:05.442
+1392	c4e22006-3ed9-4250-91c8-6618d57253ed	91394923-4666-4e48-83cb-a07e7f572742	22	PENDING	2026-03-08 09:25:25.276
+1404	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	23	PENDING	2026-03-08 09:46:08.863
+510	81f895c5-36b8-4d09-8241-80e64868fe56	374967ac-ad14-4bc0-9cb0-cac87fb4a794	9	COMPLETED	2026-03-07 22:41:37.761
+509	81f895c5-36b8-4d09-8241-80e64868fe56	1ec8702f-66a7-4d65-86f8-2c562f622308	8	NO_SHOW	2026-03-07 22:41:15.579
+1423	4df9bf27-579a-4661-a2ea-703387a2bdaf	52c13b7a-c16c-4e33-9e98-048dfc6862e1	17	COMPLETED	2026-03-08 10:05:22.417
+572	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	77f96cb2-66b6-4fe9-9c5b-c2d4aa4b470d	1	PENDING	2026-03-07 23:11:48.391
+573	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	518681cc-dbdd-4b1f-8c2e-a5a7b8d7d83b	2	PENDING	2026-03-07 23:12:07.338
+575	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	cd078007-069c-484e-8e17-2b6d70baa040	4	PENDING	2026-03-07 23:12:48.491
+576	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	1596ace4-f53b-432c-8fae-ecf0e06039bc	5	PENDING	2026-03-07 23:13:08.211
+577	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	f8f5fa2b-d308-416f-9b6f-795abaae257a	6	PENDING	2026-03-07 23:13:41.604
+578	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	cf173827-b85b-4166-93b7-e8f744f96635	7	PENDING	2026-03-07 23:14:05.601
+580	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	3ab64ac9-34fd-4129-830c-67cc5a3b0df0	9	PENDING	2026-03-07 23:15:09.274
+585	52535048-47f2-42cb-91ec-65a4824c9908	0d7c2dc5-021d-4ed7-a350-dbb52c791cc9	5	PENDING	2026-03-07 23:18:07.774
+560	ce6d53c7-d3d3-401f-be95-013fa81fd707	bd0c9f6d-199e-4238-8fdd-8b16c9c04ed3	1	COMPLETED	2026-03-07 23:03:45.282
+502	81f895c5-36b8-4d09-8241-80e64868fe56	633ef711-c7c7-4cee-9863-c9480c4bedf8	1	COMPLETED	2026-03-07 22:38:45.463
+527	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	bdc7ac62-11ad-4140-abe7-78412063d466	1	COMPLETED	2026-03-07 22:48:53.668
+541	4df9bf27-579a-4661-a2ea-703387a2bdaf	5e321aa7-1f29-4f58-a3b7-f05fd32e7a5e	7	COMPLETED	2026-03-07 22:55:26.052
+528	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	0d72ef1c-6a1f-4e91-9a63-7bbc4226a111	2	COMPLETED	2026-03-07 22:49:17.153
+522	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	38640d7c-eacc-45fa-b2e0-c0f9c8b6939e	4	COMPLETED	2026-03-07 22:47:00.534
+511	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	75312d77-2d8b-441d-85b5-538b3262bec4	1	COMPLETED	2026-03-07 22:42:18.585
+582	52535048-47f2-42cb-91ec-65a4824c9908	5e5015a3-bb85-4fa7-a5ea-3e7abc85b474	2	COMPLETED	2026-03-07 23:16:32.918
+503	81f895c5-36b8-4d09-8241-80e64868fe56	f0205c3a-25bc-409c-9bdf-06265ebe9cad	2	COMPLETED	2026-03-07 22:39:00.954
+526	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	5a3ec3ec-8ee5-485f-8c2f-252dce79b5c9	8	COMPLETED	2026-03-07 22:48:12.159
+512	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	80fe8e49-55fd-4bbc-9dea-5565805573cc	2	COMPLETED	2026-03-07 22:42:41.685
+561	ce6d53c7-d3d3-401f-be95-013fa81fd707	be586f64-f568-4089-89c0-819919a254be	2	COMPLETED	2026-03-07 23:04:38.344
+529	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	607261e5-0d4b-40df-af2f-09422a2f49af	3	COMPLETED	2026-03-07 22:49:47.806
+525	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	3b5c35b3-bb05-4422-bfc5-e794ae7e008d	7	COMPLETED	2026-03-07 22:47:53.75
+583	52535048-47f2-42cb-91ec-65a4824c9908	03cd4019-0c9f-417e-a635-439f9dd1ae15	3	COMPLETED	2026-03-07 23:17:08.995
+504	81f895c5-36b8-4d09-8241-80e64868fe56	313964e9-99d8-4fc3-aa84-bc43c2dbd11c	3	COMPLETED	2026-03-07 22:39:20.588
+513	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	15bfa627-6e88-4cc1-ae8c-ea47301ade75	3	COMPLETED	2026-03-07 22:43:06.696
+531	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	e6d680f8-d4fd-409b-8bef-edc6a6814471	5	COMPLETED	2026-03-07 22:50:41.397
+535	4df9bf27-579a-4661-a2ea-703387a2bdaf	9bb476c4-a066-4f92-89af-343f8a18f133	1	COMPLETED	2026-03-07 22:53:23.648
+530	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	2f9df7aa-6b11-4dc7-af3e-52ed6809a759	4	COMPLETED	2026-03-07 22:50:14.079
+581	52535048-47f2-42cb-91ec-65a4824c9908	267f072b-2f8c-4d34-acca-b5e2e86b7192	1	COMPLETED	2026-03-07 23:16:09.352
+514	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	b1dd9bc2-c844-41d3-a5b5-ebfd335dca8b	4	COMPLETED	2026-03-07 22:43:30.457
+586	52535048-47f2-42cb-91ec-65a4824c9908	4b8698d4-a70b-46b0-9e52-b217eb0ba82c	6	COMPLETED	2026-03-07 23:18:36.105
+536	4df9bf27-579a-4661-a2ea-703387a2bdaf	eacc8fd0-e4d2-48e5-9f75-71fe82b5c2f9	2	COMPLETED	2026-03-07 22:53:41.173
+515	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	6093556d-ab37-4888-860a-39581a91817b	5	COMPLETED	2026-03-07 22:44:04.069
+584	52535048-47f2-42cb-91ec-65a4824c9908	468a32d7-b06b-4c7a-a7c5-6b28b3bbd21f	4	COMPLETED	2026-03-07 23:17:40.689
+1331	864fdade-0299-4871-a060-3c55442a1355	e1448bd1-dee7-4627-bf11-51eab6063206	7	COMPLETED	2026-03-08 08:47:29.837
+533	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	9a19beee-f9cc-471b-b95d-04d8b1c22296	7	COMPLETED	2026-03-07 22:51:35.541
+537	4df9bf27-579a-4661-a2ea-703387a2bdaf	c463841b-3ae8-46bb-b80c-1a10adb24bc6	3	COMPLETED	2026-03-07 22:53:57.357
+517	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	e85ef903-86b8-4955-b873-d69a1686ba99	7	COMPLETED	2026-03-07 22:44:54.607
+507	81f895c5-36b8-4d09-8241-80e64868fe56	bc3c7f8a-39c7-4fe1-ae89-ac7b9614cea6	6	COMPLETED	2026-03-07 22:40:33.124
+518	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	4107d149-4723-458b-b1fb-456caf6b55e3	8	COMPLETED	2026-03-07 22:45:35.151
+538	4df9bf27-579a-4661-a2ea-703387a2bdaf	22548804-d74f-4bbd-94b3-0b1a8944bf80	4	COMPLETED	2026-03-07 22:54:15.322
+506	81f895c5-36b8-4d09-8241-80e64868fe56	28a5ae59-3fbf-4055-b899-cb13182e975e	5	COMPLETED	2026-03-07 22:39:51.674
+1430	458250d8-e65f-4171-9e11-3a6dff72a848	4ab87f11-2f55-493b-b76c-2a3866ec8770	15	COMPLETED	2026-03-08 10:31:56.691
+1335	864fdade-0299-4871-a060-3c55442a1355	e1a724db-ad29-4995-8706-0e51d6c90785	9	COMPLETED	2026-03-08 08:48:20.777
+1374	e4d9b090-495e-4d82-9c3e-d8048154ccd6	35a569b1-f730-439c-863f-10291647a362	7	COMPLETED	2026-03-08 09:08:17.326
+1354	104e34a6-fd53-4012-a0f0-41df6842c833	5f5ecb94-ee4d-42e9-8059-06d67aed7a93	12	COMPLETED	2026-03-08 08:57:36.903
+1438	458250d8-e65f-4171-9e11-3a6dff72a848	daef5ff4-02d1-4e03-8d5c-f87b02c5bbc6	17	COMPLETED	2026-03-08 10:38:26.619
+588	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	2d29e04a-5bc9-4c9c-99bc-3c78eae0d8ec	1	PENDING	2026-03-07 23:20:40.767
+589	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	2c61b33c-5831-4137-8421-cb2895758729	2	PENDING	2026-03-07 23:21:23.417
+590	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	979799d3-a188-4021-899d-f10758bdb4e9	3	PENDING	2026-03-07 23:21:45.618
+591	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	b02c1740-99aa-4b02-afd2-0c8fe2c024fa	4	PENDING	2026-03-07 23:22:09.992
+592	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	7a7fe462-d228-4c0d-910d-a82a2241f438	5	PENDING	2026-03-07 23:22:31.873
+593	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	0f7eb338-e10a-449d-97e8-08202409dc28	6	PENDING	2026-03-07 23:22:53.537
+595	44f338a5-56b0-4ad1-8258-79826e1445b3	82902993-7486-4ad1-9a2d-a1ca4ecd01a0	2	PENDING	2026-03-07 23:24:39.505
+602	44f338a5-56b0-4ad1-8258-79826e1445b3	53d12a77-fd17-44ce-89d6-04a0e6823246	9	PENDING	2026-03-07 23:27:41.96
+604	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	6e5af564-1f45-401c-bdec-d8132508f6e6	1	PENDING	2026-03-07 23:29:05.381
+605	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	8bd13ece-e3aa-4437-951a-5b214727dfd5	2	PENDING	2026-03-07 23:29:40.345
+606	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	5bb92392-f8e7-4e72-82c2-f0efd9fe47ae	3	PENDING	2026-03-07 23:30:00.528
+607	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	f5f18e57-403c-4a0f-9280-6231ae7196f4	4	PENDING	2026-03-07 23:30:46.505
+608	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	fdcc6185-de94-40d7-9a7b-c32f1e57377b	5	PENDING	2026-03-07 23:31:00.438
+609	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	bc1178d4-1a56-4281-9cff-b480d228b94a	6	PENDING	2026-03-07 23:31:21.701
+610	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	1bea7427-ab7e-41f1-98c2-54b88a802245	7	PENDING	2026-03-07 23:31:42.119
+611	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	9d3a2dcd-f06d-44c4-bc63-f1f1befd1a9f	8	PENDING	2026-03-07 23:31:59.03
+612	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	49594786-2018-4972-907c-5fa5125e3c0b	9	PENDING	2026-03-07 23:32:29.592
+664	aaec9758-627f-40bb-b8b2-e92110d36327	dbd68461-6833-473c-a763-0954ddc0f89f	5	COMPLETED	2026-03-08 00:06:17.489
+682	7d959ecb-3999-47cd-ae17-5aab0405cb97	d14f31dd-8e02-45fd-818f-fa054ecdba0d	7	COMPLETED	2026-03-08 00:14:23.725
+616	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	8405f208-f1e0-48ae-a38d-6649fbcdd7b0	4	PENDING	2026-03-07 23:35:45.392
+663	aaec9758-627f-40bb-b8b2-e92110d36327	d7874bf3-04f5-4732-8b2d-192d5c018b85	4	COMPLETED	2026-03-08 00:05:57.493
+625	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	ef22ffa3-3855-433a-a473-6426d4e446ba	6	PENDING	2026-03-07 23:40:14.204
+628	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	58d3056a-842e-4572-b696-5fd0e679cc10	2	PENDING	2026-03-07 23:41:41.514
+636	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	25b651c4-73c4-4d74-a94d-7f1992fb51eb	3	PENDING	2026-03-07 23:45:29.256
+638	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	5c17ee0e-3e33-42e4-9fdd-0deb1d59c2d7	5	PENDING	2026-03-07 23:46:13.518
+640	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	a809949e-4a73-45a2-b11b-2f0744571a8f	7	PENDING	2026-03-07 23:46:57.98
+643	eea52d8e-619c-4985-9891-2b417c468095	25303667-6460-4c8e-86e0-095979411ab6	2	PENDING	2026-03-07 23:48:40.626
+644	eea52d8e-619c-4985-9891-2b417c468095	f76c7d8a-e9de-438e-9aaf-5c5bf9aeaf8d	3	PENDING	2026-03-07 23:49:04.577
+645	eea52d8e-619c-4985-9891-2b417c468095	82ba2bdb-254b-4990-9a96-6a2d4a2a7e5a	4	PENDING	2026-03-07 23:49:27.098
+646	eea52d8e-619c-4985-9891-2b417c468095	f591bfcd-b45a-4145-b40d-e0dfdbfcb228	5	PENDING	2026-03-07 23:49:49.407
+647	eea52d8e-619c-4985-9891-2b417c468095	76e5c632-c0bd-4d10-9a43-e1cdd666094d	6	PENDING	2026-03-07 23:50:18.861
+658	d6400b5f-5117-4826-8aa2-20e215edfb2b	59b80357-a5d5-494e-9401-082565edad34	8	PENDING	2026-03-07 23:54:38.647
+666	aaec9758-627f-40bb-b8b2-e92110d36327	982f9f12-bcba-4802-a160-7722b7059f02	7	PENDING	2026-03-08 00:07:07.746
+669	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	a2dd2910-429a-43b8-8bba-9936117d35d2	1	PENDING	2026-03-08 00:08:37.03
+670	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	9217e03b-0c9b-4470-a50c-3eec2ae54511	2	PENDING	2026-03-08 00:08:52.656
+671	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	0b9cb6d0-b456-4508-b183-407ec4c3de5a	3	PENDING	2026-03-08 00:09:08.788
+673	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	3067bf30-4720-42ba-bcfc-d082b857d7db	5	PENDING	2026-03-08 00:10:08.085
+684	4755002c-b849-46a3-8d7d-09a6f0244fe0	1396f983-745e-4c42-a6aa-4ee5a6c6e425	10	PENDING	2026-03-08 00:15:15.043
+634	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	8806c887-f3c6-46f5-803e-70cd48dd4295	1	COMPLETED	2026-03-07 23:44:29.931
+655	d6400b5f-5117-4826-8aa2-20e215edfb2b	fd6e47be-3fe3-4522-8a3e-aaad21e92c4f	5	COMPLETED	2026-03-07 23:53:37.83
+613	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	876b3fb9-8977-4540-981a-790099ed05d2	1	COMPLETED	2026-03-07 23:33:13.23
+617	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	c6d445a8-7dc3-4999-a3f3-28c1496bdc0c	5	COMPLETED	2026-03-07 23:36:07.856
+676	7d959ecb-3999-47cd-ae17-5aab0405cb97	7d8f7668-6048-4383-b08f-b2c885dc2002	1	COMPLETED	2026-03-08 00:11:32.944
+594	44f338a5-56b0-4ad1-8258-79826e1445b3	af6dbb9b-cfdf-4b50-b017-c50d19c7186f	1	COMPLETED	2026-03-07 23:23:59.054
+620	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	3a6c1a62-6127-4991-9031-41043be4f5f5	1	COMPLETED	2026-03-07 23:37:41.279
+598	44f338a5-56b0-4ad1-8258-79826e1445b3	2fb7cafe-3473-4028-952a-f81d3d22e09c	5	COMPLETED	2026-03-07 23:25:52.462
+657	d6400b5f-5117-4826-8aa2-20e215edfb2b	748a77c1-445b-4764-92ec-0cc01c06ca22	7	COMPLETED	2026-03-07 23:54:18.903
+600	44f338a5-56b0-4ad1-8258-79826e1445b3	15dd7f45-75f4-44b8-aae8-8500d95fd3eb	7	COMPLETED	2026-03-07 23:26:48.457
+639	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	f5f09364-d077-4fce-b924-2af4aadf0036	6	COMPLETED	2026-03-07 23:46:30.333
+637	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	c9c3a787-a156-4c85-b702-2f3b2299ed24	4	COMPLETED	2026-03-07 23:45:54.782
+627	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	9932284c-8a74-40e9-b879-cd61a9f6405f	1	COMPLETED	2026-03-07 23:41:23.593
+621	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	b7006233-a0f2-4535-9cf6-0ba18ac98b0e	2	COMPLETED	2026-03-07 23:38:35.803
+677	7d959ecb-3999-47cd-ae17-5aab0405cb97	8db5374a-2189-4b0a-9fb1-ae91b6393f46	2	COMPLETED	2026-03-08 00:12:14.212
+596	44f338a5-56b0-4ad1-8258-79826e1445b3	a7f59ba7-19bd-4647-a6ef-91dc1b5a126c	3	COMPLETED	2026-03-07 23:25:04.054
+659	aaec9758-627f-40bb-b8b2-e92110d36327	9a01df9e-af43-4071-82bc-9a336003a8a4	1	COMPLETED	2026-03-08 00:02:58.777
+656	d6400b5f-5117-4826-8aa2-20e215edfb2b	b4e04de8-d5d5-467c-b212-40c427412e6e	6	COMPLETED	2026-03-07 23:53:58.657
+622	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	9131ada4-b023-4dd4-92ed-903160c44a20	3	COMPLETED	2026-03-07 23:38:55.641
+660	aaec9758-627f-40bb-b8b2-e92110d36327	4572a87c-c994-44a9-aa44-8ef2685124a0	2	COMPLETED	2026-03-08 00:03:23.676
+678	7d959ecb-3999-47cd-ae17-5aab0405cb97	89f793e4-1797-4da7-a6a0-17759d1bf313	3	COMPLETED	2026-03-08 00:12:34.029
+601	44f338a5-56b0-4ad1-8258-79826e1445b3	c3a4772e-435d-4d4f-bbbc-f6a0544412db	8	COMPLETED	2026-03-07 23:27:12.873
+603	44f338a5-56b0-4ad1-8258-79826e1445b3	da40cfe4-560c-47de-acf1-475126110b2d	10	COMPLETED	2026-03-07 23:28:24.709
+654	d6400b5f-5117-4826-8aa2-20e215edfb2b	b88c2921-5150-4b37-9d20-e0c86e95ef05	4	COMPLETED	2026-03-07 23:53:17.147
+597	44f338a5-56b0-4ad1-8258-79826e1445b3	f1ff5238-fdb2-4659-8cce-2db550bb3db8	4	COMPLETED	2026-03-07 23:25:28.571
+623	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	574a486c-cc53-4f41-9f4f-ab13dd5fdac3	4	COMPLETED	2026-03-07 23:39:20.671
+587	52535048-47f2-42cb-91ec-65a4824c9908	690af39c-84f1-41fa-bbe4-33dd46f3b055	7	COMPLETED	2026-03-07 23:19:31.954
+679	7d959ecb-3999-47cd-ae17-5aab0405cb97	b5578fe4-9b9c-4a97-a4d1-da1da30038e1	4	COMPLETED	2026-03-08 00:13:04.203
+624	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	25b290c5-7b15-4eaa-98f3-54646b29ea64	5	COMPLETED	2026-03-07 23:39:44.209
+599	44f338a5-56b0-4ad1-8258-79826e1445b3	4bd872f3-f2f7-45d9-87a3-883483694a70	6	COMPLETED	2026-03-07 23:26:14.958
+619	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	017979e2-4e7e-46c7-8c27-e1831083e0c0	7	COMPLETED	2026-03-07 23:37:07.395
+661	aaec9758-627f-40bb-b8b2-e92110d36327	416f9261-2e84-4666-a861-184add985c54	3	COMPLETED	2026-03-08 00:03:43.002
+653	d6400b5f-5117-4826-8aa2-20e215edfb2b	df15ffb9-8141-4700-ac67-c9768d6128b6	3	COMPLETED	2026-03-07 23:52:57.452
+626	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	0aeb7b42-3ff8-4e01-b77d-55658a2eb123	7	COMPLETED	2026-03-07 23:40:39.467
+630	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	8f40c921-bf3a-474c-a155-aae7bca001da	4	COMPLETED	2026-03-07 23:42:19.115
+681	7d959ecb-3999-47cd-ae17-5aab0405cb97	88c7a839-aa7f-4dd4-b078-3b2d959f6cd6	6	COMPLETED	2026-03-08 00:14:01.353
+631	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	a200e835-4285-4b3f-84c9-dfe5a0208061	5	COMPLETED	2026-03-07 23:43:14.039
+652	d6400b5f-5117-4826-8aa2-20e215edfb2b	9e8fe944-7dee-4c01-a117-d10fc0c8bc18	2	COMPLETED	2026-03-07 23:52:32.152
+632	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	0c0abc94-afd4-40c2-950d-6ae600f718c4	6	COMPLETED	2026-03-07 23:43:31.852
+651	d6400b5f-5117-4826-8aa2-20e215edfb2b	0d3ed5ad-e4d5-4d45-bb0e-997b80673aef	1	COMPLETED	2026-03-07 23:52:02.343
+667	aaec9758-627f-40bb-b8b2-e92110d36327	bfe6ef71-246a-4499-a7ea-45c6feffd1c1	8	COMPLETED	2026-03-08 00:07:29.402
+683	7d959ecb-3999-47cd-ae17-5aab0405cb97	e5faad65-1789-45fa-8674-fbb33186d231	8	COMPLETED	2026-03-08 00:14:47.303
+665	aaec9758-627f-40bb-b8b2-e92110d36327	ea65df8f-57d8-4c98-b8d5-f0e7231e0c54	6	COMPLETED	2026-03-08 00:06:46.988
+688	5772f06a-bf47-407f-b92e-74bf4a85aead	a7f75d73-ba69-4920-b9f9-e61978678b33	4	PENDING	2026-03-08 00:16:50.101
+689	5772f06a-bf47-407f-b92e-74bf4a85aead	db62c697-47c8-4f98-99db-91fec9280a14	5	PENDING	2026-03-08 00:17:16.172
+690	5772f06a-bf47-407f-b92e-74bf4a85aead	36d64737-8b0d-44fc-88b3-3e2ddd8142db	6	PENDING	2026-03-08 00:17:34.336
+691	5772f06a-bf47-407f-b92e-74bf4a85aead	d367582a-0b9c-4983-bfa9-da86a377dea1	7	PENDING	2026-03-08 00:18:11.191
+692	5772f06a-bf47-407f-b92e-74bf4a85aead	457593a4-fc2a-4e96-a551-0b7519c98c1f	8	PENDING	2026-03-08 00:18:39.154
+727	cd263764-71e2-4ead-87a3-0c5e9aff9828	979fa66b-39ec-45ea-9cb5-3e31f2d4a638	5	PENDING	2026-03-08 00:35:59.274
+742	54ad8399-936a-47f5-bfc8-db3194c32ea3	1ee882b4-b855-4889-9864-ae050e2c6674	5	COMPLETED	2026-03-08 00:45:49.374
+732	c9d7022f-7e84-4876-a4fa-beda27a31cd5	a484b78a-791a-4420-8ae9-05d8b05290f1	1	PENDING	2026-03-08 00:38:47.814
+740	54ad8399-936a-47f5-bfc8-db3194c32ea3	9e5341b0-9264-4001-86e2-bb527c6e61bc	3	COMPLETED	2026-03-08 00:44:28.325
+736	c9d7022f-7e84-4876-a4fa-beda27a31cd5	7a3875d6-59a0-47ea-8ad1-498474e0f9c9	5	PENDING	2026-03-08 00:41:16.452
+737	c9d7022f-7e84-4876-a4fa-beda27a31cd5	f93b9e77-1c1e-4c6f-bd6b-c16f0255b8ae	6	PENDING	2026-03-08 00:41:55.323
+746	dc83d654-7865-4342-9437-16bfcb075e6a	7a485330-a3aa-47d4-85e6-2d94a93379fe	4	PENDING	2026-03-08 02:08:17.72
+748	dc83d654-7865-4342-9437-16bfcb075e6a	76bdae76-9eb7-43f4-b1a2-538451cb7743	6	PENDING	2026-03-08 02:10:33.029
+749	dc83d654-7865-4342-9437-16bfcb075e6a	e956eb92-8642-4982-9fdf-b00fb570c3f6	7	PENDING	2026-03-08 02:11:28.355
+752	38236c5f-2faa-4940-aa37-60a206f3be14	c1b6dbc8-a78e-47c6-a924-527182a92e98	2	PENDING	2026-03-08 02:20:32.322
+758	38236c5f-2faa-4940-aa37-60a206f3be14	5aa2ff6c-ad0b-452d-a783-075099ab05e2	8	PENDING	2026-03-08 02:23:03.027
+1234	565b69ae-c54e-4f96-9d46-a31e869eccbf	33cb2f15-2c22-4e9d-a574-97823977b9cb	10	PENDING	2026-03-08 08:11:46.253
+1240	565b69ae-c54e-4f96-9d46-a31e869eccbf	ca7b2899-e2be-4d5b-b8ac-41a02e97492d	12	PENDING	2026-03-08 08:12:38.638
+1261	5cd29d5a-169e-41db-87a2-997e5fd5301f	803a0f9f-e2f6-471e-98f2-4152b192bcb4	11	PENDING	2026-03-08 08:22:26.894
+1263	bf71f55b-86ba-46b8-afa1-1aea09f829e1	7c9932c0-b2c2-4093-8f9c-ce9d2efa2c45	10	PENDING	2026-03-08 08:23:32.557
+1287	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	3b2808c2-550c-430c-9a05-76c247677dae	13	PENDING	2026-03-08 08:31:23.071
+767	6b65b0e5-ad3f-4756-a04d-f15f072ab740	b4f84d45-f48f-48bd-b251-4c33e3cefdc9	3	PENDING	2026-03-08 02:29:34.921
+769	6b65b0e5-ad3f-4756-a04d-f15f072ab740	99e2b0e3-6bfe-4b1b-85da-b1779bbd671f	5	PENDING	2026-03-08 02:30:49.338
+770	6b65b0e5-ad3f-4756-a04d-f15f072ab740	e135d9c6-a789-4922-8316-7adb230afb1f	6	PENDING	2026-03-08 02:31:38.013
+771	6b65b0e5-ad3f-4756-a04d-f15f072ab740	94b97882-f63a-4cd8-8382-13831c462261	7	PENDING	2026-03-08 02:33:07.314
+686	5772f06a-bf47-407f-b92e-74bf4a85aead	0d2f82df-0533-4491-b413-f13a1782188c	2	COMPLETED	2026-03-08 00:16:06.659
+710	efa89ff0-babb-47d8-9694-afcbe18d049e	78837ca5-3bcd-4ea3-9b05-6ccd4a11330b	3	COMPLETED	2026-03-08 00:28:00.308
+95	d6a31449-5393-444e-89c7-f8ba9d35545a	e243d102-ad72-47e3-adb0-0f756d39e12a	13	COMPLETED	2026-03-07 19:29:17.538
+685	5772f06a-bf47-407f-b92e-74bf4a85aead	217e64cb-6bb5-4924-a119-1b725699b1e9	1	COMPLETED	2026-03-08 00:15:47.996
+723	cd263764-71e2-4ead-87a3-0c5e9aff9828	d3fabd71-b624-4b3a-a47e-ce92fc1ee906	1	COMPLETED	2026-03-08 00:34:11.023
+724	cd263764-71e2-4ead-87a3-0c5e9aff9828	43ef9456-f40b-4054-8bb7-3115b9a5dcb4	2	COMPLETED	2026-03-08 00:34:50.657
+708	efa89ff0-babb-47d8-9694-afcbe18d049e	ce8cbb79-0502-4c72-81ae-250d95f4b55b	1	COMPLETED	2026-03-08 00:27:14.592
+694	104e34a6-fd53-4012-a0f0-41df6842c833	7f88abb9-7940-4cdc-b99e-21715e682c52	2	COMPLETED	2026-03-08 00:19:51.529
+707	6a9107b1-6b87-42c5-8994-967a28c2b0d1	0beb221f-c93d-4913-ac9f-ca176692aa79	7	COMPLETED	2026-03-08 00:26:37.152
+751	38236c5f-2faa-4940-aa37-60a206f3be14	f77bd3b1-928f-42b6-9fc1-1eed498f831a	1	COMPLETED	2026-03-08 02:20:11.12
+725	cd263764-71e2-4ead-87a3-0c5e9aff9828	d11da8ac-540e-4349-98cc-1153d77d15ed	3	COMPLETED	2026-03-08 00:35:10.959
+709	efa89ff0-babb-47d8-9694-afcbe18d049e	430eb6f9-98e6-4e5f-a1a8-a355b8f20d55	2	COMPLETED	2026-03-08 00:27:34.514
+743	dc83d654-7865-4342-9437-16bfcb075e6a	8c731ef1-5c02-4db4-8478-37e657c02822	1	COMPLETED	2026-03-08 02:00:00.502
+687	5772f06a-bf47-407f-b92e-74bf4a85aead	d78e1f6b-b04d-4894-9a57-7e58727d8433	3	COMPLETED	2026-03-08 00:16:26.97
+695	104e34a6-fd53-4012-a0f0-41df6842c833	55f4d696-54a4-4f50-b656-5d83b98d463f	3	COMPLETED	2026-03-08 00:20:09.8
+726	cd263764-71e2-4ead-87a3-0c5e9aff9828	bf76c172-e627-4be9-8201-797c59986a97	4	COMPLETED	2026-03-08 00:35:31.909
+753	38236c5f-2faa-4940-aa37-60a206f3be14	81bbc788-2417-4dab-ae90-481c93e668bd	3	COMPLETED	2026-03-08 02:20:54.474
+696	104e34a6-fd53-4012-a0f0-41df6842c833	15f56565-c0ef-414f-b7e5-ca8ade61a571	4	COMPLETED	2026-03-08 00:20:37.665
+754	38236c5f-2faa-4940-aa37-60a206f3be14	e90afeab-ad47-4551-8bf6-aee10385090c	4	COMPLETED	2026-03-08 02:21:14.139
+711	efa89ff0-babb-47d8-9694-afcbe18d049e	48865e86-b110-4bc0-9166-657d8bcc2bf5	4	COMPLETED	2026-03-08 00:28:33.507
+698	104e34a6-fd53-4012-a0f0-41df6842c833	d4422035-cfac-4864-8aae-18462ccf4db1	6	COMPLETED	2026-03-08 00:21:32.026
+1288	5cd29d5a-169e-41db-87a2-997e5fd5301f	be7081e1-0629-4adf-8e68-0a47ecc0e0ad	17	PENDING	2026-03-08 08:31:29.382
+705	6a9107b1-6b87-42c5-8994-967a28c2b0d1	805410d8-c733-49b3-ac5b-a284ab0050cb	5	COMPLETED	2026-03-08 00:25:28.514
+755	38236c5f-2faa-4940-aa37-60a206f3be14	c3dd69c0-218a-41b7-9653-811aeeea470d	5	COMPLETED	2026-03-08 02:21:54.966
+744	dc83d654-7865-4342-9437-16bfcb075e6a	3b3398cb-c423-42de-bcb7-dab17eb40bbf	2	COMPLETED	2026-03-08 02:04:03.43
+729	cd263764-71e2-4ead-87a3-0c5e9aff9828	81161e9f-b1ea-43cc-b3f3-40089e9c5f89	7	COMPLETED	2026-03-08 00:36:46.003
+712	efa89ff0-babb-47d8-9694-afcbe18d049e	5f5ecb94-ee4d-42e9-8059-06d67aed7a93	5	COMPLETED	2026-03-08 00:28:55.239
+697	104e34a6-fd53-4012-a0f0-41df6842c833	17c6e987-b4a0-4726-bb15-c85550251455	5	COMPLETED	2026-03-08 00:21:00.167
+765	6b65b0e5-ad3f-4756-a04d-f15f072ab740	9e86d3f7-fad5-4b4f-82ab-356f2b78f337	1	COMPLETED	2026-03-08 02:28:31.125
+756	38236c5f-2faa-4940-aa37-60a206f3be14	61aa0167-efdf-4ee9-b35a-fff5560a5313	6	COMPLETED	2026-03-08 02:22:14.343
+730	cd263764-71e2-4ead-87a3-0c5e9aff9828	e0c83265-5a59-4cfd-99c9-dc5212bf9525	8	COMPLETED	2026-03-08 00:37:12.458
+745	dc83d654-7865-4342-9437-16bfcb075e6a	9f1571c0-8b72-4fba-bfa8-c4ce64a3ebef	3	COMPLETED	2026-03-08 02:07:17.604
+731	cd263764-71e2-4ead-87a3-0c5e9aff9828	8f86c362-ed56-4a1c-bd86-a8f3548baeb0	9	COMPLETED	2026-03-08 00:38:09.391
+766	6b65b0e5-ad3f-4756-a04d-f15f072ab740	5536dfff-479e-4d4c-be39-84dc465c4014	2	COMPLETED	2026-03-08 02:29:05.164
+699	104e34a6-fd53-4012-a0f0-41df6842c833	d4553524-4039-41d3-b339-e7cd47a556ff	7	COMPLETED	2026-03-08 00:21:56.644
+739	54ad8399-936a-47f5-bfc8-db3194c32ea3	371b7559-58a1-4cef-99a8-549134d5b2d2	2	COMPLETED	2026-03-08 00:43:59.461
+713	efa89ff0-babb-47d8-9694-afcbe18d049e	fa007fc3-3760-4eef-8198-c7cf668ac63a	6	COMPLETED	2026-03-08 00:29:13.655
+714	efa89ff0-babb-47d8-9694-afcbe18d049e	32c86b70-9817-4baf-b2d5-3c73100c7fe3	7	COMPLETED	2026-03-08 00:29:38.936
+741	54ad8399-936a-47f5-bfc8-db3194c32ea3	b6729536-3ebd-4861-86ba-d778b29de32c	4	COMPLETED	2026-03-08 00:45:12.803
+701	6a9107b1-6b87-42c5-8994-967a28c2b0d1	cca176c2-f1b8-4747-8463-2de632e79cf5	1	COMPLETED	2026-03-08 00:23:11.248
+768	6b65b0e5-ad3f-4756-a04d-f15f072ab740	ddb16c1a-c4d5-4cff-84ec-f9a1295d0699	4	COMPLETED	2026-03-08 02:30:17.033
+747	dc83d654-7865-4342-9437-16bfcb075e6a	9e542a99-85e5-4ef3-8880-13e5b290f6da	5	COMPLETED	2026-03-08 02:09:54.229
+704	6a9107b1-6b87-42c5-8994-967a28c2b0d1	32a5441f-9dfe-4bb4-b903-e43f54e07df6	4	COMPLETED	2026-03-08 00:24:48.125
+700	104e34a6-fd53-4012-a0f0-41df6842c833	38010a43-7f12-4893-bbdc-f625e666cb9c	8	COMPLETED	2026-03-08 00:22:21.984
+750	dc83d654-7865-4342-9437-16bfcb075e6a	17c4f6aa-a509-45bc-97d5-d17c12502eb5	8	COMPLETED	2026-03-08 02:13:25.53
+702	6a9107b1-6b87-42c5-8994-967a28c2b0d1	2e3a3d7c-f33a-4b8b-9276-395554b16fcf	2	COMPLETED	2026-03-08 00:23:41.563
+757	38236c5f-2faa-4940-aa37-60a206f3be14	0ee9cc0d-0540-410b-a6ef-7c88e3dbca3d	7	COMPLETED	2026-03-08 02:22:37.886
+693	104e34a6-fd53-4012-a0f0-41df6842c833	16d530be-85f3-4c32-8a7d-b3db2a40724a	1	COMPLETED	2026-03-08 00:19:20.107
+1333	cd263764-71e2-4ead-87a3-0c5e9aff9828	1a4ccde8-19cd-4b80-81aa-4f4100f17c5a	27	PENDING	2026-03-08 08:48:06.392
+1334	5cd29d5a-169e-41db-87a2-997e5fd5301f	370ee3ab-6ca4-4427-9d2a-a45f2a1686e5	23	PENDING	2026-03-08 08:48:16.03
+703	6a9107b1-6b87-42c5-8994-967a28c2b0d1	90f3cca1-7440-4d22-9024-ad862b979a0c	3	COMPLETED	2026-03-08 00:24:09.012
+1379	cd263764-71e2-4ead-87a3-0c5e9aff9828	8a422961-feee-450b-a455-716d71e041de	32	PENDING	2026-03-08 09:10:33.231
+738	54ad8399-936a-47f5-bfc8-db3194c32ea3	a8f7ffdd-561e-4f3b-a1fa-aae22b41131d	1	COMPLETED	2026-03-08 00:43:02.329
+1314	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	3d9a9dd5-3386-4583-94ba-4a5c392706a6	9	COMPLETED	2026-03-08 08:40:05.23
+706	6a9107b1-6b87-42c5-8994-967a28c2b0d1	cbff175a-bfeb-4991-aafe-ecebb038e87c	6	COMPLETED	2026-03-08 00:26:05.266
+1313	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	175a1341-ab76-428d-81d7-77f3b16ac17e	8	COMPLETED	2026-03-08 08:39:41.361
+1332	864fdade-0299-4871-a060-3c55442a1355	4c482b96-1133-4e14-936a-09bda4a4e498	8	COMPLETED	2026-03-08 08:47:55.711
+715	3bb7ac61-b27f-4979-b200-79ff470f486f	d35995c4-daf6-4d65-b69d-9a6c81205077	1	COMPLETED	2026-03-08 00:30:40.008
+716	3bb7ac61-b27f-4979-b200-79ff470f486f	28820349-8c42-4874-9cc5-e529122d3841	2	COMPLETED	2026-03-08 00:31:00.485
+717	3bb7ac61-b27f-4979-b200-79ff470f486f	a20c6c5a-4ef3-41e3-9ddb-c308d55d5a13	3	COMPLETED	2026-03-08 00:31:17.859
+718	3bb7ac61-b27f-4979-b200-79ff470f486f	74312d06-f49b-4b7d-88e7-fd45da78ff62	4	COMPLETED	2026-03-08 00:31:37.533
+719	3bb7ac61-b27f-4979-b200-79ff470f486f	f794cdd6-fb55-4a0d-be72-fbbfaaa7203c	5	COMPLETED	2026-03-08 00:32:07.399
+720	3bb7ac61-b27f-4979-b200-79ff470f486f	6f3fc290-2f18-458c-a410-199c71c03ca6	6	COMPLETED	2026-03-08 00:32:28.254
+721	3bb7ac61-b27f-4979-b200-79ff470f486f	db13ea9f-42f8-476c-a85b-88c332d0682e	7	COMPLETED	2026-03-08 00:32:51.546
+722	3bb7ac61-b27f-4979-b200-79ff470f486f	1fdec66b-6677-4cbf-b320-a65e5abbf864	8	COMPLETED	2026-03-08 00:33:24.496
+772	649453fd-ef30-42d1-8d2a-94c26237e814	7525d283-f569-4712-a586-7963aff8404f	1	PENDING	2026-03-08 03:52:34.563
+776	649453fd-ef30-42d1-8d2a-94c26237e814	ecda5d7e-db39-4e32-8ffe-13771f69f988	5	PENDING	2026-03-08 03:52:34.599
+293	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	dff2d6a6-33d2-4ae2-a3ee-ea583602ae67	1	COMPLETED	2026-03-07 20:54:07.62
+250	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	265e16cb-d2b6-4cb4-9644-e6d82b6a2a49	7	COMPLETED	2026-03-07 20:38:16.992
+812	5c9635b4-b0e1-40ac-947e-93714df4d582	bdc7ac62-11ad-4140-abe7-78412063d466	1	PENDING	2026-03-08 04:55:52.816
+1233	458250d8-e65f-4171-9e11-3a6dff72a848	af6dbb9b-cfdf-4b50-b017-c50d19c7186f	8	PENDING	2026-03-08 08:11:23.328
+833	51c28633-94a9-4653-bbc8-47eca7fd98c2	001ea126-d19d-4cf8-8736-7101b50ed87a	13	PENDING	2026-03-08 05:04:42.215
+834	51c28633-94a9-4653-bbc8-47eca7fd98c2	a2cd74bf-5e29-469d-8834-70f8d8d6b4ff	14	PENDING	2026-03-08 05:05:13.524
+844	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	a741a522-b2a7-4a15-aad2-e19e9dbb95b0	10	PENDING	2026-03-08 05:23:20.879
+873	54ad8399-936a-47f5-bfc8-db3194c32ea3	1fda308e-0428-43be-ab55-32a1a8e232eb	7	PENDING	2026-03-08 05:46:51.259
+874	54ad8399-936a-47f5-bfc8-db3194c32ea3	633ef711-c7c7-4cee-9863-c9480c4bedf8	8	PENDING	2026-03-08 05:47:18.934
+773	649453fd-ef30-42d1-8d2a-94c26237e814	3871102a-3f7a-42e2-94d3-37c2188f72d9	2	COMPLETED	2026-03-08 03:52:34.578
+883	54ad8399-936a-47f5-bfc8-db3194c32ea3	0aeb7b42-3ff8-4e01-b77d-55658a2eb123	15	PENDING	2026-03-08 05:54:26.531
+890	2920b45c-0ce6-4dec-8766-3892322ff1b0	719d8448-c347-417f-b320-5489e3976132	15	PENDING	2026-03-08 06:04:13.712
+911	cd263764-71e2-4ead-87a3-0c5e9aff9828	2f758b98-8e1c-4cca-a7bd-44e24eeab4ee	12	PENDING	2026-03-08 06:26:10.68
+915	cd263764-71e2-4ead-87a3-0c5e9aff9828	7a866359-ddd5-4d92-a9c9-3e811aa732fb	14	PENDING	2026-03-08 06:26:56.971
+923	68e11996-3b69-413e-a7d6-9b361f1d4b2b	b67930e5-9a18-47cf-bdeb-8f2a70fe85e6	1	PENDING	2026-03-08 06:28:51.894
+932	68e11996-3b69-413e-a7d6-9b361f1d4b2b	c5e76483-5372-4722-b138-1a543b373c16	6	PENDING	2026-03-08 06:33:56.55
+939	efa89ff0-babb-47d8-9694-afcbe18d049e	7857e076-b7bf-4d26-b7cc-197ba20c43d5	9	PENDING	2026-03-08 06:36:59.847
+948	efa89ff0-babb-47d8-9694-afcbe18d049e	2fc8dd8c-4a6e-41de-a45f-6893de433bdb	15	PENDING	2026-03-08 06:39:14.288
+955	5772f06a-bf47-407f-b92e-74bf4a85aead	f0205c3a-25bc-409c-9bdf-06265ebe9cad	9	PENDING	2026-03-08 06:44:19.625
+956	2447e995-8cd8-431b-80fd-2654f0b2298b	2008a9f1-f949-4a61-94f1-489cb40c308a	4	PENDING	2026-03-08 06:44:45.32
+974	a16f26ae-83b3-4288-ba7d-7efb541104c4	458fc806-4674-409f-ace2-8ba8160ff333	2	PENDING	2026-03-08 06:48:45.852
+993	a16f26ae-83b3-4288-ba7d-7efb541104c4	19d0365c-e44d-420f-bbda-bb80e09e7662	11	PENDING	2026-03-08 06:55:06.307
+1007	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	50381fa0-99ff-4580-b3cc-c4ba4eeb21f9	4	PENDING	2026-03-08 06:59:13.213
+1018	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	87ff5b33-b204-4a41-a228-2e4cf7c83229	8	PENDING	2026-03-08 07:04:18.693
+983	a0df520f-d839-4acf-b594-7cad857eeaa7	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	15	COMPLETED	2026-03-08 06:51:52.682
+1027	aaec9758-627f-40bb-b8b2-e92110d36327	0d2f82df-0533-4491-b413-f13a1782188c	10	PENDING	2026-03-08 07:08:00.359
+1029	674b5de7-296f-4f50-8359-9e337c508dd2	8efa7788-bc3e-4ab0-bca9-5d044cf49b0b	10	PENDING	2026-03-08 07:08:20.895
+1039	d6400b5f-5117-4826-8aa2-20e215edfb2b	42d92e7a-a1dc-4c04-8fe2-0fd94bdb1443	11	PENDING	2026-03-08 07:11:17.846
+1040	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	17b558c1-4525-4e51-b265-e0916f039033	7	PENDING	2026-03-08 07:11:19.994
+1042	d6400b5f-5117-4826-8aa2-20e215edfb2b	c0f4af70-33d7-4dd0-aa1a-95434b6ca284	12	PENDING	2026-03-08 07:11:44.725
+1043	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	f32ca38e-8e1c-4ed7-b40a-0845c4b91b76	9	PENDING	2026-03-08 07:12:00.216
+1046	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	5317e5ef-237c-4391-a797-d04938a63d7c	11	PENDING	2026-03-08 07:12:32.063
+1047	d6400b5f-5117-4826-8aa2-20e215edfb2b	0e28216e-61cc-41a4-b759-10632dc5b4b8	14	PENDING	2026-03-08 07:12:34.245
+1054	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	a3a263c3-4f5f-4d1c-a236-a790de3eaf5a	15	PENDING	2026-03-08 07:13:53.704
+1055	eea52d8e-619c-4985-9891-2b417c468095	c9c3a787-a156-4c85-b702-2f3b2299ed24	11	PENDING	2026-03-08 07:14:12.773
+1056	eea52d8e-619c-4985-9891-2b417c468095	313964e9-99d8-4fc3-aa84-bc43c2dbd11c	12	PENDING	2026-03-08 07:14:31.247
+1059	eea52d8e-619c-4985-9891-2b417c468095	a5a1951c-4f46-43ef-af83-f56ae93dfa55	15	PENDING	2026-03-08 07:15:30.741
+775	649453fd-ef30-42d1-8d2a-94c26237e814	819f57ff-943c-407f-8c87-383dc70624ea	4	COMPLETED	2026-03-08 03:52:34.592
+1064	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	4ea3b42f-1ac6-45b1-87e5-ef808b71df0e	14	PENDING	2026-03-08 07:24:36.861
+1067	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	b2e6ed6a-6161-4488-8922-4fad36c750a4	17	PENDING	2026-03-08 07:25:43.582
+1075	a895d6bc-408f-4590-a7b2-d228d3627109	3871102a-3f7a-42e2-94d3-37c2188f72d9	2	PENDING	2026-03-08 07:28:39.452
+1086	a0df520f-d839-4acf-b594-7cad857eeaa7	bd69e8de-814b-4b14-a390-891d73d3438e	16	PENDING	2026-03-08 07:30:39.658
+901	cd263764-71e2-4ead-87a3-0c5e9aff9828	db1a988d-a721-4a0f-8f3c-1f3729802b62	11	COMPLETED	2026-03-08 06:16:24.04
+1131	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	e97776c0-bd1c-47de-8780-4720b2aac7ef	14	PENDING	2026-03-08 07:41:51.852
+1132	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	a3f7387d-fd40-42ac-9cd1-670a21ea547c	15	PENDING	2026-03-08 07:42:11.307
+1138	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	96e81ee0-b055-41f5-88ff-36c74bd1b24f	16	PENDING	2026-03-08 07:42:33.095
+1139	3bdac905-7cfa-4a31-85de-39ec2f854afd	0136fc99-d67d-4972-8d7e-aede2b1577e6	13	PENDING	2026-03-08 07:42:35.134
+1147	cd263764-71e2-4ead-87a3-0c5e9aff9828	6ad84eb2-e148-40ba-98a5-80d3cb5aa5c3	18	PENDING	2026-03-08 07:44:33.223
+1065	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	ea739780-6712-4a90-b489-8221729f109a	15	COMPLETED	2026-03-08 07:24:56.589
+935	6a9107b1-6b87-42c5-8994-967a28c2b0d1	187b4d97-78fe-4fd2-8ec3-99bc4de84672	10	COMPLETED	2026-03-08 06:35:14.05
+1107	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	81161e9f-b1ea-43cc-b3f3-40089e9c5f89	11	COMPLETED	2026-03-08 07:35:03.26
+1185	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	e21dbadd-ebc7-43a5-8d54-f6288592d881	15	PENDING	2026-03-08 07:53:06.394
+1194	52535048-47f2-42cb-91ec-65a4824c9908	a522f030-9169-4690-81bb-4e3dafed94bd	13	PENDING	2026-03-08 07:59:45.2
+1206	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	2466da94-3b2f-48db-bca3-517ac14198c9	15	PENDING	2026-03-08 08:03:31.822
+1207	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	66b4ea0b-24af-4f3f-b2b5-3285db38a5f7	16	PENDING	2026-03-08 08:03:55.563
+1209	217ae2de-4843-400b-964c-30302c10965e	01ae16e7-a847-4c13-bf1d-206b01ff79bc	11	PENDING	2026-03-08 08:04:22.335
+1210	217ae2de-4843-400b-964c-30302c10965e	4f83848a-f1b1-4680-8ba6-ae3afa9441f1	12	PENDING	2026-03-08 08:04:41.582
+863	dc83d654-7865-4342-9437-16bfcb075e6a	064b4b50-d7ba-4f10-b35b-cb4702424938	9	COMPLETED	2026-03-08 05:36:38.263
+1236	565b69ae-c54e-4f96-9d46-a31e869eccbf	fb900dff-7928-46a8-8424-14a487867e6e	11	PENDING	2026-03-08 08:12:07.633
+1241	565b69ae-c54e-4f96-9d46-a31e869eccbf	f036a6d6-c2d2-4e3f-ab25-a17fed5bd228	13	PENDING	2026-03-08 08:13:09.696
+149	39201be0-22a9-4afc-8bbf-9a7dd43637e6	16b425e3-d5f2-4d4c-b6e1-74e177ca4a6a	3	COMPLETED	2026-03-07 20:00:03.751
+1285	4755002c-b849-46a3-8d7d-09a6f0244fe0	f93b9e77-1c1e-4c6f-bd6b-c16f0255b8ae	18	PENDING	2026-03-08 08:30:54.528
+1286	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	c9c41cca-1e26-4dda-a968-fe946973e61f	12	PENDING	2026-03-08 08:30:55.048
+1262	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	8	COMPLETED	2026-03-08 08:23:18.926
+912	539ff319-c98a-440f-9541-c0e736fe44b3	0114fe5b-ec06-4567-848c-11e28fdb8824	5	COMPLETED	2026-03-08 06:26:19.286
+1317	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	11e58be4-dacc-4a99-8e1f-40634bd01ab4	18	PENDING	2026-03-08 08:41:02.744
+1146	cd263764-71e2-4ead-87a3-0c5e9aff9828	c1673388-cdfa-47d3-986c-eceb6031693b	17	COMPLETED	2026-03-08 07:44:33.214
+1358	c34851b2-fce1-4c90-b896-3a1a666a841a	2c3347ea-4e52-464e-82cc-09bd9e4cd234	7	PENDING	2026-03-08 09:00:20.409
+1360	c34851b2-fce1-4c90-b896-3a1a666a841a	f1163c6a-25d2-4a51-b3d0-c2cf77ed792a	8	PENDING	2026-03-08 09:01:13.575
+1148	cd263764-71e2-4ead-87a3-0c5e9aff9828	7f281677-c4c1-4683-a5fb-82e2fc583317	19	COMPLETED	2026-03-08 07:44:33.229
+1149	cd263764-71e2-4ead-87a3-0c5e9aff9828	4af10704-e3fa-4c73-9cf0-3ab817ada940	20	COMPLETED	2026-03-08 07:44:33.235
+1380	24421caf-3a14-4681-b9f9-f237f956d8d4	b346998c-a243-4803-b486-0dbac551f44e	9	NO_SHOW	2026-03-08 09:14:37.075
+774	649453fd-ef30-42d1-8d2a-94c26237e814	4bd77e7d-9be3-4871-94f1-479dc11934d7	3	COMPLETED	2026-03-08 03:52:34.586
+1393	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	877d567d-d403-46fe-a03b-2395c6ffa751	9	PENDING	2026-03-08 09:31:54.292
+854	38236c5f-2faa-4940-aa37-60a206f3be14	1a15d587-ec8a-4bc3-8fff-fb99e73341e5	14	COMPLETED	2026-03-08 05:29:16.19
+1315	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7f88abb9-7940-4cdc-b99e-21715e682c52	17	COMPLETED	2026-03-08 08:40:36.341
+1381	24421caf-3a14-4681-b9f9-f237f956d8d4	a2e0f3a4-5806-4250-ba3c-bcd02bc53a2c	10	COMPLETED	2026-03-08 09:14:37.086
+786	a3ca42d8-ab64-421a-ab67-aeb12925661e	38056ce0-e257-4f8e-ad6e-b1faa5154b5c	7	NO_SHOW	2026-03-08 04:03:42.068
+1219	a3ca42d8-ab64-421a-ab67-aeb12925661e	05ade5c7-ae17-4558-bb5e-dd5e99f8f15a	11	COMPLETED	2026-03-08 08:07:53.494
+1407	5cd29d5a-169e-41db-87a2-997e5fd5301f	857a5785-53d9-4d0a-9592-856e7dde125c	29	PENDING	2026-03-08 09:48:38.326
+1028	aaec9758-627f-40bb-b8b2-e92110d36327	c8388555-2e5f-4329-bd90-f966b94d1389	11	COMPLETED	2026-03-08 07:08:19.541
+1316	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	9a91245b-5335-4ccf-82e7-4fb245d9da8e	10	NO_SHOW	2026-03-08 08:41:00.487
+975	7d959ecb-3999-47cd-ae17-5aab0405cb97	16485858-2df6-4b52-b567-52ccc8943851	10	COMPLETED	2026-03-08 06:48:54.771
+1108	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	5aa2ff6c-ad0b-452d-a783-075099ab05e2	12	COMPLETED	2026-03-08 07:35:20.643
+1356	104e34a6-fd53-4012-a0f0-41df6842c833	d966cea9-872b-4e2d-86a1-ecf975d55b10	13	COMPLETED	2026-03-08 08:58:05.117
+1424	cd263764-71e2-4ead-87a3-0c5e9aff9828	67ceac98-83a5-407b-ad88-8f89f2328ee9	33	COMPLETED	2026-03-08 10:09:02.115
+1336	864fdade-0299-4871-a060-3c55442a1355	48865e86-b110-4bc0-9166-657d8bcc2bf5	10	COMPLETED	2026-03-08 08:48:49.611
+929	539ff319-c98a-440f-9541-c0e736fe44b3	a22b33fa-0901-4f81-ab1c-3c8c67b437ef	12	COMPLETED	2026-03-08 06:32:59.705
+1439	458250d8-e65f-4171-9e11-3a6dff72a848	e96b16a3-3e71-4561-9803-4f6b392cce3a	18	COMPLETED	2026-03-08 10:40:11.962
+1440	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	20e9963a-ed23-4484-bf0a-e75251004a0b	21	COMPLETED	2026-03-08 10:41:05.915
+1361	3bb7ac61-b27f-4979-b200-79ff470f486f	bc345b3b-a0f3-4b64-ad46-e1adae8ec97a	10	COMPLETED	2026-03-08 09:01:21.826
+1367	3bb7ac61-b27f-4979-b200-79ff470f486f	c25e65ae-fcfa-485a-9aa5-b171d72aa82a	13	COMPLETED	2026-03-08 09:02:46.724
+777	0cc1387b-56c9-4ce6-a994-e1cf59c24632	0eac51f3-e454-4cba-9bba-15372ba4f166	10	PENDING	2026-03-08 03:58:12.519
+778	0cc1387b-56c9-4ce6-a994-e1cf59c24632	3d3274fa-1c2f-487f-a398-792904bd338e	11	PENDING	2026-03-08 03:58:33.888
+779	0cc1387b-56c9-4ce6-a994-e1cf59c24632	a3d403e2-a31a-4bd6-9fad-da95b4b325ed	12	PENDING	2026-03-08 03:58:59.797
+524	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7f0b3f4f-7937-4a47-9a1d-075480009d60	6	COMPLETED	2026-03-07 22:47:38.32
+803	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	83e4d621-df55-421e-80c3-6a9f03119e3b	6	PENDING	2026-03-08 04:39:20.165
+813	5c9635b4-b0e1-40ac-947e-93714df4d582	9ff92a65-fa65-41cc-ade4-45a0930d20df	2	PENDING	2026-03-08 04:56:14.894
+814	5c9635b4-b0e1-40ac-947e-93714df4d582	8806c887-f3c6-46f5-803e-70cd48dd4295	3	PENDING	2026-03-08 04:56:33.072
+824	db338578-8876-4dec-a6d5-2d0094828b16	b235fcfd-e97c-4047-bd07-08947b15d278	12	PENDING	2026-03-08 05:00:49.566
+831	51c28633-94a9-4653-bbc8-47eca7fd98c2	e2086818-8da1-4fcc-9f4d-3cf2ebd42eff	11	PENDING	2026-03-08 05:04:00.994
+278	fcce01c3-007c-4299-a17f-9d5f4402c6ec	937aa4e9-09cf-4578-8714-a978476edda0	8	COMPLETED	2026-03-07 20:48:22.69
+845	38236c5f-2faa-4940-aa37-60a206f3be14	fac8d228-c871-4ad6-98a5-dc5c4a9f7bcd	9	PENDING	2026-03-08 05:24:46.877
+876	54ad8399-936a-47f5-bfc8-db3194c32ea3	50213a8c-0cab-46ad-92d9-31dcc8f58978	10	PENDING	2026-03-08 05:48:20.885
+1237	458250d8-e65f-4171-9e11-3a6dff72a848	3c6f2501-7404-40be-b2d2-15696486aaaa	9	PENDING	2026-03-08 08:12:15.389
+893	cd263764-71e2-4ead-87a3-0c5e9aff9828	82902993-7486-4ad1-9a2d-a1ca4ecd01a0	10	PENDING	2026-03-08 06:06:28.775
+903	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	39ec48de-2e94-40bf-a7a9-41b90a37df05	10	PENDING	2026-03-08 06:21:16.471
+924	539ff319-c98a-440f-9541-c0e736fe44b3	7eebb759-a5d5-47f9-9c5a-03daa2411935	9	PENDING	2026-03-08 06:29:28.559
+930	68e11996-3b69-413e-a7d6-9b361f1d4b2b	c96bf50a-7be7-4426-a830-95a7eca92cd2	4	PENDING	2026-03-08 06:33:03.253
+949	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	a1c3e7ce-1dd8-42ce-b912-a4604d936f70	14	PENDING	2026-03-08 06:39:50.828
+957	5772f06a-bf47-407f-b92e-74bf4a85aead	973a26a1-19dc-4c70-b8c7-861411a655a1	10	PENDING	2026-03-08 06:44:49.42
+976	a16f26ae-83b3-4288-ba7d-7efb541104c4	93bd7e43-b702-422a-bc0e-abefbd732515	3	PENDING	2026-03-08 06:49:06.774
+798	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	d023aeed-015e-4df6-a9b2-e56ffdaed415	1	COMPLETED	2026-03-08 04:39:20.131
+984	a16f26ae-83b3-4288-ba7d-7efb541104c4	bcafdf88-6a99-4e29-9ea8-95fce540f1b7	6	PENDING	2026-03-08 06:53:01.5
+985	efa89ff0-babb-47d8-9694-afcbe18d049e	5cec8765-2310-4e4b-a145-6c52295e3acf	16	PENDING	2026-03-08 06:53:07.145
+799	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	411ff2c0-85b0-4dbd-972a-988fa9353e03	2	COMPLETED	2026-03-08 04:39:20.141
+988	a16f26ae-83b3-4288-ba7d-7efb541104c4	9a20421b-0f1b-4692-b5fa-8e9936aa635b	8	PENDING	2026-03-08 06:53:46.131
+990	a16f26ae-83b3-4288-ba7d-7efb541104c4	bc2c6c62-b374-4b84-be9d-09bff4b9b136	9	PENDING	2026-03-08 06:54:03.778
+994	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	a376f133-7a24-4b7b-9a24-683de717e390	10	PENDING	2026-03-08 06:55:16.183
+995	a16f26ae-83b3-4288-ba7d-7efb541104c4	c200dfd8-fd66-47ff-813c-25325aa3bc73	12	PENDING	2026-03-08 06:55:35.296
+997	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	b6ef8838-ed1d-45a2-86d5-d563133ec76c	11	PENDING	2026-03-08 06:56:03.184
+800	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	a140d7d3-b5c8-4955-81f9-685d51d8a8c1	3	COMPLETED	2026-03-08 04:39:20.147
+1003	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cbf02b07-cb7c-4393-8942-2cf6b06768e5	15	PENDING	2026-03-08 06:58:28.685
+1004	fcce01c3-007c-4299-a17f-9d5f4402c6ec	f9e203e4-91cb-4363-a68f-c6fddb659248	16	PENDING	2026-03-08 06:58:28.694
+1012	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	5acbd521-d3c7-4ca5-85eb-1d3623d9e3a1	8	PENDING	2026-03-08 07:00:59.003
+906	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	d9678115-2e09-4bd2-bb1c-5c4c465b4c16	13	COMPLETED	2026-03-08 06:21:16.488
+1013	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	86d09afa-c8e7-4a65-9465-5fea7fdfc275	9	PENDING	2026-03-08 07:01:53.487
+1019	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	371b7559-58a1-4cef-99a8-549134d5b2d2	9	PENDING	2026-03-08 07:04:49.415
+1021	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	8a422961-feee-450b-a455-716d71e041de	10	PENDING	2026-03-08 07:05:15.312
+1031	aaec9758-627f-40bb-b8b2-e92110d36327	ca28ffb7-6bbc-4c94-8054-3e3d76127750	13	PENDING	2026-03-08 07:08:54.595
+1034	aaec9758-627f-40bb-b8b2-e92110d36327	28a5ae59-3fbf-4055-b899-cb13182e975e	15	PENDING	2026-03-08 07:09:39.653
+1041	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	5e7443f0-9d4c-46c3-8c92-bc8d90eed3c3	8	PENDING	2026-03-08 07:11:39.973
+801	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	0b574786-41aa-4178-bdc0-76c4f7584e8e	4	COMPLETED	2026-03-08 04:39:20.153
+1076	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	797c7fdf-cd2a-4f23-a3b5-4411ee4b82d4	13	PENDING	2026-03-08 07:28:55.179
+1087	a895d6bc-408f-4590-a7b2-d228d3627109	edaedab4-0f80-466b-8fe6-14eb82284cda	7	PENDING	2026-03-08 07:30:56.561
+1115	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	d7874bf3-04f5-4732-8b2d-192d5c018b85	9	PENDING	2026-03-08 07:38:18.021
+1121	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	286c6922-f303-4985-9ce8-77923659104f	18	PENDING	2026-03-08 07:39:27.387
+1122	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	6099798e-25a5-4c55-81c0-5ffb13294c9b	12	PENDING	2026-03-08 07:39:48.685
+913	cd263764-71e2-4ead-87a3-0c5e9aff9828	f4a8afda-b740-4297-be95-2ff01b02a2ea	13	COMPLETED	2026-03-08 06:26:35.256
+1161	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	295d5fdf-a7bc-4a2b-9452-708b88a403a3	6	PENDING	2026-03-08 07:46:34.509
+1163	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	5608f4ea-371d-40d2-b459-907909f2921c	7	PENDING	2026-03-08 07:47:01.909
+1171	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	3d07a508-5a30-4547-b02e-eb1a4cc78c23	7	PENDING	2026-03-08 07:49:28.983
+1172	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	5df56423-f02d-450d-8bbd-19e9e8e8d6a5	12	PENDING	2026-03-08 07:49:40.066
+1174	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	10ca2b13-3ed7-43a9-944f-24fb0dad93ff	9	PENDING	2026-03-08 07:50:17.147
+1186	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	7a3875d6-59a0-47ea-8ad1-498474e0f9c9	11	PENDING	2026-03-08 07:53:15.549
+802	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	54d57056-bdac-48f2-b8dc-75741b608f05	5	COMPLETED	2026-03-08 04:39:20.159
+1068	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	5b439ef4-d685-4e7d-b797-221f281ab248	18	COMPLETED	2026-03-08 07:26:03.155
+1109	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	3c42ca13-9f5f-472f-ac39-8187842552e2	13	COMPLETED	2026-03-08 07:35:47.752
+1212	217ae2de-4843-400b-964c-30302c10965e	5e321aa7-1f29-4f58-a3b7-f05fd32e7a5e	14	PENDING	2026-03-08 08:05:26.489
+1220	246e2354-457e-4112-af52-025952cca149	243a55de-955e-4e36-a7e6-f436bc6c0944	4	PENDING	2026-03-08 08:08:05.771
+1221	6f127d1b-9a45-41d4-9fcb-da121c576e16	e8275e02-6e21-459a-881e-cc70d37299c7	8	PENDING	2026-03-08 08:08:05.844
+1264	bf71f55b-86ba-46b8-afa1-1aea09f829e1	4ab87f11-2f55-493b-b76c-2a3866ec8770	11	PENDING	2026-03-08 08:23:57.658
+864	dc83d654-7865-4342-9437-16bfcb075e6a	d0d86feb-4639-4f63-9705-e3bf400959b5	10	COMPLETED	2026-03-08 05:37:06.431
+1289	5cd29d5a-169e-41db-87a2-997e5fd5301f	4d7f9320-8a13-4f93-92e6-794cdabfd1ce	18	PENDING	2026-03-08 08:31:53.209
+1290	5cd29d5a-169e-41db-87a2-997e5fd5301f	1e3f2e84-d2b7-4d91-b173-2ce30503c135	19	PENDING	2026-03-08 08:31:53.219
+1291	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	12cf3c64-1ea2-4665-985b-7cc784fddf2d	14	PENDING	2026-03-08 08:31:54.167
+1292	cd263764-71e2-4ead-87a3-0c5e9aff9828	e6ce598c-450f-431a-9985-0dce3fdf7b7e	26	COMPLETED	2026-03-08 08:32:26.169
+1077	24421caf-3a14-4681-b9f9-f237f956d8d4	58a10c53-f356-47b6-ab20-5d02b48a9b20	6	COMPLETED	2026-03-08 07:28:55.545
+1135	fcce01c3-007c-4299-a17f-9d5f4402c6ec	ed146e19-1056-490a-a4f5-7bd3cc0a5a4f	20	COMPLETED	2026-03-08 07:42:20.278
+963	2447e995-8cd8-431b-80fd-2654f0b2298b	00df0dfd-b646-4698-9d67-f008dabfac30	8	COMPLETED	2026-03-08 06:46:13.656
+1357	5cd29d5a-169e-41db-87a2-997e5fd5301f	8c78cabb-901a-428d-9da8-20ad69f016d7	28	PENDING	2026-03-08 08:58:36.551
+1078	24421caf-3a14-4681-b9f9-f237f956d8d4	3d5bcc19-91c9-4c2c-98cb-832e2b362dda	7	COMPLETED	2026-03-08 07:28:55.556
+905	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	3d07a508-5a30-4547-b02e-eb1a4cc78c23	12	NO_SHOW	2026-03-08 06:21:16.483
+934	6a9107b1-6b87-42c5-8994-967a28c2b0d1	48b1ad11-aadf-4b62-a9df-8ac7a81a438c	9	COMPLETED	2026-03-08 06:34:26.684
+1318	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	53bcfe04-7e2d-4776-ac2c-11fb1c28e4d2	19	COMPLETED	2026-03-08 08:41:26.496
+1382	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	52c7a8b4-78f9-4fb0-b966-f25c469bc2cc	14	PENDING	2026-03-08 09:16:55.898
+1137	fcce01c3-007c-4299-a17f-9d5f4402c6ec	e3b63cc6-5eaf-4135-a0ab-8717eeaa8917	22	COMPLETED	2026-03-08 07:42:20.3
+787	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	97387603-6698-4b10-80b7-164d413e81e5	1	COMPLETED	2026-03-08 04:11:09.064
+914	539ff319-c98a-440f-9541-c0e736fe44b3	26462040-10a9-4d94-aba6-43b88de4be63	6	COMPLETED	2026-03-08 06:26:50.735
+1079	24421caf-3a14-4681-b9f9-f237f956d8d4	bc6e780a-8715-418a-8678-99a56144eb89	8	COMPLETED	2026-03-08 07:28:55.564
+1136	fcce01c3-007c-4299-a17f-9d5f4402c6ec	4febad14-2825-43f7-b20c-46a2c524981c	21	COMPLETED	2026-03-08 07:42:20.291
+1155	cd263764-71e2-4ead-87a3-0c5e9aff9828	3cdc243b-1991-4aab-bc8d-3b404d065153	22	COMPLETED	2026-03-08 07:45:29.813
+1134	fcce01c3-007c-4299-a17f-9d5f4402c6ec	16cc8606-5683-4b62-b9ca-2a050d4421f3	19	COMPLETED	2026-03-08 07:42:20.269
+855	38236c5f-2faa-4940-aa37-60a206f3be14	15bfa627-6e88-4cc1-ae8c-ea47301ade75	15	COMPLETED	2026-03-08 05:29:44.105
+1408	54ad8399-936a-47f5-bfc8-db3194c32ea3	bee4d295-9e11-46a2-97a7-1457eb9fa02a	21	PENDING	2026-03-08 09:55:39.938
+1394	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	c45fbc24-212b-40e2-89c5-e2520ee54b2a	10	COMPLETED	2026-03-08 09:32:34.094
+1008	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	d24af4ca-00c9-4fa5-acb4-412ef174e2c5	5	COMPLETED	2026-03-08 06:59:37.208
+865	dc83d654-7865-4342-9437-16bfcb075e6a	a20ca561-ebda-4c4a-aacf-f5f69c9c37ee	11	COMPLETED	2026-03-08 05:37:41.118
+1337	864fdade-0299-4871-a060-3c55442a1355	25b290c5-7b15-4eaa-98f3-54646b29ea64	11	NO_SHOW	2026-03-08 08:49:14.547
+1015	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	d4422035-cfac-4864-8aae-18462ccf4db1	11	COMPLETED	2026-03-08 07:02:36.344
+977	7d959ecb-3999-47cd-ae17-5aab0405cb97	cfac5947-64e2-434e-b2e0-daab571c4391	11	COMPLETED	2026-03-08 06:49:24.742
+1009	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	b1b1be82-285d-4313-b50c-82ec04ecc331	6	COMPLETED	2026-03-08 06:59:55.214
+1425	c34851b2-fce1-4c90-b896-3a1a666a841a	cf4a8285-f6c2-4860-8f8d-3529a1374be5	14	COMPLETED	2026-03-08 10:15:55.683
+1442	458250d8-e65f-4171-9e11-3a6dff72a848	295d5fdf-a7bc-4a2b-9452-708b88a403a3	19	COMPLETED	2026-03-08 10:41:14.288
+869	dc83d654-7865-4342-9437-16bfcb075e6a	17d704f6-f2b5-4d34-ac51-9fa746aa2d36	15	COMPLETED	2026-03-08 05:39:49.794
+868	dc83d654-7865-4342-9437-16bfcb075e6a	fb534978-892f-401b-aa84-e5ec3c495812	14	COMPLETED	2026-03-08 05:39:21.165
+150	39201be0-22a9-4afc-8bbf-9a7dd43637e6	3463f821-dbc5-4ed8-9d89-4a404ad4f005	4	COMPLETED	2026-03-07 20:00:39.192
+815	5c9635b4-b0e1-40ac-947e-93714df4d582	2e6fd048-8246-4f9f-b9aa-b89f1306789f	4	PENDING	2026-03-08 04:56:53.44
+804	6a9107b1-6b87-42c5-8994-967a28c2b0d1	4eb50c5c-8472-4d14-af27-714a38e5e788	8	COMPLETED	2026-03-08 04:49:14.651
+856	6b65b0e5-ad3f-4756-a04d-f15f072ab740	439ebb71-0b7b-46fe-b3de-3cdbadde2eb0	8	PENDING	2026-03-08 05:31:29.178
+859	6b65b0e5-ad3f-4756-a04d-f15f072ab740	580fed09-f65c-4cf7-9e42-89a0ce25da0b	11	PENDING	2026-03-08 05:33:05.548
+862	6b65b0e5-ad3f-4756-a04d-f15f072ab740	3dd14844-1e5e-4683-a86b-b05c04c0a2a1	14	PENDING	2026-03-08 05:34:40.006
+877	54ad8399-936a-47f5-bfc8-db3194c32ea3	de857289-e368-4a9a-afc8-c7d596302ae9	11	PENDING	2026-03-08 05:50:07.632
+839	db338578-8876-4dec-a6d5-2d0094828b16	36e7e3f2-2f0c-4f5a-acf8-ea35a514656a	18	COMPLETED	2026-03-08 05:19:04.71
+885	c9d7022f-7e84-4876-a4fa-beda27a31cd5	983d604d-e045-4ab6-bd69-b4d6b38adb06	7	PENDING	2026-03-08 06:01:30.75
+781	a3ca42d8-ab64-421a-ab67-aeb12925661e	6e5af564-1f45-401c-bdec-d8132508f6e6	2	COMPLETED	2026-03-08 04:00:46.02
+894	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	eaedba7e-7c02-4b0a-b05a-21dac78c3dbe	5	COMPLETED	2026-03-08 06:06:50.325
+916	539ff319-c98a-440f-9541-c0e736fe44b3	03dca943-4e3d-4ae4-9958-ce5b56d854d1	7	PENDING	2026-03-08 06:27:16.373
+917	cd263764-71e2-4ead-87a3-0c5e9aff9828	f77cb046-1218-4edf-9c74-2180509f828b	15	PENDING	2026-03-08 06:27:20.651
+925	539ff319-c98a-440f-9541-c0e736fe44b3	c80c0576-d1bb-4e0f-b430-3b714ec93586	10	PENDING	2026-03-08 06:29:53.496
+936	efa89ff0-babb-47d8-9694-afcbe18d049e	f1ff5238-fdb2-4659-8cce-2db550bb3db8	8	PENDING	2026-03-08 06:36:03.569
+138	50fa6865-037c-451b-8ecc-c4fd9bdb0334	64ac3963-be12-4b37-8760-66d94a6576d1	13	COMPLETED	2026-03-07 19:56:41.325
+960	5772f06a-bf47-407f-b92e-74bf4a85aead	dff2d6a6-33d2-4ae2-a3ee-ea583602ae67	11	PENDING	2026-03-08 06:45:29.533
+962	5772f06a-bf47-407f-b92e-74bf4a85aead	1b079f3b-04fc-43ee-85d3-e638f41f613b	12	PENDING	2026-03-08 06:45:51.628
+1110	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	c923edab-f218-48a5-a9b2-52e7d02901f8	14	COMPLETED	2026-03-08 07:36:15.987
+965	e4d9b090-495e-4d82-9c3e-d8048154ccd6	ba890160-2fc3-4e71-8601-ffc154fa51f2	2	PENDING	2026-03-08 06:46:29.878
+978	a16f26ae-83b3-4288-ba7d-7efb541104c4	40405d4d-8346-432d-ae65-a4193e929086	4	PENDING	2026-03-08 06:49:30.851
+838	db338578-8876-4dec-a6d5-2d0094828b16	b2889d4c-2f58-4c09-a37a-9eb6ff98bb81	17	COMPLETED	2026-03-08 05:19:04.705
+986	a16f26ae-83b3-4288-ba7d-7efb541104c4	9977c7f7-712d-4983-9cc2-3109b62b6803	7	PENDING	2026-03-08 06:53:25.736
+996	a16f26ae-83b3-4288-ba7d-7efb541104c4	dc5d753e-b685-429b-84b7-5f3d8983b5b1	13	PENDING	2026-03-08 06:55:52.458
+1010	55fbdf9b-b4c7-4844-babc-bba452abf569	5fd2640e-b4da-4940-aba4-f00a33498231	16	PENDING	2026-03-08 07:00:21.386
+1033	674b5de7-296f-4f50-8359-9e337c508dd2	c297f3bb-14aa-4978-a02c-adcaa3837baa	11	PENDING	2026-03-08 07:09:24.877
+1045	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	5bb92392-f8e7-4e72-82c2-f0efd9fe47ae	10	PENDING	2026-03-08 07:12:15.745
+1053	eea52d8e-619c-4985-9891-2b417c468095	5e5015a3-bb85-4fa7-a5ea-3e7abc85b474	10	PENDING	2026-03-08 07:13:51.283
+1069	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	819f57ff-943c-407f-8c87-383dc70624ea	8	PENDING	2026-03-08 07:26:57.631
+1080	a895d6bc-408f-4590-a7b2-d228d3627109	dbd68461-6833-473c-a763-0954ddc0f89f	3	PENDING	2026-03-08 07:29:00.502
+1081	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	79e7b7c4-a3a0-4ce6-be69-3a0be89fdbcc	14	PENDING	2026-03-08 07:29:36.653
+1093	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	5c17ee0e-3e33-42e4-9fdd-0deb1d59c2d7	11	PENDING	2026-03-08 07:32:04.679
+1096	a895d6bc-408f-4590-a7b2-d228d3627109	4c5c8579-b043-4971-b48c-e065b63ba524	11	PENDING	2026-03-08 07:32:39.547
+1097	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	bdec500d-37a8-4e91-9da8-0e972b2100f2	13	PENDING	2026-03-08 07:32:45.955
+1099	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	4055ea3b-fdfa-4010-bc27-cae32a72c854	14	PENDING	2026-03-08 07:33:08.525
+1101	2447e995-8cd8-431b-80fd-2654f0b2298b	a06028cc-b930-4d88-9680-49407552bf0e	12	PENDING	2026-03-08 07:33:48.974
+1123	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	bfe6ef71-246a-4499-a7ea-45c6feffd1c1	13	PENDING	2026-03-08 07:40:12.165
+1125	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	31fc7a75-e7f1-48cc-916e-f8d9e05c9d58	11	PENDING	2026-03-08 07:40:33.961
+1140	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	62de75f6-d302-443f-a7d7-2fbdb6afd7db	17	PENDING	2026-03-08 07:42:50.479
+1158	44f338a5-56b0-4ad1-8258-79826e1445b3	0e858322-6088-4b40-852f-ca2161dce50f	13	PENDING	2026-03-08 07:46:07.882
+1173	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	86b71a3b-3a0d-4841-96ed-18405bd03cee	8	PENDING	2026-03-08 07:49:51.414
+1188	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	3e314d3d-6eb9-4f33-8a75-33f06c691ce6	13	PENDING	2026-03-08 07:54:18.54
+1196	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	b054dc13-abdf-4e54-8502-20cd3e700706	11	PENDING	2026-03-08 08:01:52.912
+1214	246e2354-457e-4112-af52-025952cca149	bbea4cee-54bd-480b-8367-dc1c42df510a	1	PENDING	2026-03-08 08:05:54.166
+1223	246e2354-457e-4112-af52-025952cca149	1936ed82-6f37-44ac-9b49-c17bd6677fe7	5	PENDING	2026-03-08 08:08:33.336
+958	2447e995-8cd8-431b-80fd-2654f0b2298b	4e9357e0-bbc7-48f4-b629-17125f1053ff	5	COMPLETED	2026-03-08 06:45:04.483
+959	2447e995-8cd8-431b-80fd-2654f0b2298b	d106315c-716d-410b-832e-0514731527b4	6	COMPLETED	2026-03-08 06:45:29.299
+1297	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	14940b5d-bcbc-42a6-9a47-6bbf2246066a	15	PENDING	2026-03-08 08:33:47.246
+846	38236c5f-2faa-4940-aa37-60a206f3be14	b85a97f2-802d-4961-9068-19614c0567db	10	COMPLETED	2026-03-08 05:25:14.001
+1319	920b5fba-b331-4010-8858-8a5b3fb29a02	d5b5926d-63ba-4a2a-863c-141133feb91b	10	PENDING	2026-03-08 08:42:48.626
+1323	920b5fba-b331-4010-8858-8a5b3fb29a02	bf76c172-e627-4be9-8201-797c59986a97	12	PENDING	2026-03-08 08:43:40.102
+1295	4df9bf27-579a-4661-a2ea-703387a2bdaf	876b3fb9-8977-4540-981a-790099ed05d2	9	COMPLETED	2026-03-08 08:33:08.625
+1359	3bb7ac61-b27f-4979-b200-79ff470f486f	5cec8765-2310-4e4b-a145-6c52295e3acf	9	PENDING	2026-03-08 09:00:59.866
+1049	d6400b5f-5117-4826-8aa2-20e215edfb2b	d29ed03e-5f40-4d17-9c2e-8e53f83fe5a3	15	COMPLETED	2026-03-08 07:12:54.467
+788	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	6b85aaab-1c46-48c4-8f37-f893bc930efb	2	COMPLETED	2026-03-08 04:12:49.382
+968	2447e995-8cd8-431b-80fd-2654f0b2298b	421451e7-a61f-4dff-9e7c-3e8b9b8ea2e3	9	COMPLETED	2026-03-08 06:46:37.372
+1383	81f895c5-36b8-4d09-8241-80e64868fe56	712a89a1-933f-4087-b1ba-101e986d2c9f	17	PENDING	2026-03-08 09:21:44.58
+1384	81f895c5-36b8-4d09-8241-80e64868fe56	3bb6e4bd-7b9d-4613-a3fc-84f888f9cd42	18	PENDING	2026-03-08 09:21:44.59
+780	a3ca42d8-ab64-421a-ab67-aeb12925661e	8c9a0674-a68f-4591-926c-12210bc80c62	1	NO_SHOW	2026-03-08 04:00:02.411
+783	a3ca42d8-ab64-421a-ab67-aeb12925661e	6a65de32-2fe0-44e5-8c99-e919a952ab28	4	COMPLETED	2026-03-08 04:01:54.017
+1100	2447e995-8cd8-431b-80fd-2654f0b2298b	73528f23-8053-4ac2-84d8-0220e7e90c90	11	COMPLETED	2026-03-08 07:33:48.967
+1242	458250d8-e65f-4171-9e11-3a6dff72a848	2a468916-7c57-4b2d-a887-ad33003290ee	10	COMPLETED	2026-03-08 08:13:25.592
+1395	539ff319-c98a-440f-9541-c0e736fe44b3	31035a29-4799-4624-944a-2b1220720266	13	COMPLETED	2026-03-08 09:33:36.333
+1409	54ad8399-936a-47f5-bfc8-db3194c32ea3	6771ef7b-7731-4fb2-87e1-11b1e3684a2e	22	PENDING	2026-03-08 09:55:53.463
+1396	539ff319-c98a-440f-9541-c0e736fe44b3	3de29801-8f0e-43e4-b063-8f29cd51c75b	14	COMPLETED	2026-03-08 09:33:36.343
+1385	81f895c5-36b8-4d09-8241-80e64868fe56	0c126d35-19f2-4288-8f94-4aacd7881983	19	COMPLETED	2026-03-08 09:21:44.596
+1159	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	536127a1-04e3-4ac2-b0a5-ec11d43ab844	5	COMPLETED	2026-03-08 07:46:09.078
+966	e4d9b090-495e-4d82-9c3e-d8048154ccd6	bb6335ce-3a63-4955-824b-61380ba0bb27	3	COMPLETED	2026-03-08 06:46:29.884
+866	dc83d654-7865-4342-9437-16bfcb075e6a	985cba0a-84b2-4292-a7b2-71e63fa75c2e	12	COMPLETED	2026-03-08 05:38:03.046
+1338	5cd29d5a-169e-41db-87a2-997e5fd5301f	aa149584-4e72-4200-8ee8-7c2933ff3fae	24	COMPLETED	2026-03-08 08:51:07.954
+1428	68e11996-3b69-413e-a7d6-9b361f1d4b2b	617ee0b2-750d-4e87-9063-255852fe966e	9	PENDING	2026-03-08 10:22:28.152
+1426	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	11	COMPLETED	2026-03-08 10:20:36.454
+979	7d959ecb-3999-47cd-ae17-5aab0405cb97	d1e6c7a7-1118-4731-92d6-f970bcb59b0d	12	COMPLETED	2026-03-08 06:49:58.495
+907	539ff319-c98a-440f-9541-c0e736fe44b3	8db5374a-2189-4b0a-9fb1-ae91b6393f46	1	COMPLETED	2026-03-08 06:22:04.05
+1397	539ff319-c98a-440f-9541-c0e736fe44b3	dcd2f622-6f0b-42ca-a9e3-c0b414f3f968	15	COMPLETED	2026-03-08 09:33:36.35
+1443	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3445d8dc-afe2-48fb-ac17-a5dc9db5d729	10	COMPLETED	2026-03-08 10:49:04.313
+822	db338578-8876-4dec-a6d5-2d0094828b16	975fc7fa-6dc8-4999-be19-de354af57f2e	10	COMPLETED	2026-03-08 04:59:56.14
+918	cd263764-71e2-4ead-87a3-0c5e9aff9828	4bd872f3-f2f7-45d9-87a3-883483694a70	16	COMPLETED	2026-03-08 06:27:44.624
+1266	4755002c-b849-46a3-8d7d-09a6f0244fe0	67baddaa-6f7f-45e4-80d2-1064011f339b	11	PENDING	2026-03-08 08:25:02.498
+1189	52535048-47f2-42cb-91ec-65a4824c9908	a20c6c5a-4ef3-41e3-9ddb-c308d55d5a13	8	COMPLETED	2026-03-08 07:55:27.986
+1268	bf71f55b-86ba-46b8-afa1-1aea09f829e1	892fa408-4007-4f13-bd6a-abc0fab9c274	13	PENDING	2026-03-08 08:25:29.982
+1190	52535048-47f2-42cb-91ec-65a4824c9908	d35995c4-daf6-4d65-b69d-9a6c81205077	9	COMPLETED	2026-03-08 07:55:56.263
+1070	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	f49bb6e2-a8f2-4c1c-8fec-6881660f6823	9	COMPLETED	2026-03-08 07:27:18.826
+1112	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	f51be337-a107-4bc3-9411-e2db1e2982a1	15	COMPLETED	2026-03-08 07:36:48.499
+1300	4df9bf27-579a-4661-a2ea-703387a2bdaf	9131ada4-b023-4dd4-92ed-903160c44a20	12	PENDING	2026-03-08 08:34:32.628
+816	5c9635b4-b0e1-40ac-947e-93714df4d582	37e25cf8-0358-4150-9210-a003a7d4644f	5	PENDING	2026-03-08 04:57:17.675
+817	5c9635b4-b0e1-40ac-947e-93714df4d582	617ee0b2-750d-4e87-9063-255852fe966e	6	PENDING	2026-03-08 04:57:37.846
+818	db338578-8876-4dec-a6d5-2d0094828b16	72d44463-b270-4e8d-838f-eee6fce4da11	6	PENDING	2026-03-08 04:58:16.194
+615	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	16b425e3-d5f2-4d4c-b6e1-74e177ca4a6a	3	COMPLETED	2026-03-07 23:35:17.041
+841	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	bd0c9f6d-199e-4238-8fdd-8b16c9c04ed3	7	PENDING	2026-03-08 05:21:40.054
+857	6b65b0e5-ad3f-4756-a04d-f15f072ab740	1339d205-d499-475e-a4e9-0bac38f9b9dd	9	PENDING	2026-03-08 05:31:56.168
+878	54ad8399-936a-47f5-bfc8-db3194c32ea3	d11da8ac-540e-4349-98cc-1153d77d15ed	12	PENDING	2026-03-08 05:51:04.32
+886	c9d7022f-7e84-4876-a4fa-beda27a31cd5	43456f5a-82c8-42d7-a00f-ef97682ee8cf	8	PENDING	2026-03-08 06:02:27.564
+888	c9d7022f-7e84-4876-a4fa-beda27a31cd5	037f969e-c3be-4dbb-9f6e-80ac8c98cd8d	10	PENDING	2026-03-08 06:03:31.942
+919	fcce01c3-007c-4299-a17f-9d5f4402c6ec	41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	12	PENDING	2026-03-08 06:27:56.608
+299	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	72dc8022-2093-4088-8522-71bfcab6b6c5	7	COMPLETED	2026-03-07 20:56:03.768
+940	efa89ff0-babb-47d8-9694-afcbe18d049e	91c696c6-919a-4a5a-8088-1ec2269501a5	10	PENDING	2026-03-08 06:37:22.077
+942	efa89ff0-babb-47d8-9694-afcbe18d049e	d9fe8497-24d7-4b60-93c5-35a498c21c03	11	PENDING	2026-03-08 06:37:47.465
+947	efa89ff0-babb-47d8-9694-afcbe18d049e	fdfd2cf5-90ab-4f8a-8e96-3db6966c8850	14	PENDING	2026-03-08 06:38:53.032
+950	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	f3aff576-c4ce-4294-9ce6-2f07a64b2736	8	PENDING	2026-03-08 06:41:25.4
+980	a16f26ae-83b3-4288-ba7d-7efb541104c4	b3ad4528-a604-472f-a231-76d65f043297	5	PENDING	2026-03-08 06:50:06.466
+998	a16f26ae-83b3-4288-ba7d-7efb541104c4	49eec49a-462d-43aa-bca1-363c0d6b08cd	14	PENDING	2026-03-08 06:56:26.039
+1000	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	c0516714-28bd-4610-859f-1bbbfc26f8a5	12	PENDING	2026-03-08 06:58:00.617
+1011	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	d7fffa7f-3970-4301-b3c9-8e6aa9432b68	7	PENDING	2026-03-08 07:00:40.173
+1014	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	a759a3fc-f5ec-4a4b-b9b4-cca7fe539828	10	PENDING	2026-03-08 07:02:15.484
+1024	674b5de7-296f-4f50-8359-9e337c508dd2	16d530be-85f3-4c32-8a7d-b3db2a40724a	7	PENDING	2026-03-08 07:07:11.214
+1035	674b5de7-296f-4f50-8359-9e337c508dd2	4cef0d4c-f866-4d08-9d69-ede456e1c64c	12	PENDING	2026-03-08 07:10:00.503
+1023	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	95bf410c-d41d-47cd-8658-a13f696f9e16	9	COMPLETED	2026-03-08 07:06:49.897
+1050	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	18ac9154-59f7-4213-9971-6c3f05611af7	10	PENDING	2026-03-08 07:13:00.762
+1060	eea52d8e-619c-4985-9891-2b417c468095	c463162a-cd93-45a1-8816-06208f316f12	16	PENDING	2026-03-08 07:15:53.213
+1082	a895d6bc-408f-4590-a7b2-d228d3627109	5f4430f1-0e87-41f4-a65b-205808b37c38	4	PENDING	2026-03-08 07:29:54.416
+1095	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	35b0fde1-ad84-442f-a68e-c5b183e6c680	12	PENDING	2026-03-08 07:32:26.176
+1111	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	c2ea66e1-f7a5-4f7d-a2bb-fe3fda96c8d0	12	PENDING	2026-03-08 07:36:47.335
+1124	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	92f5d5f5-1286-4e19-ab96-57626ee6226b	10	PENDING	2026-03-08 07:40:14.745
+1128	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	27309d23-1de4-40d4-a448-eafe3dcb127a	15	PENDING	2026-03-08 07:40:59.326
+1141	3bdac905-7cfa-4a31-85de-39ec2f854afd	cca176c2-f1b8-4747-8463-2de632e79cf5	14	PENDING	2026-03-08 07:43:16.092
+1142	3bdac905-7cfa-4a31-85de-39ec2f854afd	08d34ea0-4135-45ec-a3d6-459cc17254cc	15	PENDING	2026-03-08 07:43:40.58
+1160	44f338a5-56b0-4ad1-8258-79826e1445b3	52661308-ca35-4237-942f-4b4665dd8b95	14	PENDING	2026-03-08 07:46:30.932
+1162	44f338a5-56b0-4ad1-8258-79826e1445b3	1a61a996-00b2-4caf-b268-2d3c952b64be	15	PENDING	2026-03-08 07:46:52.964
+1179	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	e96b16a3-3e71-4561-9803-4f6b392cce3a	13	PENDING	2026-03-08 07:52:22.952
+908	539ff319-c98a-440f-9541-c0e736fe44b3	2c871563-65ac-4ef1-8fda-ca6c28afb823	2	COMPLETED	2026-03-08 06:24:55.38
+820	db338578-8876-4dec-a6d5-2d0094828b16	46e5d681-a70c-4d81-baa5-c4a367686176	8	COMPLETED	2026-03-08 04:59:02.176
+1197	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	81bbc788-2417-4dab-ae90-481c93e668bd	12	PENDING	2026-03-08 08:02:17.207
+1215	217ae2de-4843-400b-964c-30302c10965e	7737e46d-1e93-4bd2-90ae-061eef9e3e6d	16	PENDING	2026-03-08 08:06:18.964
+847	38236c5f-2faa-4940-aa37-60a206f3be14	a2afc98d-59ac-4ea5-8d38-6c970c1708af	11	COMPLETED	2026-03-08 05:25:39.24
+1322	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	3a563ca7-2d45-48b1-ac03-f54fafd4b153	21	PENDING	2026-03-08 08:43:21.392
+1325	920b5fba-b331-4010-8858-8a5b3fb29a02	add8659a-2bc8-4111-a9e4-7280e5372792	13	PENDING	2026-03-08 08:44:14.666
+961	2447e995-8cd8-431b-80fd-2654f0b2298b	518233eb-899a-4997-8204-4491e1e448ad	7	COMPLETED	2026-03-08 06:45:49.186
+789	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	3a28b1ed-ae8d-42d6-8a98-9eb8d010b2aa	3	COMPLETED	2026-03-08 04:13:19.315
+1341	5cd29d5a-169e-41db-87a2-997e5fd5301f	a92ff7c3-5c4c-4f74-bccc-69ee57fe7c5e	25	PENDING	2026-03-08 08:53:04.404
+1320	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	35c0ff1a-6f4e-4055-a2d3-51738405cce7	20	COMPLETED	2026-03-08 08:42:50.263
+848	38236c5f-2faa-4940-aa37-60a206f3be14	c8c26219-699d-4edd-bb38-21ce307014dd	12	COMPLETED	2026-03-08 05:26:14.599
+1301	4df9bf27-579a-4661-a2ea-703387a2bdaf	57dd40e3-cc3d-49ca-b744-0908d42fd2d0	13	COMPLETED	2026-03-08 08:34:53.88
+1296	4df9bf27-579a-4661-a2ea-703387a2bdaf	1a3e452d-73f9-4fed-981b-d93363e2da80	10	COMPLETED	2026-03-08 08:33:33.808
+1398	5c9635b4-b0e1-40ac-947e-93714df4d582	8957fe91-2b5d-40b5-b517-7add7765754a	8	PENDING	2026-03-08 09:34:56.024
+782	a3ca42d8-ab64-421a-ab67-aeb12925661e	6ef44bbc-1f86-4358-8887-913e6370ddf3	3	COMPLETED	2026-03-08 04:01:18.534
+1175	a3ca42d8-ab64-421a-ab67-aeb12925661e	39f8aa3c-7c0d-44c8-8ef4-0d0a3b10e819	8	NO_SHOW	2026-03-08 07:51:13.86
+1177	a3ca42d8-ab64-421a-ab67-aeb12925661e	b0fe186c-cd98-45af-b03a-36e7ccf3333e	10	NO_SHOW	2026-03-08 07:51:13.881
+1176	a3ca42d8-ab64-421a-ab67-aeb12925661e	56225877-f78e-4088-8c9d-15ab1bd87e69	9	COMPLETED	2026-03-08 07:51:13.873
+1339	81f895c5-36b8-4d09-8241-80e64868fe56	416f9261-2e84-4666-a861-184add985c54	10	COMPLETED	2026-03-08 08:52:34.05
+1001	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	46b0a193-b783-442e-828f-2fa1c48e26e7	1	COMPLETED	2026-03-08 06:58:09.535
+1164	cd263764-71e2-4ead-87a3-0c5e9aff9828	67846e25-22cd-4fea-88c5-72f3da58acb6	24	COMPLETED	2026-03-08 07:47:14.729
+937	6a9107b1-6b87-42c5-8994-967a28c2b0d1	4cc7bef3-e654-439c-9816-9f208c7bb5a6	11	NO_SHOW	2026-03-08 06:36:14.284
+1410	c4e22006-3ed9-4250-91c8-6618d57253ed	a61f67d2-43b7-453e-916b-bfa40bbdf74c	23	PENDING	2026-03-08 09:56:52.681
+880	54ad8399-936a-47f5-bfc8-db3194c32ea3	a19fd527-9d8a-4b07-9ed9-b65b089da329	14	COMPLETED	2026-03-08 05:53:51.955
+1363	c34851b2-fce1-4c90-b896-3a1a666a841a	2a2c141a-acdb-4fe7-9d68-0f268945057c	9	COMPLETED	2026-03-08 09:01:47.563
+1386	d6400b5f-5117-4826-8aa2-20e215edfb2b	a05012e1-4919-49cf-9d92-0ba642683ef0	16	COMPLETED	2026-03-08 09:22:33.945
+1165	cd263764-71e2-4ead-87a3-0c5e9aff9828	dc10ab1b-7a37-44f6-b436-9f56f13ff909	25	COMPLETED	2026-03-08 07:47:14.739
+1427	68e11996-3b69-413e-a7d6-9b361f1d4b2b	8957fe91-2b5d-40b5-b517-7add7765754a	8	PENDING	2026-03-08 10:21:39.932
+1365	c34851b2-fce1-4c90-b896-3a1a666a841a	0716c393-bd54-4be7-9c55-1fe211e4dc91	10	COMPLETED	2026-03-08 09:02:12.185
+867	dc83d654-7865-4342-9437-16bfcb075e6a	a2197f4c-b857-4611-9031-2b6a23239b24	13	COMPLETED	2026-03-08 05:38:34.161
+1444	e4d9b090-495e-4d82-9c3e-d8048154ccd6	65883298-b905-46cf-b270-acc84d7f838c	11	COMPLETED	2026-03-08 10:49:25.9
+1364	3bb7ac61-b27f-4979-b200-79ff470f486f	c96bf50a-7be7-4426-a830-95a7eca92cd2	12	COMPLETED	2026-03-08 09:02:07.522
+1362	3bb7ac61-b27f-4979-b200-79ff470f486f	c5e76483-5372-4722-b138-1a543b373c16	11	COMPLETED	2026-03-08 09:01:44.071
+790	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	4caf6862-1b6c-47b6-ae75-1c58a163046a	4	PENDING	2026-03-08 04:14:03.118
+618	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	37e25cf8-0358-4150-9210-a003a7d4644f	6	COMPLETED	2026-03-07 23:36:31.724
+819	db338578-8876-4dec-a6d5-2d0094828b16	55f4d696-54a4-4f50-b656-5d83b98d463f	7	PENDING	2026-03-08 04:58:42.614
+827	51c28633-94a9-4653-bbc8-47eca7fd98c2	ec242199-a7ae-4794-a9d9-5992dde0f637	7	PENDING	2026-03-08 05:02:32.083
+387	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	580fed09-f65c-4cf7-9e42-89a0ce25da0b	6	COMPLETED	2026-03-07 21:45:58.601
+842	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	e108daab-28fb-4b18-ae50-10ca49533c8c	8	PENDING	2026-03-08 05:22:16.05
+850	ce6d53c7-d3d3-401f-be95-013fa81fd707	30d250dc-3e68-4ef9-a01b-868cd6798153	4	PENDING	2026-03-08 05:28:27.459
+851	ce6d53c7-d3d3-401f-be95-013fa81fd707	983d604d-e045-4ab6-bd69-b4d6b38adb06	5	PENDING	2026-03-08 05:28:27.466
+1244	565b69ae-c54e-4f96-9d46-a31e869eccbf	457003dd-60c6-4054-bad1-67a14e775717	14	PENDING	2026-03-08 08:14:12.943
+84	d6a31449-5393-444e-89c7-f8ba9d35545a	866f1f13-6339-4371-bb05-3d8479783721	2	COMPLETED	2026-03-07 19:24:19.564
+887	c9d7022f-7e84-4876-a4fa-beda27a31cd5	8c924911-9a4f-4b17-8574-a10b3e3c358a	9	PENDING	2026-03-08 06:02:56.771
+892	c9d7022f-7e84-4876-a4fa-beda27a31cd5	7c409ad2-a73f-439c-b395-c6ab113efafb	12	PENDING	2026-03-08 06:04:32.712
+1245	458250d8-e65f-4171-9e11-3a6dff72a848	3d5bcc19-91c9-4c2c-98cb-832e2b362dda	11	PENDING	2026-03-08 08:14:25.22
+1211	217ae2de-4843-400b-964c-30302c10965e	e8b52e8a-883f-4dba-8e76-8663e8bc71db	13	COMPLETED	2026-03-08 08:05:09.104
+614	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	4ecb2c09-1b00-49f8-b239-9d32f0f49c9e	2	COMPLETED	2026-03-07 23:33:36.55
+926	68e11996-3b69-413e-a7d6-9b361f1d4b2b	a8f7ffdd-561e-4f3b-a1fa-aae22b41131d	2	PENDING	2026-03-08 06:31:22.408
+870	3bdac905-7cfa-4a31-85de-39ec2f854afd	42d92e7a-a1dc-4c04-8fe2-0fd94bdb1443	9	COMPLETED	2026-03-08 05:44:37.504
+953	2447e995-8cd8-431b-80fd-2654f0b2298b	00e02cc4-bd8e-401e-86c2-5f2ddbe473fb	2	PENDING	2026-03-08 06:42:56.607
+967	5772f06a-bf47-407f-b92e-74bf4a85aead	8d73b47b-ce1f-462a-b234-223beef43c13	13	PENDING	2026-03-08 06:46:36.137
+970	5772f06a-bf47-407f-b92e-74bf4a85aead	4bd77e7d-9be3-4871-94f1-479dc11934d7	14	PENDING	2026-03-08 06:47:02.313
+971	5772f06a-bf47-407f-b92e-74bf4a85aead	cb736e31-1f1f-4ff1-8a5d-4e1764056372	15	PENDING	2026-03-08 06:47:28.96
+991	a16f26ae-83b3-4288-ba7d-7efb541104c4	f1f6b1de-e4c4-456d-98be-e21848fbd7ef	10	PENDING	2026-03-08 06:54:32.891
+999	a16f26ae-83b3-4288-ba7d-7efb541104c4	dc4a43af-3059-4ed3-8a4b-4968716ad34e	15	PENDING	2026-03-08 06:56:54.638
+871	3bdac905-7cfa-4a31-85de-39ec2f854afd	582a2700-7ed4-4c5b-adc2-00805984ba09	10	COMPLETED	2026-03-08 05:44:37.518
+1025	674b5de7-296f-4f50-8359-9e337c508dd2	d52e0bf2-db05-4709-adb5-50083dcbc130	8	PENDING	2026-03-08 07:07:33.873
+1036	d6400b5f-5117-4826-8aa2-20e215edfb2b	130ad1c0-f847-4760-a686-0b8ae1eeaecf	9	PENDING	2026-03-08 07:10:32.152
+1051	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	f8aa2e65-f30b-4130-97be-d7061471137a	13	PENDING	2026-03-08 07:13:06.46
+1063	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	c1b6dbc8-a78e-47c6-a924-527182a92e98	13	PENDING	2026-03-08 07:24:15.978
+1066	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	bc3c7f8a-39c7-4fe1-ae89-ac7b9614cea6	16	PENDING	2026-03-08 07:25:20.057
+1267	5cd29d5a-169e-41db-87a2-997e5fd5301f	b2729f01-8b62-4b16-a606-bd26db233b68	12	PENDING	2026-03-08 08:25:19.856
+1071	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	97814d5f-1678-4e45-9d8b-06f1f65135b2	10	PENDING	2026-03-08 07:27:39.402
+1074	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	cf173827-b85b-4166-93b7-e8f744f96635	12	PENDING	2026-03-08 07:28:21.41
+1083	a895d6bc-408f-4590-a7b2-d228d3627109	b2889d4c-2f58-4c09-a37a-9eb6ff98bb81	5	PENDING	2026-03-08 07:30:16.035
+1084	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	b6ed4bd0-dd4b-4e88-b362-f59a9d1fbe8a	8	PENDING	2026-03-08 07:30:24.271
+1098	a895d6bc-408f-4590-a7b2-d228d3627109	91cc3204-8000-40f6-a361-0d2e106924ca	12	PENDING	2026-03-08 07:33:03.23
+1106	2447e995-8cd8-431b-80fd-2654f0b2298b	30993443-fe2a-4153-b01d-8954d067ddc8	14	PENDING	2026-03-08 07:34:42.967
+1113	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	982f9f12-bcba-4802-a160-7722b7059f02	13	PENDING	2026-03-08 07:37:39.905
+1118	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	267f072b-2f8c-4d34-acca-b5e2e86b7192	10	PENDING	2026-03-08 07:38:52.493
+1120	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	75fa97e5-674a-452a-b506-edb4b706ea3c	11	PENDING	2026-03-08 07:39:21.463
+1127	fcce01c3-007c-4299-a17f-9d5f4402c6ec	4a94de9a-51a0-4e6d-bb01-76e66bb04ccf	17	PENDING	2026-03-08 07:40:54.775
+1143	3bdac905-7cfa-4a31-85de-39ec2f854afd	e8ca44c8-f526-4838-9675-b6d26c88e283	16	PENDING	2026-03-08 07:44:05.063
+1144	44f338a5-56b0-4ad1-8258-79826e1445b3	3a6c1a62-6127-4991-9031-41043be4f5f5	11	PENDING	2026-03-08 07:44:09.947
+1153	3bdac905-7cfa-4a31-85de-39ec2f854afd	47f18a11-5a19-489a-99b1-43c95df070f9	18	PENDING	2026-03-08 07:45:01.828
+952	2447e995-8cd8-431b-80fd-2654f0b2298b	3678a622-3c5d-477b-abab-89a3c3b33a16	1	COMPLETED	2026-03-08 06:42:33.928
+1178	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	991675e0-55c5-49d9-8237-e2ed0d6d9dde	10	PENDING	2026-03-08 07:52:01.729
+849	ce6d53c7-d3d3-401f-be95-013fa81fd707	03fa8173-d5ce-477d-8813-a8e61bdc0e55	3	COMPLETED	2026-03-08 05:28:27.449
+1191	52535048-47f2-42cb-91ec-65a4824c9908	5872d4ae-7dc4-4e12-beb0-51715e698a94	10	PENDING	2026-03-08 07:58:40.361
+1103	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	2fd6d890-d6a7-46bc-a01a-4d09d9fd0066	6	COMPLETED	2026-03-08 07:34:16.414
+1198	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	eaedba7e-7c02-4b0a-b05a-21dac78c3dbe	13	PENDING	2026-03-08 08:02:41.824
+1199	54ad8399-936a-47f5-bfc8-db3194c32ea3	fdb28f34-668e-43b6-8056-ba67ab24ca39	16	PENDING	2026-03-08 08:02:41.944
+1200	54ad8399-936a-47f5-bfc8-db3194c32ea3	1d027392-8cb4-4cf7-a072-8ea3a085ebe0	17	PENDING	2026-03-08 08:02:41.954
+1201	54ad8399-936a-47f5-bfc8-db3194c32ea3	f52ac80a-a32e-4ebb-ae1d-d4f6b9ae9a6a	18	PENDING	2026-03-08 08:02:41.961
+1202	54ad8399-936a-47f5-bfc8-db3194c32ea3	21eabfcf-46b5-4bf5-9e24-756bee453abd	19	PENDING	2026-03-08 08:02:41.967
+1203	54ad8399-936a-47f5-bfc8-db3194c32ea3	9b8b5d15-00c1-46fa-a241-6bf6ed998adc	20	PENDING	2026-03-08 08:02:41.973
+1204	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	2b48be84-3b07-4621-bd3e-7ecaa4be953d	16	PENDING	2026-03-08 08:03:04.995
+1213	217ae2de-4843-400b-964c-30302c10965e	e61be007-bd54-4a84-87a6-365d82a1443a	15	PENDING	2026-03-08 08:05:52.561
+1217	217ae2de-4843-400b-964c-30302c10965e	a6c08021-377f-4992-9e26-cf8d600338ab	17	PENDING	2026-03-08 08:06:38.905
+1061	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	28820349-8c42-4874-9cc5-e529122d3841	11	COMPLETED	2026-03-08 07:23:37.18
+909	539ff319-c98a-440f-9541-c0e736fe44b3	7d8f7668-6048-4383-b08f-b2c885dc2002	3	COMPLETED	2026-03-08 06:25:26.538
+1307	649453fd-ef30-42d1-8d2a-94c26237e814	3a483c87-9f09-41d8-8e4b-3a2acc49699e	8	PENDING	2026-03-08 08:36:29.98
+1321	920b5fba-b331-4010-8858-8a5b3fb29a02	9e86d3f7-fad5-4b4f-82ab-356f2b78f337	11	PENDING	2026-03-08 08:43:12.342
+852	ce6d53c7-d3d3-401f-be95-013fa81fd707	f77cb046-1218-4edf-9c74-2180509f828b	6	COMPLETED	2026-03-08 05:28:27.472
+1346	c4e22006-3ed9-4250-91c8-6618d57253ed	c753b9a7-d75f-4818-bdef-05f4b2f575fb	16	PENDING	2026-03-08 08:54:27.673
+1299	5cd29d5a-169e-41db-87a2-997e5fd5301f	a9c06548-8662-4977-929e-303c76c3e2db	22	COMPLETED	2026-03-08 08:34:17.852
+969	2447e995-8cd8-431b-80fd-2654f0b2298b	dfb4d338-0cd7-4252-8f5e-9773ec6c9ed3	10	COMPLETED	2026-03-08 06:47:01.951
+1324	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	b1dd9bc2-c844-41d3-a5b5-ebfd335dca8b	22	COMPLETED	2026-03-08 08:43:44.959
+1399	5c9635b4-b0e1-40ac-947e-93714df4d582	19040699-6cc2-45be-ac21-093f2b6b13cb	9	PENDING	2026-03-08 09:35:42.708
+1387	d6400b5f-5117-4826-8aa2-20e215edfb2b	0decfcd2-1182-47fe-9a74-d75d93615f83	17	COMPLETED	2026-03-08 09:22:45.375
+1152	cd263764-71e2-4ead-87a3-0c5e9aff9828	5c2c5e74-41ec-4d37-bb3d-5d76fd098794	21	COMPLETED	2026-03-08 07:44:55.735
+784	a3ca42d8-ab64-421a-ab67-aeb12925661e	252358b5-6c12-43ae-b19d-b65d2ee063f2	5	COMPLETED	2026-03-08 04:02:31.978
+810	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	d121fb18-a3d3-4a85-880d-765613d31a95	6	COMPLETED	2026-03-08 04:52:56.208
+1166	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	f8f5fa2b-d308-416f-9b6f-795abaae257a	8	COMPLETED	2026-03-08 07:47:31.017
+1298	4df9bf27-579a-4661-a2ea-703387a2bdaf	fd39cdbb-113d-484a-94a8-79d22e84680a	11	COMPLETED	2026-03-08 08:34:11.144
+1340	81f895c5-36b8-4d09-8241-80e64868fe56	a7f75d73-ba69-4920-b9f9-e61978678b33	11	COMPLETED	2026-03-08 08:52:59.711
+1016	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	38010a43-7f12-4893-bbdc-f625e666cb9c	12	COMPLETED	2026-03-08 07:02:59.014
+1411	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	e82007fe-2394-4f86-888b-785fd7a27021	11	COMPLETED	2026-03-08 09:57:28.144
+938	6a9107b1-6b87-42c5-8994-967a28c2b0d1	17c6e987-b4a0-4726-bb15-c85550251455	12	COMPLETED	2026-03-08 06:36:39.263
+879	54ad8399-936a-47f5-bfc8-db3194c32ea3	3f6742dc-f094-4cf6-aae2-c054490f5bf0	13	COMPLETED	2026-03-08 05:52:40.08
+1445	e4d9b090-495e-4d82-9c3e-d8048154ccd6	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	12	COMPLETED	2026-03-08 10:49:34.762
+1429	c34851b2-fce1-4c90-b896-3a1a666a841a	30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	15	COMPLETED	2026-03-08 10:23:30.789
+981	7d959ecb-3999-47cd-ae17-5aab0405cb97	a42a78c8-5c8e-43d0-b2b3-051eda4cbb52	13	COMPLETED	2026-03-08 06:50:21.69
+1368	c34851b2-fce1-4c90-b896-3a1a666a841a	2374f5a3-b7c3-41f1-867b-88cb77d776bc	11	COMPLETED	2026-03-08 09:02:49.957
+1308	649453fd-ef30-42d1-8d2a-94c26237e814	1404ca08-8c2c-499b-be0b-7df146c60c95	9	COMPLETED	2026-03-08 08:36:49.929
+1192	52535048-47f2-42cb-91ec-65a4824c9908	954da0d1-3b4c-41b8-b270-7cf02297592a	11	COMPLETED	2026-03-08 07:59:02.541
+79	a0df520f-d839-4acf-b594-7cad857eeaa7	acbeb8b7-d83e-4e39-9e93-40f3ff1e4652	2	COMPLETED	2026-03-07 19:21:23.372
+821	db338578-8876-4dec-a6d5-2d0094828b16	0d7c2dc5-021d-4ed7-a350-dbb52c791cc9	9	PENDING	2026-03-08 04:59:37.281
+828	51c28633-94a9-4653-bbc8-47eca7fd98c2	7e899857-f303-47b3-8549-57517cf6e233	8	PENDING	2026-03-08 05:02:50.374
+829	51c28633-94a9-4653-bbc8-47eca7fd98c2	f04cd2d9-9c54-4572-a770-070206e6b62a	9	PENDING	2026-03-08 05:03:11.606
+130	50fa6865-037c-451b-8ecc-c4fd9bdb0334	f4f860d2-324b-4103-85d4-3d7dd7d7a34b	6	COMPLETED	2026-03-07 19:53:57.27
+843	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	4cf1d39b-2600-4185-964c-f254ef4a682a	9	PENDING	2026-03-08 05:22:49.713
+860	6b65b0e5-ad3f-4756-a04d-f15f072ab740	f9be71a0-5b3f-40e1-aa08-4a5b834c154e	12	PENDING	2026-03-08 05:33:44.99
+861	6b65b0e5-ad3f-4756-a04d-f15f072ab740	8405f208-f1e0-48ae-a38d-6649fbcdd7b0	13	PENDING	2026-03-08 05:34:12.186
+872	54ad8399-936a-47f5-bfc8-db3194c32ea3	9a01df9e-af43-4071-82bc-9a336003a8a4	6	PENDING	2026-03-08 05:45:39.036
+875	54ad8399-936a-47f5-bfc8-db3194c32ea3	ce8cbb79-0502-4c72-81ae-250d95f4b55b	9	PENDING	2026-03-08 05:47:49.059
+1246	458250d8-e65f-4171-9e11-3a6dff72a848	aaaa1c88-0aa7-434c-990e-a366d21a9d10	12	PENDING	2026-03-08 08:15:06.178
+889	c9d7022f-7e84-4876-a4fa-beda27a31cd5	4f9fffdc-8c61-4726-9b9b-c64720e7a3da	11	PENDING	2026-03-08 06:03:55.472
+900	a0df520f-d839-4acf-b594-7cad857eeaa7	d20c3150-2af1-442d-bb13-0b8b1effdf99	14	PENDING	2026-03-08 06:11:17.772
+922	539ff319-c98a-440f-9541-c0e736fe44b3	78837ca5-3bcd-4ea3-9b05-6ccd4a11330b	8	PENDING	2026-03-08 06:28:45.136
+927	68e11996-3b69-413e-a7d6-9b361f1d4b2b	877eeadb-3b26-4e23-8338-9b502a0abe1d	3	PENDING	2026-03-08 06:32:07.783
+931	68e11996-3b69-413e-a7d6-9b361f1d4b2b	bc345b3b-a0f3-4b64-ad46-e1adae8ec97a	5	PENDING	2026-03-08 06:33:23.784
+933	68e11996-3b69-413e-a7d6-9b361f1d4b2b	c25e65ae-fcfa-485a-9aa5-b171d72aa82a	7	PENDING	2026-03-08 06:34:21.376
+899	a0df520f-d839-4acf-b594-7cad857eeaa7	546eb85c-485b-4b8c-a4aa-71351fe8ecc8	13	COMPLETED	2026-03-08 06:11:17.764
+972	a16f26ae-83b3-4288-ba7d-7efb541104c4	da3d0984-1322-45e6-97d7-c77706524766	1	PENDING	2026-03-08 06:48:26.519
+946	6a9107b1-6b87-42c5-8994-967a28c2b0d1	baf4752f-7cc5-4399-9e3d-284d794abb4c	15	COMPLETED	2026-03-08 06:38:40.322
+992	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	25b651c4-73c4-4d74-a94d-7f1992fb51eb	9	PENDING	2026-03-08 06:54:48.389
+1002	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	68c923d8-49ec-4a0b-936c-cb435095c46c	13	PENDING	2026-03-08 06:58:22.619
+1006	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	71301d6d-ebe0-476c-b97a-6aae8c59c02a	3	PENDING	2026-03-08 06:58:48.93
+1020	964b9c92-19e6-4140-8be6-a64973f93bfa	5cec8765-2310-4e4b-a145-6c52295e3acf	9	PENDING	2026-03-08 07:05:08.101
+1167	44f338a5-56b0-4ad1-8258-79826e1445b3	151a0387-3e44-47bc-8f71-4ac8e00dc27f	16	COMPLETED	2026-03-08 07:47:47.219
+882	3bdac905-7cfa-4a31-85de-39ec2f854afd	5c71628e-d3d9-4811-b021-998b2b388e6d	12	NO_SHOW	2026-03-08 05:54:12.767
+1026	674b5de7-296f-4f50-8359-9e337c508dd2	335eb41c-c4a8-467b-a423-765852117267	9	PENDING	2026-03-08 07:07:58.968
+1030	aaec9758-627f-40bb-b8b2-e92110d36327	43ef9456-f40b-4054-8bb7-3115b9a5dcb4	12	PENDING	2026-03-08 07:08:36.461
+1032	aaec9758-627f-40bb-b8b2-e92110d36327	9e5341b0-9264-4001-86e2-bb527c6e61bc	14	PENDING	2026-03-08 07:09:18.331
+1038	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	b7006233-a0f2-4535-9cf6-0ba18ac98b0e	6	PENDING	2026-03-08 07:11:01.388
+1017	5c9635b4-b0e1-40ac-947e-93714df4d582	aa8228ac-abb4-4714-bdaa-71f5909e35ed	7	COMPLETED	2026-03-08 07:03:55.136
+1052	670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	bb71eecf-6e70-48bc-8f4e-be1809bf46c3	14	PENDING	2026-03-08 07:13:25.859
+1062	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	74312d06-f49b-4b7d-88e7-fd45da78ff62	12	PENDING	2026-03-08 07:23:53.856
+1072	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	aa42183f-7b31-4c49-9d4b-6a010c3c065c	11	PENDING	2026-03-08 07:28:03.072
+1085	a895d6bc-408f-4590-a7b2-d228d3627109	81cc7224-6cea-42f1-8473-a765b1af80a3	6	PENDING	2026-03-08 07:30:38.378
+1088	a0df520f-d839-4acf-b594-7cad857eeaa7	89fb7844-ef4d-4d7c-b5d3-8d99eac3ce71	17	PENDING	2026-03-08 07:30:58.348
+1089	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	2aa771ff-0292-4ebf-b253-f7bd5903a285	9	PENDING	2026-03-08 07:31:05.097
+1090	a895d6bc-408f-4590-a7b2-d228d3627109	b89542cf-0da2-4900-9a1e-54bf311d5505	8	PENDING	2026-03-08 07:31:19.445
+1104	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	94b97882-f63a-4cd8-8382-13831c462261	10	PENDING	2026-03-08 07:34:39.591
+1114	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	8e38ac15-a7cd-42e7-9203-16d74e841997	14	PENDING	2026-03-08 07:38:02.521
+1116	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	db5fc17f-e622-4dfc-af38-9e5f735c5941	15	PENDING	2026-03-08 07:38:21.986
+1117	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	a05d0084-9da8-4929-b54b-b13d031c0e01	16	PENDING	2026-03-08 07:38:43.728
+1130	8dc2e306-0b99-47f4-ab15-7e64121bdd0e	3b38b3fd-2548-4568-b0e9-0a8b9aecfce5	13	PENDING	2026-03-08 07:41:28.337
+1145	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	9bb476c4-a066-4f92-89af-343f8a18f133	13	PENDING	2026-03-08 07:44:28.371
+1151	44f338a5-56b0-4ad1-8258-79826e1445b3	dc9fbe75-ada6-402e-a511-309b9138417e	12	PENDING	2026-03-08 07:44:48.741
+1154	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	2ba76c4d-e664-4b22-966b-e7fe6f822f38	14	PENDING	2026-03-08 07:45:16.194
+1156	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	151a0387-3e44-47bc-8f71-4ac8e00dc27f	15	PENDING	2026-03-08 07:45:46.099
+1168	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	9436c480-79ff-40b4-9709-eed6ffa15957	9	PENDING	2026-03-08 07:47:52.286
+1170	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	daef5ff4-02d1-4e03-8d5c-f87b02c5bbc6	11	PENDING	2026-03-08 07:48:54.841
+1183	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	4ab87f11-2f55-493b-b76c-2a3866ec8770	9	PENDING	2026-03-08 07:52:37.272
+1184	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	b6729536-3ebd-4861-86ba-d778b29de32c	14	PENDING	2026-03-08 07:52:41.979
+1187	74a0f6ca-e9d4-48ce-80b4-463ce6f06489	dc0409e0-6205-49b6-be61-8798f6802580	12	PENDING	2026-03-08 07:53:55.793
+1193	52535048-47f2-42cb-91ec-65a4824c9908	88af5829-1606-4737-9fe0-b34ad41c5fa6	12	PENDING	2026-03-08 07:59:20.136
+954	2447e995-8cd8-431b-80fd-2654f0b2298b	0ee6e922-bc7c-47d2-a0c3-19a3f64c3347	3	COMPLETED	2026-03-08 06:43:31.129
+1205	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	17a520b1-b8d1-4d10-9a53-b61030713f9b	14	PENDING	2026-03-08 08:03:11.381
+1208	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	5c2c5e74-41ec-4d37-bb3d-5d76fd098794	17	PENDING	2026-03-08 08:04:21.11
+1218	246e2354-457e-4112-af52-025952cca149	6ad84eb2-e148-40ba-98a5-80d3cb5aa5c3	3	PENDING	2026-03-08 08:07:42.454
+1222	6f127d1b-9a45-41d4-9fcb-da121c576e16	e243d102-ad72-47e3-adb0-0f756d39e12a	9	PENDING	2026-03-08 08:08:31.607
+1269	5cd29d5a-169e-41db-87a2-997e5fd5301f	b7c744d5-ba09-4762-9fec-519fad8a9229	13	PENDING	2026-03-08 08:26:01.237
+1274	bf71f55b-86ba-46b8-afa1-1aea09f829e1	d9678115-2e09-4bd2-bb1c-5c4c465b4c16	16	PENDING	2026-03-08 08:28:08.408
+910	539ff319-c98a-440f-9541-c0e736fe44b3	48be4361-9456-4745-9206-2b52f9362149	4	COMPLETED	2026-03-08 06:25:48.336
+1277	5cd29d5a-169e-41db-87a2-997e5fd5301f	10f00b58-28ea-491b-bc12-2cf5a3365514	16	PENDING	2026-03-08 08:29:03.365
+1302	649453fd-ef30-42d1-8d2a-94c26237e814	00a12e23-c562-47c9-b6bc-203896635a6c	6	PENDING	2026-03-08 08:35:08.373
+1305	4df9bf27-579a-4661-a2ea-703387a2bdaf	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	15	PENDING	2026-03-08 08:35:42.203
+1037	d6400b5f-5117-4826-8aa2-20e215edfb2b	03cd4019-0c9f-417e-a635-439f9dd1ae15	10	COMPLETED	2026-03-08 07:10:57.291
+1102	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	c8c41f49-f44f-452e-bed0-b84ad3a33013	9	COMPLETED	2026-03-08 07:34:14.893
+1344	5cd29d5a-169e-41db-87a2-997e5fd5301f	6d54e318-b4e5-486a-b96e-213d099e4e73	26	PENDING	2026-03-08 08:53:51.934
+1181	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	515a153f-7744-4b50-81b7-4e1f3da115bf	7	COMPLETED	2026-03-08 07:52:37.259
+1390	c4e22006-3ed9-4250-91c8-6618d57253ed	4936e1ef-ea2a-4463-a331-f8254d903601	20	PENDING	2026-03-08 09:24:12.97
+853	38236c5f-2faa-4940-aa37-60a206f3be14	e245fac6-bc7f-4551-a2ac-ccc03f7366be	13	COMPLETED	2026-03-08 05:28:46.122
+1182	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	521466be-ed8a-43d5-91fe-a63c5b9f641a	8	COMPLETED	2026-03-08 07:52:37.265
+973	7d959ecb-3999-47cd-ae17-5aab0405cb97	4572a87c-c994-44a9-aa44-8ef2685124a0	9	COMPLETED	2026-03-08 06:48:26.971
+811	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	7cd187fd-5474-4b14-98e0-65fcfadf0926	7	COMPLETED	2026-03-08 04:54:17.072
+785	a3ca42d8-ab64-421a-ab67-aeb12925661e	8ba7158e-6280-4631-b300-a8639eb31cf6	6	NO_SHOW	2026-03-08 04:03:26.999
+1303	4df9bf27-579a-4661-a2ea-703387a2bdaf	5c71628e-d3d9-4811-b021-998b2b388e6d	14	COMPLETED	2026-03-08 08:35:17.436
+944	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7bffe557-d591-43c0-874c-65b80111cac8	14	COMPLETED	2026-03-08 06:38:11.744
+1400	fcce01c3-007c-4299-a17f-9d5f4402c6ec	2295eb98-2649-496e-bdab-b7edfaf18bc9	23	COMPLETED	2026-03-08 09:39:16.918
+941	6a9107b1-6b87-42c5-8994-967a28c2b0d1	5a45464c-a601-40a5-b44f-0f1fa3e2bcd8	13	NO_SHOW	2026-03-08 06:37:29.708
+1005	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	aef6e97e-ff16-4bac-ad7d-57eb26627e50	2	COMPLETED	2026-03-08 06:58:32.471
+1157	cd263764-71e2-4ead-87a3-0c5e9aff9828	06391f38-0b76-4f71-a34b-357913ecf0c1	23	COMPLETED	2026-03-08 07:45:57.091
+1180	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	74016b70-42ea-4ac3-b617-f712e213b73d	6	COMPLETED	2026-03-08 07:52:37.248
+1342	104e34a6-fd53-4012-a0f0-41df6842c833	2cf23dd3-fb4e-4c9b-a2a1-6ee081a4a129	9	COMPLETED	2026-03-08 08:53:09.998
+1412	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	4b4c247a-1503-41c1-bc7f-203a916783c1	16	COMPLETED	2026-03-08 10:00:09.242
+1413	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	d2839665-643c-4f92-940b-56f141d31acd	17	COMPLETED	2026-03-08 10:00:09.269
+1415	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	5c71319b-3279-4bbc-b582-c419b20a9cae	19	COMPLETED	2026-03-08 10:00:09.295
+1281	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	8f551e00-cb94-44ff-801b-71d377ddaa28	10	COMPLETED	2026-03-08 08:29:51.213
+1372	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3b9b89e6-d606-4889-bc90-766e44d78d13	6	COMPLETED	2026-03-08 09:07:44.153
+1304	649453fd-ef30-42d1-8d2a-94c26237e814	2e683e93-873a-404b-919a-463338292329	7	COMPLETED	2026-03-08 08:35:35.751
+1441	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	b24243bf-9dd1-4cf7-ab29-36fa3d549f5b	22	COMPLETED	2026-03-08 10:41:05.925
+1388	d6400b5f-5117-4826-8aa2-20e215edfb2b	0b153f16-c17d-4a17-98cf-6715b40a64d9	18	COMPLETED	2026-03-08 09:23:15.035
+928	539ff319-c98a-440f-9541-c0e736fe44b3	32e6245c-f483-4eb0-8829-942dca8c3d55	11	COMPLETED	2026-03-08 06:32:30.873
+982	7d959ecb-3999-47cd-ae17-5aab0405cb97	b2c56a10-484e-4657-a107-a6cd702d045c	14	COMPLETED	2026-03-08 06:50:52.933
+\.
+
+
+--
+-- Data for Name: Student; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public."Student" (id, name, "registerNumber", department, section, "resumeUrl", "aptitudeScore", "gdScore") FROM stdin;
+01ae16e7-a847-4c13-bf1d-206b01ff79bc	JANAGIRAM K	2127230501056	Computer Science	\N		27	0
+2be214ec-4721-41f0-a5a0-52f12e1659f8	BALASRIDHAR P	2127230601007	Electrical and Electronics Engineering	\N		15	0
+e0c83265-5a59-4cfd-99c9-dc5212bf9525	BADRINATH B	2127231001007	Mechanical Engineering	\N		22	47
+7a3875d6-59a0-47ea-8ad1-498474e0f9c9	NARAEN KARTICK A	2127230401016	Civil Engineering	\N	https://drive.google.com/open?id=1VJElmQIdyco5M6z5H9DHX4lpmp2L2Vge	0	0
+9e86d3f7-fad5-4b4f-82ab-356f2b78f337	ARAVINDHAN L	2127230501015	Computer Science	\N	https://drive.google.com/open?id=1IOQA7_Oqw2oSYoX3SqaoQmdl2MuLRqdG	24	44
+5536dfff-479e-4d4c-be39-84dc465c4014	SRISURYA M	2127230501148	Computer Science	\N	https://drive.google.com/open?id=1G_tSI4UIg9ZtJg7C1W7LOp0E3i_WrjF2	22	37
+ddb16c1a-c4d5-4cff-84ec-f9a1295d0699	DAWAN BABU K	2127230502022	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1S6uVOE9rvbcFiGc83e5P2_PFcqeDnUfV	27	42
+94b97882-f63a-4cd8-8382-13831c462261	RENUGA DEVI S	2127230601069	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1OKNotAuRMoYsRYaxe3Kv2pO7Zufmgj4L	21	43
+e135d9c6-a789-4922-8316-7adb230afb1f	GOPIKA D	2127230701034	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=15UuwNCsv_FA1HTB6Gmq-gCbWk-JqiUgN	16	37
+99e2b0e3-6bfe-4b1b-85da-b1779bbd671f	SAKTHI PURUSHOTHAMAN	2127230701125	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=198_bCkc-cdTy8jf348PxP5SVVI9S_uoy	28	43
+b4f84d45-f48f-48bd-b251-4c33e3cefdc9	MANISHA T	2127230801054	Information Technology	\N	https://drive.google.com/open?id=18ac1tZxWjD6Iow3fjIkHMPd_dn45TXal	26	37
+bd0c9f6d-199e-4238-8fdd-8b16c9c04ed3	ABDUL RAHMAN N	2127230101001	Automobile Engineering	\N	https://drive.google.com/open?id=18IkWsSxKl0RlLYdz-ElEixdKmS6ue6WI	24	38
+e108daab-28fb-4b18-ae50-10ca49533c8c	BALA GURU V	2127230101002	Automobile Engineering	\N	https://drive.google.com/open?id=10qwz5JQV7fyeukgA57K6dVCBi4BQXXXJ	21	42
+d023aeed-015e-4df6-a9b2-e56ffdaed415	DHANUSH D	2127230101003	Automobile Engineering	\N	https://drive.google.com/open?id=1CoDM7PMfBEO6pVhrux842pQfoiN10ywB	23	44
+411ff2c0-85b0-4dbd-972a-988fa9353e03	DIVAKAR B	2127230101004	Automobile Engineering	\N	https://drive.google.com/open?id=1BbuSd6X1x66QA-Q0HeuoPozFsk6RmE-n	24	42
+a140d7d3-b5c8-4955-81f9-685d51d8a8c1	GUHA PRASATH V	2127230101005	Automobile Engineering	\N	https://drive.google.com/open?id=1X43y7YESXpnI0QPRQKTRe1Tu6xn2_GQT	24	43
+0b574786-41aa-4178-bdc0-76c4f7584e8e	JOSHIKA M	2127230101007	Automobile Engineering	\N	https://drive.google.com/open?id=1A6N1PMwX11nS5JBepWk2zjBD_cwCQOmk	27	45
+be586f64-f568-4089-89c0-819919a254be	MOHAMED ASKAR MEERAN N	2127230101008	Automobile Engineering	\N	https://drive.google.com/open?id=138D0gSMlP9p_eS3pvjptXBBuix0zE2ZW	26	40
+4cf1d39b-2600-4185-964c-f254ef4a682a	NAVEEN D	2127230101009	Automobile Engineering	\N	https://drive.google.com/open?id=1mwKH8Q9vkaXOReMiXS8BXAL2Qq_N3ACS	27	33
+374d310c-614b-4a24-ba96-9a802b39f08b	PUNEETH VIGNESH S	2127230101010	Automobile Engineering	\N	https://drive.google.com/open?id=1Y1IZFlCkpTJ1KRREjB3QLPZ4wABHHq_8	31	42
+54d57056-bdac-48f2-b8dc-75741b608f05	THIRUSELVAN K J	2127230101013	Automobile Engineering	\N	https://drive.google.com/open?id=18ul9ZxObvUnQ6RqTpNXHlPLS7uzHJB2M	29	38
+83e4d621-df55-421e-80c3-6a9f03119e3b	YUVARAJ D	2127230101014	Automobile Engineering	\N	https://drive.google.com/open?id=1A6c-1dHUQGVRMt7Udd_NlFHovM3vYL0V	27	42
+3a082634-ffab-49ca-88cf-a3f08638f042	BHAAVANA SHREE S	2127230201004	Biotechnology	\N	https://drive.google.com/open?id=10OMHI-VUNoyvua60S-jIdfyjxVudf3Lq	27	37
+12db54f3-145e-4752-90db-ccb6048cca3e	DHINESH V	2127230201008	Biotechnology	\N	https://drive.google.com/open?id=1bLfk9ZEJ9fOSjHcVvBtokLUhmHt6dQtI	13	27
+1ea59620-42fd-4d8e-8352-cd821d3e05bc	GOKULAVASAN S	2127230201013	Biotechnology	\N	https://drive.google.com/open?id=1_HsfoKBoVXvsE_Sq4scUf6-E9fRq3ag6	31	28
+a95db27f-172a-4122-8614-769c6748b290	GOUSIQ J	2127230201014	Biotechnology	\N	https://drive.google.com/open?id=1n9Sl0yeHfAxOWuZ1zTsRUiYqJRuWqWjs	15	23
+05ade5c7-ae17-4558-bb5e-dd5e99f8f15a	GUNA SRI N	2127230201015	Biotechnology	\N	https://drive.google.com/open?id=184AF2v26ov-jdxhUWcBJZUn4Yzzxudaa	20	38
+6627f1c0-5bf9-433e-bb0a-cfa64394bd0f	GURUDESH M S	2127230201016	Biotechnology	\N	https://drive.google.com/open?id=1C2PTRobONRacFhFvSow6SGKPP9YD8pt6	16	28
+8199ea4a-671f-4386-a7ce-1151c4db2a87	HARIPRIYA G	2127230201018	Biotechnology	\N	https://drive.google.com/open?id=1oRvvcmXeR57J7cUh37SGRJHlkPripYwd	26	43
+b9890359-1be9-4998-87c3-c685d846d348	HEMACHANDRA U	2127230201020	Biotechnology	\N	https://drive.google.com/open?id=1KXnA8WUDlhdfxsVoMXmNzfXLhSo6gTrW	18	39
+4107d149-4723-458b-b1fb-456caf6b55e3	JANANI K P	2127230201021	Biotechnology	\N	https://drive.google.com/open?id=1GqMoXjj7HtyuR0mtV_0PhI5VLdVLjjO1	25	48
+3822a452-a328-4f7b-a8bd-524b4866722f	KAVIYA S	2127230201023	Biotechnology	\N	https://drive.google.com/open?id=1fwAmw6dtv-IVfi6-KAChPeW-vvGTw0-A	18	42
+58a0270a-62de-4bf5-b720-b54571c13ede	LAKSHANAA K	2127230201027	Biotechnology	\N	https://drive.google.com/open?id=1IeEhh2MIE-h5vgpnUij_AfGJN7srB0tu	19	49
+d9678115-2e09-4bd2-bb1c-5c4c465b4c16	LALITHAMMBIKA S K	2127230201028	Biotechnology	\N	https://drive.google.com/open?id=1aTPCKYsQgjNqBiEAT8KNA9pjy3JksFfr	22	47
+56225877-f78e-4088-8c9d-15ab1bd87e69	MAHATHI T	2127230201030	Biotechnology	\N	https://drive.google.com/open?id=1PdoF90aclXGQ5GA3vPf38I-etKdF8MyK	28	43
+037f969e-c3be-4dbb-9f6e-80ac8c98cd8d	MONICA M	2127230201032	Biotechnology	\N	https://drive.google.com/open?id=1K5pIrqS2IBSbvujIT5Jkk23d6hTWD2Nt	27	44
+555d8c6d-2139-450e-a402-5a5393c0571e	NEHA RAMGANESH	2127230201034	Biotechnology	\N	https://drive.google.com/open?id=1EqB-pz-doFNGwXjTHeSwXCcfbwDrLkYp	28	45
+f35ac2f1-5556-4562-825c-d3960259b434	RAM PRAKASH K	2127230201038	Biotechnology	\N	https://drive.google.com/open?id=12XBYmecTM1d8Lad9GaHdLV-kTorTi_eU	22	41
+b26ed963-30c2-4c00-bce1-9522ebd37a85	RESHMA S	2127230201039	Biotechnology	\N	https://drive.google.com/open?id=1tjBIe78otyiinqs9h5OhyQq8M9sDj-dl	23	47
+8a7f3595-0f78-461e-9d60-5e9b9a11d3de	RITHIKA J	2127230201040	Biotechnology	\N	https://drive.google.com/open?id=1ZazV7uFb83GfC1Lv0XzdhUV_hv2JbTJF	28	49
+2417e2e3-5f09-4195-87ec-24557ba3cde3	RUSHIKA S K	2127230201041	Biotechnology	\N	https://drive.google.com/open?id=1pYYdYC3qeM5Vu9Pi6Xh7YLkiO6gf3coy	23	44
+b0fe186c-cd98-45af-b03a-36e7ccf3333e	SANJAYRAAM PARASURAMAN	2127230201044	Biotechnology	\N	https://drive.google.com/open?id=1sVa7iDYgTSdValbrKjYPjnzb1-n3s9XT	22	49
+ebcba73e-925f-4557-808e-375e4ce22269	SARAN M	2127230201046	Biotechnology	\N	https://drive.google.com/open?id=10zRiQXo8-SoUUA8YkD72hFfCdd7ObhCs	21	38
+705b8c9d-5815-46c8-88ea-2b10be97ff1c	SHUJAH FALEHAH MARIAM	2127230201050	Biotechnology	\N	https://drive.google.com/open?id=1Q2wp0DycKkl_BgJEE8m6bjBUcymeCov1	22	39
+6ef44bbc-1f86-4358-8887-913e6370ddf3	SRINIDHI K	2127230201051	Biotechnology	\N	https://drive.google.com/open?id=1Ds2P4p4QQ-XmPbqui3w0yzRX17dawowK	29	43
+27c4c674-04c4-4df3-954b-d0dbb3a617e8	SRINIDHI K	2127230201052	Biotechnology	\N	https://drive.google.com/open?id=1r1Pd8QEiwEUE2PYCqaj2H1F__YDbV6IY	27	42
+c6efedd9-06b7-41b0-bbde-2d677d99ea6b	SRINIDHI VARADHARAJAN	2127230201053	Biotechnology	\N	https://drive.google.com/open?id=1Hs52j8k7-Y0PGodY8nZAgGmvPLa708ad	26	47
+8c9a886e-a3ef-4d30-98a8-556c4e5ff6c4	SRITHIKA RENGAPRABHU	2127230201054	Biotechnology	\N	https://drive.google.com/open?id=1wwjAP08AynmN491Qm4y28Id9lCemrCHF	27	45
+41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	TEJASWINI R	2127230201055	Biotechnology	\N	https://drive.google.com/open?id=1ECV_iu0K8W0sY_4aBMcnEXrSJeGaxQlN	26	50
+39f8aa3c-7c0d-44c8-8ef4-0d0a3b10e819	THARUN. T	2127230201056	Biotechnology	\N	https://drive.google.com/open?id=1UgFD12HwiXSibHMHaXdVMJUAOiRwWp89	30	45
+406f091a-e23e-4fdf-bf38-07ed3bf967e4	AMRITH ROSHAN N	2127230301002	Chemical Engineering	\N	https://drive.google.com/open?id=1rj2OPfBgNDV_91NTSPYGewjSuf_Vv6je	22	42
+e956eb92-8642-4982-9fdf-b00fb570c3f6	ANBUSELVAN B	2127230301003	Chemical Engineering	\N	https://drive.google.com/open?id=12tbErpIGRcZHsBvts-T14h17z9TfNyt9	16	33
+fc36cc60-f4a2-4b57-aefb-d7f8c6a083d4	ARTANA C R	2127230301005	Chemical Engineering	\N	https://drive.google.com/open?id=1XfQOCvmVhzxq4LD7XekafCc2N_9LdRib	23	38
+aa92afbe-cda2-4591-b885-b5b2906a2dd5	BHALA SUNDARESAN	2127230301008	Chemical Engineering	\N	https://drive.google.com/open?id=1l727CbydT8A-19FgtZ1Ea6-IFZUxV1T9	22	44
+6a788949-c3c4-4fa3-be3a-a3ee9535c15a	DHARSHITHA R	2127230301010	Chemical Engineering	\N	https://drive.google.com/open?id=1wXocqfSOrTFdWO4_08ToJvy5FOWesOB0	20	48
+3d559d3c-4a8e-454a-9de0-7deec3e52366	DHIRAJ K	2127230301011	Chemical Engineering	\N	https://drive.google.com/open?id=16NgG0elV-wwPEEtxYenWMr8q_ov4wth5	24	47
+f6b6db61-4577-4ffa-aed6-27cb51fb242a	GNANASHEKAR S	2127230301012	Chemical Engineering	\N	https://drive.google.com/open?id=1HPrUKzVNaEp0GES8J0ZFW1YjhC8HYhCG	31	44
+93bd7e43-b702-422a-bc0e-abefbd732515	GUNALAN K	2127230301013	Chemical Engineering	\N	https://drive.google.com/open?id=1R77tPuqkrsYMFMzrG7cfAfFiI5Op1Z72	14	36
+3c42ca13-9f5f-472f-ac39-8187842552e2	HARIPRIYA V	2127230301014	Chemical Engineering	\N	https://drive.google.com/open?id=1OtXnBuT1AwRwG02kreEejts3_qoBqDck	28	50
+76aae8ff-e3e8-49a1-bee7-25f8e99831df	JAI KARTHIK AYYANAR	2127230301016	Chemical Engineering	\N	https://drive.google.com/open?id=153GrekYPv5Gq_D8XfEGtqj8srG3cz07l	19	41
+2c3347ea-4e52-464e-82cc-09bd9e4cd234	JAYASHREE S	2127230301017	Chemical Engineering	\N	https://drive.google.com/open?id=1nu3A7tGn5SenQI_9stXuMZrO8I5IDxKM	24	48
+f04cd2d9-9c54-4572-a770-070206e6b62a	KAVIYA E	2127230301018	Chemical Engineering	\N	https://drive.google.com/open?id=1e9B1nwex7bY53h40Sgn4sBHzds3Z8b8W	27	49
+73a381b1-78bf-4ae7-b4a3-d874b96c6eb2	KOLA HEMKAR	2127230301019	Chemical Engineering	\N	https://drive.google.com/open?id=1PgnQc-ZZe55w4NEuSSdzrFbs9lQm5f1O	21	33
+9be68bae-9772-4de8-a67a-d6c849f684eb	KRITHIKA RAJENDRAN	2127230301020	Chemical Engineering	\N	https://drive.google.com/open?id=1wKsTpCa0cZLHHL3G1OHmxSFarw4PaDG5	27	39
+a3d403e2-a31a-4bd6-9fad-da95b4b325ed	MADHAVAN S	2127230301021	Chemical Engineering	\N	https://drive.google.com/open?id=1butwlbc0lHAc9OP6bgxcCt6_mGjr9sAs	28	43
+e357f846-8c30-41a7-86d0-d14e3931004d	MEENAKSHI M	2127230301023	Chemical Engineering	\N	https://drive.google.com/open?id=1yXfbfC2mmDsFDjXTRAyB_FfFffBRIQP6	18	42
+27675e11-7f57-4733-b162-4b60e89b01dd	MENAGADEVI I	2127230301024	Chemical Engineering	\N	https://drive.google.com/open?id=18ltaceZS1Un25U3Wj7TplAlzzfklqI-5	21	41
+151e40f2-f9da-48f0-929c-c5a12e913f00	MRIDULA S	2127230301026	Chemical Engineering	\N	https://drive.google.com/open?id=15JF5qEZvlCVUJKt9kp3GdCYrii0UZAsb	25	43
+76bdae76-9eb7-43f4-b1a2-538451cb7743	MUGUNTHAN T	2127230301027	Chemical Engineering	\N	https://drive.google.com/open?id=1PqPSIFc9T4hlRjITgeGMxLGQt1v-o_pH	14	45
+accb1071-29d5-49f2-aa24-2a019b107e91	PRANAV A	2127230301031	Chemical Engineering	\N	https://drive.google.com/open?id=1cyUk976DTiwUcVVN7y6FFcwZ-KFIHZEF	20	49
+da3d0984-1322-45e6-97d7-c77706524766	PRANAV KUMAR S	2127230301032	Chemical Engineering	\N	https://drive.google.com/open?id=14QU-tfq1R7bHu0-IzvOqfXz-nrHUcNcn	18	48
+e85ef903-86b8-4955-b873-d69a1686ba99	RISHI PURANTHAR GOKULAKRISHNARAJU	2127230301034	Chemical Engineering	\N	https://drive.google.com/open?id=1QeVqvXQ86pYz2PiZFtj4h-xfh4fC4E0B	22	40
+3f3b50c7-08b5-42b1-ba8e-05aa6f03859e	ROSHAN S	2127230301035	Chemical Engineering	\N	https://drive.google.com/open?id=1zLNGYjE_x99r5dnGyTVO9C13mZK2QNYt	16	40
+380856e2-e85b-45d5-9ee3-67a005e6436f	SAKTHI S	2127230301036	Chemical Engineering	\N	https://drive.google.com/open?id=11qU3BPQ4sF7nRxz7MaO7_UwGgrbwqr-s	23	40
+b3ad4528-a604-472f-a231-76d65f043297	SANJAY VISHAL K	2127230301037	Chemical Engineering	\N	https://drive.google.com/open?id=1JDkyeTOqgj2VAA38ByuFXlH-9DpscfoO	12	20
+17c4f6aa-a509-45bc-97d5-d17c12502eb5	SANTHOSH P	2127230301038	Chemical Engineering	\N	https://drive.google.com/open?id=13YkOfuVNaNDvdgve2HmB_tfpQZjzFxAu	16	26
+c45fbc24-212b-40e2-89c5-e2520ee54b2a	SATHYABALAN B S	2127230301040	Chemical Engineering	\N	https://drive.google.com/open?id=1kWm1UVf_Ys6mWjF0i2kc29FMVg6z2Z3g	14	26
+3a28b1ed-ae8d-42d6-8a98-9eb8d010b2aa	SHARANTH P	2127230301041	Chemical Engineering	\N	https://drive.google.com/open?id=1v61eFSvPvQBVX_VMlf3jOBr-vMf12d4v	25	35
+f77194e9-7350-46a0-9f49-126e0cb352e6	SHREYA CRESCENTIA V	2127230301042	Chemical Engineering	\N	https://drive.google.com/open?id=1GVZ7uuPLftH5PN6U6BAtTPqxTQAqDbt0	31	44
+458fc806-4674-409f-ace2-8ba8160ff333	SREE VARSHA G	2127230301043	Chemical Engineering	\N	https://drive.google.com/open?id=1XAnmWEVLABDYnLV6GPeUhHCyaLtmtVkC	21	43
+9e542a99-85e5-4ef3-8880-13e5b290f6da	SRIHARINI S	2127230301044	Chemical Engineering	\N	https://drive.google.com/open?id=1wUkdulojcJuk5f8DuZd7acYs9uNf0JMD	22	42
+f1163c6a-25d2-4a51-b3d0-c2cf77ed792a	SRIKRISHNAN S	2127230301045	Chemical Engineering	\N	https://drive.google.com/open?id=1ZWGSQJhw2-z4HHys6-MiHIyFxfql2jQ2	18	46
+6b85aaab-1c46-48c4-8f37-f893bc930efb	SRISHTA M J	2127230301046	Chemical Engineering	\N	https://drive.google.com/open?id=1IpISHVtN-fRu7sZ-Fl6bjEP7qbVAsRDq	23	48
+97387603-6698-4b10-80b7-164d413e81e5	SUDARSHAN N	2127230301047	Chemical Engineering	\N	https://drive.google.com/open?id=1ceVU9bsoZqO7zftZ_rW7KV_CDouBTXMo	28	49
+89d544af-e10a-4c06-a18f-a2dc42f21c48	SUNIL JOTHI K	2127230301049	Chemical Engineering	\N	https://drive.google.com/open?id=1ChWekmRfkzgJWrZ6XqOSonKjGpVLCZqF	17	19
+572ad245-64d4-450e-bae0-458367ea28c7	THARUN P	2127230301050	Chemical Engineering	\N	https://drive.google.com/open?id=1P8doA9HAuNAPyV8U0yb7n2QJlXRMwits	18	47
+1f935982-a071-4c62-af0d-e585385d676a	THARUN P	2127230301051	Chemical Engineering	\N	https://drive.google.com/open?id=1xV9RYTcvz9bchqxjoe8OOzo6X7373ncE	22	36
+4caf6862-1b6c-47b6-ae75-1c58a163046a	THARUN RAJ V K	2127230301052	Chemical Engineering	\N	https://drive.google.com/open?id=1u3Y_CpvXs3CFw1RPuttxfY1gRdAqHOZ2	21	37
+40405d4d-8346-432d-ae65-a4193e929086	VISHAL S	2127230301053	Chemical Engineering	\N		14	31
+9a6473c7-d593-484b-9f0b-b663cb236edd	DIVYA JOTHI S	2127230301301	Chemical Engineering	\N		11	31
+7c409ad2-a73f-439c-b395-c6ab113efafb	ARAVIND KUMAR U	2127230401001	Civil Engineering	\N	https://drive.google.com/open?id=1z8lqtAbfztdJpMy6PXgvLSiD8PUuSFAY	18	40
+f93b9e77-1c1e-4c6f-bd6b-c16f0255b8ae	BALAJI S	2127230401002	Civil Engineering	\N	https://drive.google.com/open?id=1tirdVWDUcZ2Gf0RrHKXECviVSLPi7CJW	15	17
+10e965a3-a6ec-4825-8358-a95707c31048	JITHENDAR KRRISH S	2127230401005	Civil Engineering	\N	https://drive.google.com/open?id=1uUEvK1wisSxEE1Is-NKOZm174mub1Ysp	35	14
+7c9249a2-8cec-4683-ba7c-23f95524e1d5	KABILAN G	2127230401007	Civil Engineering	\N	https://drive.google.com/open?id=1q12oq_3oDMaUOnrbQ7kDJjpy2-X58nTJ	28	42
+b02c1740-99aa-4b02-afd2-0c8fe2c024fa	KABILAN K	2127230401008	Civil Engineering	\N	https://drive.google.com/open?id=1JyFX90LT7yCdymuNGX_L97q3DD7JO-_6	21	39
+10ca2b13-3ed7-43a9-944f-24fb0dad93ff	KEERTHIVASAN A	2127230401011	Civil Engineering	\N	https://drive.google.com/open?id=1UnldFUQg01xNyQUl9OgDIVzmjEqAaRLh	21	40
+979799d3-a188-4021-899d-f10758bdb4e9	KESAVA PRAKASH S	2127230401012	Civil Engineering	\N	https://drive.google.com/open?id=19owaYagzOfIDK5elk3q_Mc1w5q92HRcy	28	34
+2d29e04a-5bc9-4c9c-99bc-3c78eae0d8ec	KISHORKKUMAR HARIBAABHU	2127230401013	Civil Engineering	\N	https://drive.google.com/open?id=12rcRXCaYYTLoWkjUxN2UNpf8AX9DSnPD	32	47
+4f9fffdc-8c61-4726-9b9b-c64720e7a3da	KOTTESHWARI V	2127230401014	Civil Engineering	\N	https://drive.google.com/open?id=19VUXWYM3guQaRNue8015-9GOd0IEOlM-	18	41
+3e314d3d-6eb9-4f33-8a75-33f06c691ce6	MUTHAMILARASAN A	2127230401015	Civil Engineering	\N	https://drive.google.com/open?id=1IvTnDs0CIv2My6k_TY2B-9AWPl0UWLYS	18	0
+75f57868-0484-40fb-9932-2804f5b46f89	ROOBAN YOGA	2127230401017	Civil Engineering	\N	https://drive.google.com/open?id=1toaLIsD95aH30TKW6mMNFvxYO3ZzXMcx	15	34
+991675e0-55c5-49d9-8237-e2ed0d6d9dde	SANJAY S M	2127230401018	Civil Engineering	\N	https://drive.google.com/open?id=1h6vkOzkeb6KGg5B7RxVY5_DFJQ0jan4a	23	40
+2c61b33c-5831-4137-8421-cb2895758729	SRILEKHA P	2127230401019	Civil Engineering	\N	https://drive.google.com/open?id=1791OFh1JtaK_mlF4Gnx2vnFA9NXWIQNu	30	38
+3d07a508-5a30-4547-b02e-eb1a4cc78c23	SUNIL KUMAR V	2127230401022	Civil Engineering	\N	https://drive.google.com/open?id=1giNVnqVMh0uGH9zldd_62tDVE0_GLAnD	20	39
+571c3c25-0942-490e-a341-d17b99c58548	THENDRALARASU M	2127230401023	Civil Engineering	\N	https://drive.google.com/open?id=1E1ZR8YKtTcanN13Oq6ONO594xffpChoV	18	39
+0f7eb338-e10a-449d-97e8-08202409dc28	VIVEKA M	2127230401024	Civil Engineering	\N	https://drive.google.com/open?id=1eDdXOo-SW78jNEBSFkDnZ4klDcK8QvQm	16	38
+b9c66d8f-8572-4be6-8792-62cee7c13b47	JOHN SAJIN J	2127230401302	Civil Engineering	\N	https://drive.google.com/open?id=1BEGmfpQ1tNiP9rTVkPHjeOU-jhN7EY3k	21	40
+7a7fe462-d228-4c0d-910d-a82a2241f438	PRASANA KUMAR V	2127230401303	Civil Engineering	\N	https://drive.google.com/open?id=1bJtJDGO0_k9YiXkvd9YZ3TXcLBDBROun	20	37
+dff2d6a6-33d2-4ae2-a3ee-ea583602ae67	AARYAN M	2127230501002	Computer Science	\N	https://drive.google.com/open?id=1yqqZFVKCqik2axMCEZ7Ct0cYM_U605rF	36	45
+c9c3a787-a156-4c85-b702-2f3b2299ed24	ABIJITH P	2127230501004	Computer Science	\N	https://drive.google.com/open?id=1eKIaY1i-csEu3k7NDfDW1_mGEYmOfaEK	27	39
+471c590e-7a7a-4f13-ad1a-5c84b26068c5	ABINAYA S	2127230501005	Computer Science	\N	https://drive.google.com/open?id=1xDexFP6btmGSn9IEHocPMrfzNP2XFzLh	30	38
+5f546c43-7153-478a-a597-25009f21b178	ABISHEKA PRIYAN V	2127230501006	Computer Science	\N	https://drive.google.com/open?id=19rAvbuuI3DVaykCPrWjOWRracfHA5W3F	29	37
+aec7a705-57cc-4d41-b5ca-4ecf8c3ceaca	ABISHIKA G	2127230501007	Computer Science	\N	https://drive.google.com/open?id=1klOpVzYvUlcy2A42hBhbdDCt_9iL3-mU	22	39
+b9760d23-1dcc-4a42-8211-833f5d45916f	ADITHI K	2127230501008	Computer Science	\N	https://drive.google.com/open?id=1FRfiPX7f0jPrXImMmwjMBaVb0jdric2m	32	49
+d20da77c-7052-4712-aea6-0faf65371364	AMIRTHAVARSHINI JAMIRTHAVARSHINI J	2127230501011	Computer Science	\N	https://drive.google.com/open?id=1f4tkRqQ1tJGRHEeabZLyBactW8lr8xSB	23	40
+20f15a57-4c66-4ab4-b265-6c14a2d03bc9	AMIZHDHINI P	2127230501012	Computer Science	\N	https://drive.google.com/open?id=16hesbuX0l1tuVXHG6-fejMG3K64CWT-f	26	38
+2e3a3d7c-f33a-4b8b-9276-395554b16fcf	AMRITHA VARSSHINI A	2127230501013	Computer Science	\N	https://drive.google.com/open?id=1a70QMPPHCK8CS2_r4f75EZJ8MYaBsOp7	21	44
+ab5fd830-6ffc-4bfe-8e43-d23c63f71293	ANTONY ABISHEK A	2127230501014	Computer Science	\N	https://drive.google.com/open?id=1bz9Mbky5BQlxhN2ZuJ-qM_lgTA4SnLDG	29	38
+f52ac80a-a32e-4ebb-ae1d-d4f6b9ae9a6a	ARIVUNITHI R	2127230501016	Computer Science	\N	https://drive.google.com/open?id=1wCSJznBb-s-H1QoDFsppMrP-qNuctedX	32	40
+3463f821-dbc5-4ed8-9d89-4a404ad4f005	ARSHAD AHMED J	2127230501017	Computer Science	\N	https://drive.google.com/open?id=1KUkbgo5nA5ogsWYkIcIZivRtUYTmjTw2	28	45
+03cd4019-0c9f-417e-a635-439f9dd1ae15	ARTHI BALAJI	2127230501018	Computer Science	\N	https://drive.google.com/open?id=1qq2wmuEwVPSzpxiLmqyb5njZTVbDpmEs	23	40
+f507760b-d64d-4513-a2a2-14ad98107f53	ARUN VELLAYAN SRINIVASAN	2127230501019	Computer Science	\N	https://drive.google.com/open?id=1G56zvDEdivdsRhw2AdtZ67Kpt3V5Nu5M	24	45
+7525d283-f569-4712-a586-7963aff8404f	ASHWIN M	2127230501020	Computer Science	\N	https://drive.google.com/open?id=1IK3zafJzwXBunMb5EliJTMVDgIjOXvG1	19	37
+87ff5b33-b204-4a41-a228-2e4cf7c83229	BAARATH ARUMUGARAJA	2127230501021	Computer Science	\N	https://drive.google.com/open?id=1bl7LZS7uEfNNGxG7ki_HENCF9DlQ2vYK	25	38
+29f9cc44-d8b5-420e-ae7c-02e5bc611b2b	HARISH S	2127230501023	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1A1WoVyvocQUupAXX-9PDyAT2e3pp3ylb	28	39
+0136fc99-d67d-4972-8d7e-aede2b1577e6	BENSON SAMUEL K V	2127230501024	Computer Science	\N	https://drive.google.com/open?id=1bGX3oNV5jnNztD6pZQqkmXRxzbOlgj_G	28	45
+48be4361-9456-4745-9206-2b52f9362149	BHISHMA KUMAR A	2127230501025	Computer Science	\N	https://drive.google.com/open?id=1GD6PnysIvMlZ_5soFjka_BdiMrS_S4ZU	21	39
+88adbed3-9b39-4d9a-9456-e5a615f3602f	CHAITANYA H	2127230501026	Computer Science	\N	https://drive.google.com/open?id=1rQn-KgZbng_7Nd2TnwEP2dsMrgZsVU8L	27	44
+bda9954d-c4f0-4098-9540-1be6afbea1c2	DAYAALAN K T	2127230501027	Computer Science	\N	https://drive.google.com/open?id=1ejMPf7X9jdJqGok6DAphYb-UoBmShhSH	26	44
+3d5bcc19-91c9-4c2c-98cb-832e2b362dda	DEEPAN K R	2127230501028	Computer Science	\N	https://drive.google.com/open?id=1ksYa633cVX45T6KSYbF7tU7pHaIykuJx	31	38
+a0f4fb74-73e5-45c5-8c61-5d71ad55806c	DHAKSHAN T	2127230501031	Computer Science	\N	https://drive.google.com/open?id=1SJH_v8U2_zP7XktE76GePjdG-DMo40aB	20	37
+af6dbb9b-cfdf-4b50-b017-c50d19c7186f	DHARUNAGANESH BALAMURUGAN SREE	2127230501033	Computer Science	\N	https://drive.google.com/open?id=1FATEq2QNXcnGTnG_nJab6aOiZUCATKKB	25	35
+06cc7ee7-933e-4b71-a952-fe4c5a2021ec	DHINESH C	2127230501035	Computer Science	\N	https://drive.google.com/open?id=1p_4TDTPjReA0YM32mcOMlvcXWhtmmLcY	29	38
+9217e03b-0c9b-4470-a50c-3eec2ae54511	DIMBU NAGA SATYA SURYA MARAM	2127230501036	Computer Science	\N	https://drive.google.com/open?id=1GAxeqmhru4lj1Yd3_vM7QvAEE99D74tR	22	42
+31035a29-4799-4624-944a-2b1220720266	DIVYA BHARATHI R	2127230501037	Computer Science	\N	https://drive.google.com/open?id=1O5nRQVyg77JcwhMKgHDGTv5sidBDg4YY	17	42
+bc6e780a-8715-418a-8678-99a56144eb89	DIVYADHARSHINI S	2127230501038	Computer Science	\N	https://drive.google.com/open?id=1lls7w_XVy9GtrsLcO4nLVSN8bQ9hOUVq	25	42
+77ec1ce4-5bbf-4b88-a90a-6f0f6fea5826	FUZAYL AMEEN T	2127230501039	Computer Science	\N	https://drive.google.com/open?id=1YVbaq0xoBQPvnaqZ_GNmnyjBQhka8217	35	45
+217e64cb-6bb5-4924-a119-1b725699b1e9	GANAPATIRAMANAN A	2127230501040	Computer Science	\N	https://drive.google.com/open?id=1WDnsxouFCW1s2raM2xi9flcYCXqWj3Yw	30	40
+5e5015a3-bb85-4fa7-a5ea-3e7abc85b474	GOKUL HARISH B R	2127230501042	Computer Science	\N	https://drive.google.com/open?id=193Ed50Fo-eFrApuNnYccAgjRGRcZwGec	15	31
+46e5d681-a70c-4d81-baa5-c4a367686176	GOPINATH A	2127230501043	Computer Science	\N	https://drive.google.com/open?id=1K8BBXlqdbM4C4joALm1GcVyTRe_W9vJC	20	37
+30437db1-d67d-44c9-ba32-39c99ebf95c1	GOWTHAM K	2127230501044	Computer Science	\N	https://drive.google.com/open?id=1GYlG5TcVLh0CSn1cq0ar0_nqEQpiSyc9	20	29
+f1ff5238-fdb2-4659-8cce-2db550bb3db8	GURU SANKARA ARASU I	2127230501045	Computer Science	\N	https://drive.google.com/open?id=1jCzchRaMwOTXGeLjswRi5f4SQz23lEIT	20	27
+931ec1eb-a2ca-4741-9a47-90516a0018b7	HARISH KARTHI V	2127230501048	Computer Science	\N	https://drive.google.com/open?id=1B-qgLsyp_xe-sFB-C83ZkxMKgkf0rT8p	21	35
+9bb476c4-a066-4f92-89af-343f8a18f133	HARITHA S V	2127230501049	Computer Science	\N	https://drive.google.com/open?id=1H8p7OdPqKtI3TYprFmwUa-ehqr1oC-63	26	35
+dcd2f622-6f0b-42ca-a9e3-c0b414f3f968	HARSHINEE U	2127230501050	Computer Science	\N	https://drive.google.com/open?id=1MuezTheqtDOW-SIfNqMEa6BFpXuIP-Ab	35	44
+bdc7ac62-11ad-4140-abe7-78412063d466	HEMAGIRISH ELANGOVAN	2127230501051	Computer Science	\N	https://drive.google.com/open?id=1wniqwvY7R3-OrBk2smeCue-lKCzTbKC2	27	39
+8c731ef1-5c02-4db4-8478-37e657c02822	Hewin Sheraj R 	2127230501052	Computer Science	\N	https://drive.google.com/open?id=1UdMvipltOcksSSKmAOnxwcnHVWSdBALH	29	40
+aa149584-4e72-4200-8ee8-7c2933ff3fae	INDHUMATHI A P	2127230501053	Computer Science	\N	https://drive.google.com/open?id=14PU6gZ1BTLbyHiStHTVPCVIYjXP2Hiyi	28	38
+9e8fe944-7dee-4c01-a117-d10fc0c8bc18	JAHNAVI G	2127230501054	Computer Science	\N	https://drive.google.com/open?id=1p6W0RJsSg2F2FpwVmx5Y79JBPQcZA6iX	24	40
+d35995c4-daf6-4d65-b69d-9a6c81205077	JAI HARISH G	2127230501055	Computer Science	\N	https://drive.google.com/open?id=1M5XFx-q_TwgD5gNif4oSKzwVjwdWd6u0	21	38
+187b4d97-78fe-4fd2-8ec3-99bc4de84672	JANANI H	2127230501057	Computer Science	\N	https://drive.google.com/open?id=1_kU7QZdn9KGiug69xaS-1saMMv57FMZg	32	42
+43ef9456-f40b-4054-8bb7-3115b9a5dcb4	JANANI M	2127230501058	Computer Science	\N	https://drive.google.com/open?id=1kURhoExcXXaB8sRyQOt2_M5sufKxSafM	20	25
+04f1394b-fe36-4409-9696-356955e9d010	JANANI SHREE K S	2127230501060	Computer Science	\N	https://drive.google.com/open?id=1BEtPub8IP8ZSHeLaKvnQkjJ2pzliJXvT	26	34
+b85a97f2-802d-4961-9068-19614c0567db	JANANI T	2127230501061	Computer Science	\N	https://drive.google.com/open?id=11h4AIHhvzZHJHhDwMFtXgmcwauTy5rnO	29	42
+877eeadb-3b26-4e23-8338-9b502a0abe1d	JOHAN A	2127230501063	Computer Science	\N	https://drive.google.com/open?id=13H97bEoQGvjdSC3YTdrpnwyTgbVgwODP	23	43
+49594786-2018-4972-907c-5fa5125e3c0b	KAARTHIKEYAN S	2127230501064	Computer Science	\N	https://drive.google.com/open?id=1CF5uSta9XSzcPRlrJRmlCnrPlJNLjxwi	17	39
+4572a87c-c994-44a9-aa44-8ef2685124a0	KABENESH B V	2127230501066	Computer Science	\N	https://drive.google.com/open?id=1dTP3zfPiRqCU6coBI1F-PKM_rKpaFdWs	14	37
+d8ce7dd1-6a12-400b-9fe3-d0ff97dfc0c8	KAMALAM K	2127230501067	Computer Science	\N	https://drive.google.com/open?id=1nSDF9H94bzFvP7tGLeH57whXJubK1V1Q	30	45
+a2dd2910-429a-43b8-8bba-9936117d35d2	KANNISHKA S	2127230501069	Computer Science	\N	https://drive.google.com/open?id=1IM_XR2JlMu6Lz30ObRRrRKsOJcs3rb4l	24	41
+f0205c3a-25bc-409c-9bdf-06265ebe9cad	KAVHEIN NARAYAN M I	2127230501070	Computer Science	\N	https://drive.google.com/open?id=1WS2RoaZV7zoPjkDvseSgGZ5QmjZfLwlk	27	41
+fac8d228-c871-4ad6-98a5-dc5c4a9f7bcd	KEERTHANA G	2127230501071	Computer Science	\N	https://drive.google.com/open?id=1jHF1zltxc2PUnv8KBf3CLwGRqkb3GaTf	23	48
+8db5374a-2189-4b0a-9fb1-ae91b6393f46	KEERTHI VASAN R M	2127230501072	Computer Science	\N	https://drive.google.com/open?id=1dTvuSjkRi00uUp1-SHTOwywW_AIsCG-J	25	37
+abe3babc-d4b0-438e-8bef-e392e210e482	KEVIN CHRISTOPHER S	2127230501073	Computer Science	\N	https://drive.google.com/open?id=1K6ltfiP6MCvEJuN0f6kbd0soXfTFRjgR	31	49
+25b651c4-73c4-4d74-a94d-7f1992fb51eb	KIRTHIVAASAN M S	2127230501074	Computer Science	\N		27	35
+8806c887-f3c6-46f5-803e-70cd48dd4295	KRITHICK KUMAR S	2127230501075	Computer Science	\N	https://drive.google.com/open?id=1JzR1FK9R0f9MZ_90ttR9fvuvLKlpWhLx	32	35
+416f9261-2e84-4666-a861-184add985c54	LAKSHNA TARUNYA Y	2127230501076	Computer Science	\N	https://drive.google.com/open?id=1Yw_LxxU_1lBBItIJXc6EQWE57_Bzb1UW	33	36
+0f11268b-0b4f-4e75-ab9e-4c4adb0a5986	MADHAV G	2127230501077	Computer Science	\N	https://drive.google.com/open?id=18jmBVnLqNH89qttafzQGTBAnmY80Ta-n	35	39
+d9d838eb-9300-4ca5-9443-2511a20fbebe	MADHUSHREE SN	2127230501078	Computer Science	\N	https://drive.google.com/open?id=1v20RUtdbY54kg2Ydkc9TG2eW3AQxLxWq	29	48
+189bfc46-5338-4636-a2da-36baf745d551	MANIKANDAN A	2127230501080	Computer Science	\N	https://drive.google.com/open?id=1EV39ilZV2NBUDYaC6wkjisTnISoui68U	21	34
+25303667-6460-4c8e-86e0-095979411ab6	MANISHA N	2127230501081	Computer Science	\N	https://drive.google.com/open?id=157FObWWw-giTodVc7Ho5djrKWUl_lHrE	24	35
+a2cf2141-d7d1-435a-b8e4-034af9ae9e96	MANOJ B	2127230501082	Computer Science	\N	https://drive.google.com/open?id=1CCldcGjcVDjmDAwFkOeTCTNnmcidfVM3	29	39
+9ea43a5b-3554-43fb-a838-87c3819a8616	MAYENOOSH S	2127230501083	Computer Science	\N	https://drive.google.com/open?id=1OhlTp3-MVIBiBjRH3dFNszc6eVpVHIET	21	37
+cca176c2-f1b8-4747-8463-2de632e79cf5	MEENATCHI H	2127230501084	Computer Science	\N	https://drive.google.com/open?id=19WTE9eXxW71R6rgo8aSuA_U8G5IN4fyi	29	37
+a20c6c5a-4ef3-41e3-9ddb-c308d55d5a13	MEGHA RAJEEVAN	2127230501085	Computer Science	\N	https://drive.google.com/open?id=1NLVpzJaOmYtv3l3tJF5JIdNxCURqc00-	19	48
+eacc8fd0-e4d2-48e5-9f75-71fe82b5c2f9	MEYYAPPAN DM	2127230501086	Computer Science	\N	https://drive.google.com/open?id=1vTdyrVkTnjuAG6m-gdD4HgmUDddydC7J	29	37
+4cc7bef3-e654-439c-9816-9f208c7bb5a6	MOHAMMED IBRAHIM S	2127230501087	Computer Science	\N	https://drive.google.com/open?id=1pr76cwzdMiL8jU4wzHK3B8jamLcLro3Y	20	35
+5f410aa1-9d41-4f84-a300-12a76df36bbb	MONICA S	2127230501088	Computer Science	\N	https://drive.google.com/open?id=1Lv0z1zuJ1C-HBvHf_yx28RJODLJpnSw0	29	33
+1b079f3b-04fc-43ee-85d3-e638f41f613b	MUTHIAH KASI	2127230501092	Computer Science	\N	https://drive.google.com/open?id=1slA3FVnSkSgKHzhZGtr_6adk0EV-M31h	27	44
+a7f59ba7-19bd-4647-a6ef-91dc1b5a126c	MUTHUVEERAN D	2127230501093	Computer Science	\N	https://drive.google.com/open?id=1R848LefZgzrSNMtQ_P4ztRHy_-7C4_yK	16	35
+82902993-7486-4ad1-9a2d-a1ca4ecd01a0	NAGAPPAN VRA	2127230501094	Computer Science	\N	https://drive.google.com/open?id=1Y1Jro5miwaQkH6XAJjF10bVImimdOhDQ	28	44
+c463841b-3ae8-46bb-b80c-1a10adb24bc6	NANDANA S	2127230501095	Computer Science	\N	https://drive.google.com/open?id=1-ojFjO2nyZ7_PqpxVzW_G8p8wzYCIJa2	38	36
+c706bd83-0ff7-4a76-84c6-47fb06f969b0	NITHIYANANDAM S	2127230501098	Computer Science	\N	https://drive.google.com/open?id=1v62gUFVV9IzRojPtSOq52kZ-Gxf4NfeY	28	41
+0d3ed5ad-e4d5-4d45-bb0e-997b80673aef	PADMAJA S	2127230501100	Computer Science	\N	https://drive.google.com/open?id=1gbCXDOAt8hDoks6TC-HJAKjBHTgTXfDf	17	43
+c8388555-2e5f-4329-bd90-f966b94d1389	PADMAROSHINI S	2127230501101	Computer Science	\N	https://drive.google.com/open?id=1tuEJVtMexahvvpPoJUVHuiGXxyza8j_7	26	41
+74312d06-f49b-4b7d-88e7-fd45da78ff62	PAVITHRA P	2127230501102	Computer Science	\N	https://drive.google.com/open?id=1hQhKeuBYCNnEqCtwgo4iQTxsrP6WnmX3	32	41
+1fda308e-0428-43be-ab55-32a1a8e232eb	PONNURU SRI AASHISH	2127230501103	Computer Science	\N	https://drive.google.com/open?id=1t0aekD-t2oavyqhmzxjzkY72ub9BSMEA	22	43
+3aa63746-5d60-4f3b-89b0-fc564e1f4c5e	PRABAKARAN A	2127230501104	Computer Science	\N	https://drive.google.com/open?id=1ero9MEFkdTPWBGBdGRZ89haxf1MhArN4	35	37
+a2afc98d-59ac-4ea5-8d38-6c970c1708af	PRAGADEESH B	2127230501105	Computer Science	\N	https://drive.google.com/open?id=1gy70hWf6SaRgYilEj-faPEPgVJfZOT0m	24	43
+0d2f82df-0533-4491-b413-f13a1782188c	PRAJAN S	2127230501106	Computer Science	\N	https://drive.google.com/open?id=1pOqdeYxfH9jjkIgPilgVqstNGIRDadaL	22	37
+90f3cca1-7440-4d22-9024-ad862b979a0c	PRANAO N S	2127230501107	Computer Science	\N	https://drive.google.com/open?id=1FXV0SjmHRaTwin8yOM084jITtHAyBlkb	34	38
+3e542768-002e-4e28-aeeb-53d8b492aec2	PRATHIKSHAA B	2127230501108	Computer Science	\N	https://drive.google.com/open?id=1qk3Jo34njepiDiIMy82QlHedRBzvzsMi	26	38
+16d530be-85f3-4c32-8a7d-b3db2a40724a	PRINCE RAJ J	2127230501109	Computer Science	\N	https://drive.google.com/open?id=1VolOF8WvcJ8_8sD_1GICgP0zwYjH7Jn4	31	41
+5eb93ad0-aca0-4f2e-bb8c-e578ae152f01	PRITHVI RAJAN D	2127230501110	Computer Science	\N	https://drive.google.com/open?id=1bPoeMa7qjWji_VaCIgSP6tajR3FIMJ5i	25	36
+70d286a0-d95b-4897-9fa0-7de70176b5b4	RAJA GOPAL P	2127230501113	Computer Science	\N	https://drive.google.com/open?id=17NujhLVkL_2qGDoFCMLxqNX68_xbulSx	24	34
+3bb6e4bd-7b9d-4613-a3fc-84f888f9cd42	RAJALAKSHMI S	2127230501114	Computer Science	\N	https://drive.google.com/open?id=1dOXLHlLVpeJxYKjJ3GM3YncUg0RE5sBe	32	37
+55f4d696-54a4-4f50-b656-5d83b98d463f	RAJAT KUMAR	2127230501115	Computer Science	\N	https://drive.google.com/open?id=1E6F2ulDE-AusuTpBfJyHGZb3B24ap0-9	21	45
+2cf23dd3-fb4e-4c9b-a2a1-6ee081a4a129	RAMANAN G	2127230501117	Computer Science	\N		19	33
+b7006233-a0f2-4535-9cf6-0ba18ac98b0e	ROHITH P	2127230501120	Computer Science	\N		22	27
+d78e1f6b-b04d-4894-9a57-7e58727d8433	ROSHINI S	2127230501121	Computer Science	\N	https://drive.google.com/open?id=1kaucWSbZ0apxLi6SCBpwspY_mDXbvGuy	25	27
+0114fe5b-ec06-4567-848c-11e28fdb8824	SACHIN G	2127230501122	Computer Science	\N	https://drive.google.com/open?id=1ECvCMXZPfA-wd7wN_AyUlcBKrZBfas_A	30	41
+06cec8df-84ca-4400-bc03-1171c063cd62	SADHANA S	2127230501123	Computer Science	\N	https://drive.google.com/open?id=1E4nHnVwmO7024eYY2TAUQJrLs4m-tx5T	33	40
+89f793e4-1797-4da7-a6a0-17759d1bf313	SAIFUDDIN PAPA S	2127230501124	Computer Science	\N	https://drive.google.com/open?id=1hOGnktYBv6n85PnyFNTI8dL8tssFlSIw	21	36
+dc9fbe75-ada6-402e-a511-309b9138417e	SANJETH S	2127230501127	Computer Science	\N	https://drive.google.com/open?id=1CeANI4ZgQx8uqR95dmDEhagwDvJUarYG	22	44
+b2173a57-43b5-49ea-97d0-9a792b1a5642	SANJITH L	2127230501128	Computer Science	\N	https://drive.google.com/open?id=1SYnOT0jjTgt9_NwEXgfi52JSn5zwOP3R	25	39
+4ea704d8-1bfc-491f-a34c-231449103736	SARANYA E	2127230501129	Computer Science	\N	https://drive.google.com/open?id=1lWu3HDySTxbVYRPjNXyRIJYiQv4uIBj_	24	41
+607261e5-0d4b-40df-af2f-09422a2f49af	SARATH CHANDRAN M	2127230501130	Computer Science	\N	https://drive.google.com/open?id=1v8wAyJIrv4wr6xbzLv4McJts02i8jv8h	28	48
+313964e9-99d8-4fc3-aa84-bc43c2dbd11c	SARVESH RAGAV B	2127230501131	Computer Science	\N	https://drive.google.com/open?id=1VONqfWLLny8I2fG-beIYzKQCnKW-wVwd	23	48
+e91db852-72c8-4767-a136-e4f3497ef032	SARVESH RM	2127230501132	Computer Science	\N	https://drive.google.com/open?id=1ethBNYYIvLNGY_Azwbwy1KjO04Net-Lm	14	37
+d7874bf3-04f5-4732-8b2d-192d5c018b85	SASHWANTH V S	2127230501133	Computer Science	\N	https://drive.google.com/open?id=1r-kuSI8U4tw4fMwUkek04bAURtTFYLoB	27	43
+a7f75d73-ba69-4920-b9f9-e61978678b33	SATHYAN S	2127230501134	Computer Science	\N	https://drive.google.com/open?id=1OWq666CP8X4gENVdoam2W2JCTKAO67qh	34	38
+7d8f7668-6048-4383-b08f-b2c885dc2002	SHAAM SUNDER V	2127230501135	Computer Science	\N	https://drive.google.com/open?id=1f9HoOoTNF5paz2zmrxUg7gzzyQ6wP7hJ	33	40
+ce8cbb79-0502-4c72-81ae-250d95f4b55b	SHANMATHI PRASANNA B	2127230501136	Computer Science	\N	https://drive.google.com/open?id=1AvRXcJMXHSVuvqoybjxlomsVHPq9JA8T	34	36
+f76c7d8a-e9de-438e-9aaf-5c5bf9aeaf8d	SHARMILE S	2127230501137	Computer Science	\N	https://drive.google.com/open?id=1dL8OfOTpzpj30zT7SNy0T3sNN0NiknKZ	30	45
+d3fabd71-b624-4b3a-a47e-ce92fc1ee906	SHARVESH R	2127230501138	Computer Science	\N	https://drive.google.com/open?id=1QQXNrxphYkbaPUdyH2gftj76iknGrUb9	28	37
+633ef711-c7c7-4cee-9863-c9480c4bedf8	SHASHANK M	2127230501139	Computer Science	\N	https://drive.google.com/open?id=1SBmd7CdFWXJW2yaGCnnv_rNGYRYh196I	26	44
+a9c06548-8662-4977-929e-303c76c3e2db	SHASHANK N S	2127230501140	Computer Science	\N	https://drive.google.com/open?id=1MERNZbuiu3E0z9kUJTVoVgfSywMOyQaE	31	44
+9a01df9e-af43-4071-82bc-9a336003a8a4	SHIVA HARNI K	2127230501141	Computer Science	\N	https://drive.google.com/open?id=1lTrov-WGeeLelAwu1xQjipHCNvaHVEvM	21	41
+9b4d7555-7433-422c-ac19-799a95467f1b	SHIVSARAN S	2127230501142	Computer Science	\N	https://drive.google.com/open?id=1kjdA24noPj424JTFM4rKFeDXehUyoh1-	31	39
+e7d95a9c-9583-44fe-b52f-dd3b003a87f5	SHREENIDHI R	2127230501145	Computer Science	\N	https://drive.google.com/open?id=1l6dA7kt1a-r0cQWFIpFn-tbSn1EwalhD	31	41
+f4f860d2-324b-4103-85d4-3d7dd7d7a34b	SHRINIDHI D	2127230501146	Computer Science	\N	https://drive.google.com/open?id=1ABR7yqCdsj34emeOtuJLhoeLkqJ0z5IO	25	44
+876b3fb9-8977-4540-981a-790099ed05d2	SRUTHIKA B S	2127230501149	Computer Science	\N	https://drive.google.com/open?id=1X-n8RAEQuUAUjILVkRZP_Nu7k_aUk2s6	31	34
+066842fa-7768-450b-beeb-d89c4e3e9b14	STENISH ROGER S	2127230501150	Computer Science	\N	https://drive.google.com/open?id=1_eLW-kutLSuvNHjXAUcLpGGJPqVk2t6A	25	39
+7f88abb9-7940-4cdc-b99e-21715e682c52	SUBHAKSHAN K V	2127230501151	Computer Science	\N	https://drive.google.com/open?id=10JHTXFxMtunAOlAhgSGdj6gc9cPvHSZH	27	39
+df15ffb9-8141-4700-ac67-c9768d6128b6	SUDISH M	2127230501152	Computer Science	\N	https://drive.google.com/open?id=1ANuINtnEWWlcb0vEopa22fyIYAakQ5Kq	35	38
+a8f7ffdd-561e-4f3b-a1fa-aae22b41131d	SUMITH LANYRAJ	2127230501153	Computer Science	\N	https://drive.google.com/open?id=1rXO4d72vjbctqZckpwoMKGiRdbTcJ_M5	14	36
+64134fd3-ba3f-4a1a-a242-c05028eebd58	SUNIL DARAN D	2127230501154	Computer Science	\N	https://drive.google.com/open?id=1wlZFExsyEfwnqm5ge6OjWvilQf7s16Fi	22	35
+1d027392-8cb4-4cf7-a072-8ea3a085ebe0	SWETHA P	2127230501157	Computer Science	\N	https://drive.google.com/open?id=1ezrCK3aeMPySuA9O9p_i-o2Fg-o1cs9j	23	35
+22548804-d74f-4bbd-94b3-0b1a8944bf80	TARUN KUMAR R	2127230501159	Computer Science	\N	https://drive.google.com/open?id=1M2yloaWiikGICz4PSYCd8KdSad57D8Uo	29	47
+0d72ef1c-6a1f-4e91-9a63-7bbc4226a111	THAMILARASAN S	2127230501160	Computer Science	\N	https://drive.google.com/open?id=13yEM50-W9ViJLdNewLMHNBtM79OOXQf8	22	37
+82ba2bdb-254b-4990-9a96-6a2d4a2a7e5a	THAMIZH SELVAN P	2127230501161	Computer Science	\N	https://drive.google.com/open?id=18wvbgudmD8GWSRDcU8Dx6JUOuLirtQwN	33	38
+3075d0f7-557e-4826-936d-efe20ab39229	THARUN JEEVAN R	2127230501162	Computer Science	\N	https://drive.google.com/open?id=1FSDiRwM7mn07C_64ROKBkJOMQlcdefNf	22	35
+493de048-87d5-47c6-8d0e-8dd10acdca04	THENMATHI T	2127230501163	Computer Science	\N	https://drive.google.com/open?id=1wGwEjpjXWZMLyXs25RfFfxnKFdK6NQ1l	22	34
+d20a01f2-ef1d-4776-a180-32eb26947fd9	THIRUKUMARAN G	2127230501164	Computer Science	\N	https://drive.google.com/open?id=19KIKc8ZJPOQIgT0AFGbqa53hFBpTk15x	29	45
+2449271b-9f19-4464-b2eb-f6acbd045dfa	THIRUMURUGAN S	2127230501165	Computer Science	\N	https://drive.google.com/open?id=17pc5w5AgHvoWOtbKrT8ExlnhZ-t5nPjh	30	41
+f77bd3b1-928f-42b6-9fc1-1eed498f831a	THIRUNAVUKARASU T R	2127230501166	Computer Science	\N	https://drive.google.com/open?id=10HEuI4m9PxNqXyi9dk0C36sYR5r1F_eV	20	42
+48b1ad11-aadf-4b62-a9df-8ac7a81a438c	VARSHITHA M	2127230501168	Computer Science	\N	https://drive.google.com/open?id=1GZDIMzjPQWw2-vC5Z3ETIz4dFc8Ma4yW	29	46
+7ad64e8a-6e2d-40cc-bf89-a06ce828dbe1	VASANTH K	2127230501169	Computer Science	\N		16	37
+42d92e7a-a1dc-4c04-8fe2-0fd94bdb1443	VELU RAHUL L	2127230501171	Computer Science	\N	https://drive.google.com/open?id=1HPqP_BX1Erg9glvrtjkmXzD302fHg5yW	31	40
+72d44463-b270-4e8d-838f-eee6fce4da11	VENKATAKRISHNAN A J	2127230501172	Computer Science	\N	https://drive.google.com/open?id=1ohKf8fluGE4y-5NewQY5guFpLdLHa_oT	20	43
+0689d3ab-98b3-4b1f-84df-b0bdfa21de11	VIDHYA BHARATHI A V	2127230501173	Computer Science	\N	https://drive.google.com/open?id=1c0rWjNcbHOnAi30Yop5wP0dSub2LyoOf	29	39
+3c6f2501-7404-40be-b2d2-15696486aaaa	VIKASHINI V	2127230501175	Computer Science	\N	https://drive.google.com/open?id=12zCgMmf83w2-_a9iyNiqTslXnqSQgcpL	24	42
+b67930e5-9a18-47cf-bdeb-8f2a70fe85e6	VIMALKANTH A P	2127230501176	Computer Science	\N	https://drive.google.com/open?id=1_L32dUCNWnuiSq_yRso3jFHqvFLUBWJs	15	39
+c1b6dbc8-a78e-47c6-a924-527182a92e98	VINEETH I	2127230501177	Computer Science	\N	https://drive.google.com/open?id=1Ws8F1NRwS7OtNc15Bpngj5FjR_w1gZzC	30	42
+50381fa0-99ff-4580-b3cc-c4ba4eeb21f9	VISHAAL G	2127230501178	Computer Science	\N	https://drive.google.com/open?id=1VOZW5-swbLS_IhDC6eyq2KhmWgIZrSpm	25	38
+eb7a00a6-7516-44c4-a46e-462343ffce81	VISHAL K R	2127230501179	Computer Science	\N	https://drive.google.com/open?id=1eO1UshxBgtKMkRzq-UadEsW4tgtA6C5o	30	42
+f78e15ba-305d-4562-889e-4d909223cb00	VISHALAKSHI PL	2127230501180	Computer Science	\N	https://drive.google.com/open?id=11vCorDShlzGN2NW_jrGt8Rds7D-lNkgw	19	41
+85510a17-e022-4557-9dc1-a3b26646af08	VISHVA K	2127230501181	Computer Science	\N	https://drive.google.com/open?id=1kkdIxIM-pgW6IozLdnwKO916k4gmvE7t	24	45
+62dabc83-c2be-45ac-b1de-3abb143dc0d5	YOGESH G	2127230501183	Computer Science	\N	https://drive.google.com/open?id=1cjiKy0mnbFS_UA7ZyMRRBdaVI-s8LKnZ	16	29
+9131ada4-b023-4dd4-92ed-903160c44a20	YUVARANJAN S	2127230501184	Computer Science	\N	https://drive.google.com/open?id=1kUM-woobgwNCVHxfi5tnvQsom8RncoDP	29	35
+28820349-8c42-4874-9cc5-e529122d3841	AYUSH NYTIK JOSHI	2127230501301	Computer Science	\N	https://drive.google.com/open?id=1-sAmDAUyKCwHHW6sgzOwjT_ScANGLp9U	28	46
+22b3d3ea-3796-467b-b963-fe1fe51f655f	DIVYA SRI A	2127230501303	Computer Science	\N	https://drive.google.com/open?id=1ruRxFTHCVOFgAnaQd1UXX1rkYMqFbInd	18	39
+3a6c1a62-6127-4991-9031-41043be4f5f5	MADHUBALAN L	2127230501304	Computer Science	\N	https://drive.google.com/open?id=1e4a8mNezMwzNSxS6srSZeZaUxVYJ0JHy	18	26
+267f072b-2f8c-4d34-acca-b5e2e86b7192	MATHAN BALAJI A	2127230501305	Computer Science	\N	https://drive.google.com/open?id=1VsPSi04iSupyACyMfQoq0L38cEGxG0Bs	20	32
+17b558c1-4525-4e51-b265-e0916f039033	NITHIN ATHITHYA P	2127230501307	Computer Science	\N	https://drive.google.com/open?id=1WwJA6cQUoygS5-anFK2Cw7cAcGpaym4E	14	34
+64e6390e-44e3-4b60-a29b-da402ffa4a8a	ROHIT ADITHYA S V	2127230501308	Computer Science	\N	https://drive.google.com/open?id=1oMBqQdqqFNtbwIKw_G-H99L_nUWj-8Zi	29	42
+2bd49bce-fa3a-49d4-a618-39523ae71e57	VIGNESH RAJ S	2127230501309	Computer Science	\N	https://drive.google.com/open?id=1q-r-UpilovsdA0LaQ6l7gvEJncnsAy5t	17	37
+a759a3fc-f5ec-4a4b-b9b4-cca7fe539828	ADHARSH S	2127230502001	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1Fp_dRzw8q_H4NeLs1DnnOug--tzdiw3q	14	39
+d18b5bba-3633-45e8-a583-b9d83a566ea2	ADITYA N	2127230502002	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1rQeCDBrYIywIyP0Ze8zurmfuRfdOXQ10	31	45
+e6d680f8-d4fd-409b-8bef-edc6a6814471	AKASH V	2127230502003	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1CMzg8KWgj5eDXnJT09pPv1mWCVHvVqlo	29	47
+9e5341b0-9264-4001-86e2-bb527c6e61bc	AKSHARA B	2127230502004	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1ICXvvzOsueUQucFTxIbf0bBIwDdtwz0x	35	48
+b89542cf-0da2-4900-9a1e-54bf311d5505	ANGELINE JENISHA V	2127230502007	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1UnFcmfLOzfvB3BG-F7TF_-VhP4G3w4qw	32	43
+3067bf30-4720-42ba-bcfc-d082b857d7db	ANJALAIDEVI C	2127230502008	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1W3Sxr_o74NMqPjx_6_mlHPh2PfvrjUUM	28	33
+25b290c5-7b15-4eaa-98f3-54646b29ea64	ANJALI E	2127230502009	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1LG8RZjwzax1ZGWyAS0oKduQM_iaUpBbP	24	35
+d14f31dd-8e02-45fd-818f-fa054ecdba0d	ARAVINTTH T	2127230502010	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1sTCcgmtfZrNdZw0-DZT7B1eGcHHQookd	29	40
+9fc3a1d2-ed3e-4e22-bb45-981f53923a8c	ARJUN M	2127230502011	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1CJHZ4D_KkKsvQMtZjtqvr6ovdJPFAP-X	29	40
+5e32fcb5-64dc-4ada-bbba-335edd7ab968	ASHIKA HASEEN S	2127230502012	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1LlqtOsdGl35Xnpw7Nn_uiZM9kWYQedR4	26	44
+5e321aa7-1f29-4f58-a3b7-f05fd32e7a5e	ASWATH S	2127230502013	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1oZlZWH9aFv2JLjT-xbh-9xHQWB90Uj10	21	37
+38010a43-7f12-4893-bbdc-f625e666cb9c	AVVUDAIYAPPAN RM	2127230502014	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1snjcDb0xzF5Z1L-XjSrtkrcX8DIkH7S_	29	0
+954da0d1-3b4c-41b8-b270-7cf02297592a	BALAKRISHNAN R	2127230502016	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1VnDGqxVo5RbeJWWP-HupAe08PVAyN54F	27	40
+335eb41c-c4a8-467b-a423-765852117267	BALASARASWATHI S	2127230502017	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1cjrB12mzdv6fjJALE_HLA-Wat5jN9E9N	26	39
+469f9024-aa08-40ad-ab57-fe7cd9aa7e8a	BHARATH H	2127230502018	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1tUhPnLciBx_WON3n38_pwmncZ2NK9oD5	28	36
+0e28216e-61cc-41a4-b759-10632dc5b4b8	BHUVANESH R	2127230502019	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1ZZRC2gMN19J7_AJhmnlCYUiHzrKFTWzn	28	39
+cbff175a-bfeb-4991-aafe-ecebb038e87c	CHANDRU A	2127230502021	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1i189h0r50fLVPJUDrRQDCHbeJ3dXptTr	22	46
+60a6b4af-b68c-4be2-b170-4dbb075a4cf1	DHARMA DHARSHAN G	2127230502024	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1XxZ6BL8t8FYfnI2y3AEWPY1gpXizYXCK	25	34
+0b153f16-c17d-4a17-98cf-6715b40a64d9	DHARSAN P	2127230502025	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1t23qTNNxJS_ODVDm1070aTUoKBVrcNxt	24	47
+6099798e-25a5-4c55-81c0-5ffb13294c9b	DHIKSHITHA S	2127230502027	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1AkrhKgoh-oeSb7Ns83KzQSXLxdvyVQz0	33	49
+edaedab4-0f80-466b-8fe6-14eb82284cda	DINESH G	2127230502028	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=10PYa2UUGFFeRq4h0cVKEBFQc1xG_czv2	27	35
+db1a988d-a721-4a0f-8f3c-1f3729802b62	FATHIMA AFRAAH M	2127230502030	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1-XLe6GrlLJt2g6kP5u0yfzDr6d5UNfud	23	39
+a522b62e-a42a-46f4-a88a-6e574a544102	GOKUL A	2127230502031	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1UxEgek1Ua7uxmjCEPgpXKBmqojiRby8n	30	45
+7a2af654-b3e4-4fbf-ba95-f1fd2d707b31	GOKUL K	2127230502032	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1UW4cgvnirkH8otdYagIr7G5WyqKU3hUV	21	0
+d966cea9-872b-4e2d-86a1-ecf975d55b10	GOWTHAM KUMARASAMI	2127230502033	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=12lhmTOmbh2XWB083EAmEpVore1WsunWO	15	39
+805410d8-c733-49b3-ac5b-a284ab0050cb	HAARINI R	2127230502034	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=108uQuwvMk-cJ_cJGdEXQsC_gLZMlkiLz	23	41
+8a422961-feee-450b-a455-716d71e041de	HARIGHANESH ASHOKKUMAR	2127230502035	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=10uQMJtHu14zsjYrVoAcEe_rgmVd_Bv3F	24	39
+b49fcc8c-afea-4041-8573-4c39d0d2778f	HARIHARAN K	2127230502036	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1YZSa1KgxAb5mY57G3jynOlQoULy1nHI9	25	38
+16b425e3-d5f2-4d4c-b6e1-74e177ca4a6a	HARINI V	2127230502039	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1szasdj_JiUqhn_VXpuX92hRPO6e7hHCc	37	50
+19040699-6cc2-45be-ac21-093f2b6b13cb	HARISH S	2127230502041	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1i6rS6EjQXxd4ORtmQvZebGe23Qa71840	27	38
+28a5ae59-3fbf-4055-b899-cb13182e975e	HARISH S	2127230502042	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1EoH8N3ey9o4_3MS58DTn2ZRh1yWPsJnQ	34	48
+61f10cf9-5a96-4e47-9711-1100baa71fce	HEMALATHA S	2127230502044	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=17DpaknEwwKVab5Qjaol_ZLlqDaihqJAZ	30	36
+5f5ecb94-ee4d-42e9-8059-06d67aed7a93	INIYAN RAM A	2127230502046	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1bHgtu6vZ4C2Y70T5mK0VmZW3rG2y1rRB	33	0
+44d45376-b401-444f-9a4b-2553cc2ad3b3	JAI KISHORE A P	2127230502047	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1VcOi6KlVZk5DNM3rfAXLDzvwB1W9fmtq	23	29
+7eebb759-a5d5-47f9-9c5a-03daa2411935	JAI KRISHNA PRASATH D	2127230502048	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1P_QjUgPrU0BRHkTI96NY2FoY1tPH30eq	41	39
+80c60096-ac0f-4a14-8a72-e82b4af28f56	JANANI V	2127230502049	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1AeqTCODEaPLPswSAwj-DDDZdSYuM8ltu	25	36
+ef22ffa3-3855-433a-a473-6426d4e446ba	JEEVITHA P	2127230502050	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1Wy_a90GL5M9vrwLcmcqntp23KHtkIrcB	24	36
+728aa099-3b5f-406f-aee9-c9429fef7e6a	JEYASURYA S	2127230502051	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=15JI8y0rzXf8AuUKITDmsFkB09b9XEgxP	25	25
+1d175cbd-6955-46e1-a02e-58efeb5f4a88	JISHVA THIYAGARAJAN	2127230502052	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1a9s3tyAHXwGe-uwjC5nDdyofOD1Lfr2c	25	32
+0bc5e4c9-1d5d-4dc2-a871-00797f5bbb27	KARTHIKEYAN R B	2127230502055	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=11pXBqoRy6z4QvRiE_xLU1QhaUxQqfdkF	23	37
+19e4e252-39ed-4f68-8c28-e561ca54c784	KAUSIK T	2127230502056	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1tION5Qq-4p-nbQ3D_GFh0toRkteo17UB	29	47
+a809949e-4a73-45a2-b11b-2f0744571a8f	KAVINIDHI R P	2127230502057	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1LTSUKuN6VSzi9FEYZOKJ7sH2rBA9hcfP	34	45
+890e0d84-2cb3-44ec-bccc-61afc50410cd	KRISHNA VENKAT V R	2127230502059	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1tTHkf2rXkLx7V5k_dRm9bvzYEdLBdS84	26	49
+bfe6ef71-246a-4499-a7ea-45c6feffd1c1	LAKSHANAA A	2127230502060	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1yosv_6-tYxhjJ04n00gsY5bqGzmf1ZeH	29	47
+35b0fde1-ad84-442f-a68e-c5b183e6c680	LAKSHMANA PERUMAL J	2127230502061	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1wSoNUrKx4nikkZqARjmQWSaRqWEyojQK	25	36
+f9be71a0-5b3f-40e1-aa08-4a5b834c154e	LAKSHMINARAYANAN K	2127230502062	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1fOCp0jku3MD6cRe-7zE9CrHLI7gTNwrr	32	47
+1d8dfce9-e556-40ff-81a9-62fb99ffdd75	LATHIKA S P	2127230502063	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1b0G2sWVV6rVKoOy1e6pYVo6E_4k8xWRa	36	43
+36e7e3f2-2f0c-4f5a-acf8-ea35a514656a	MAYURI B	2127230502064	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1nOO4yLD0JEzE1NAvBf2Ev-n9GQLoO1wp	31	47
+d367582a-0b9c-4983-bfa9-da86a377dea1	MOHITH KUMAR G	2127230502066	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1M_wNx8ftRcgprpSn6gmzsiVw3PbR02kz	29	39
+bc3c7f8a-39c7-4fe1-ae89-ac7b9614cea6	MUKESH S	2127230502067	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1TJBI1sojaWXgWy6zq8iHqVcXOlcn8QLN	29	46
+47dd250f-ac31-40cf-9bd1-26f6460e7a7d	NAKSHATHRA L	2127230502068	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1NQJVPooaw4oXuF9gI7oA2BD7FQXfeDZC	36	39
+4bd77e7d-9be3-4871-94f1-479dc11934d7	NIHIL P RAYEN P	2127230502070	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1hzs4cuFe4jdZKojVECcwwLZX6Af1wX6E	38	42
+0d7c2dc5-021d-4ed7-a350-dbb52c791cc9	NITISH N	2127230502071	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1E84w2XZegLXdMxuW9o1fIVW9Vwn8AP5P	26	38
+88c7a839-aa7f-4dd4-b078-3b2d959f6cd6	NITYAA S	2127230502072	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1w4C7oLfA3iwRmYC5GsfuNhOAW3z0UXp9	31	40
+a05012e1-4919-49cf-9d92-0ba642683ef0	PRAKASH M	2127230502074	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1AwfmcYb603igYhEs3lkIo79rF7a7HLgm	32	37
+982f9f12-bcba-4802-a160-7722b7059f02	PREETHI R	2127230502075	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1YNquIOZuLX5npWuFrAVo-afAIaYU1q5D	27	48
+679c898d-9455-46d6-8893-6bdfc5dfc618	PRIYANKA S	2127230502076	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1rbVZuz7c0CtLFhVRRdtip91-o71t8LEG	28	34
+bf76c172-e627-4be9-8201-797c59986a97	RAGHAVENDHAR R	2127230502077	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1uHE_EPM4ABboIier3ililmsQODZVD1oX	36	39
+3eaa9ac6-be26-44d2-948d-7b72bec295f3	RAGHUL SAH V R T	2127230502078	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1RZUCOFZ4_tvjDc5EVn6-NLuKcqJjDTdo	38	41
+5b224001-de80-4367-853f-ef52854c195c	RAKSHANA N	2127230502079	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1hmQXUFuE3eF6YrI0NyxcwHMX1YycU6vl	34	42
+53f9c3e7-af26-4cc7-832f-9e91ffe2addd	RAMASOCKALINGAM M	2127230502080	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1QvcdPJaLTkLmq9RM2A34_baVtsgjcKS_	20	36
+98d9c98c-68ec-4cb5-a1f9-2d267570eedd	RESHMA RAJI U	2127230502081	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=17fG9DrU-DrxR6xm_QBmN4IMUFH0_0XlL	32	38
+21eabfcf-46b5-4bf5-9e24-756bee453abd	ROHITH S	2127230502082	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1SvGW4XO28JrTKKIvipx4t095d8QZgdrG	25	40
+748a77c1-445b-4764-92ec-0cc01c06ca22	ROHITRAM J V	2127230502083	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1MT3xVjQAbpUFW_FKYJvo6FlNbtznEkBS	24	41
+3de29801-8f0e-43e4-b063-8f29cd51c75b	RUPESH A	2127230502084	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=13uS5RhS0LPFcnJ-YxDT8lSDuUz-1ccBg	24	39
+9b8b5d15-00c1-46fa-a241-6bf6ed998adc	SABARESH B	2127230502085	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1-FpIGEBMKRotSWQozHf_DxXv2y7be4e_	33	47
+c46ed7ec-d481-487c-a3dc-25ed666421d6	SAI AAKASH V	2127230502086	Artificial Intelligence and Data Science	\N		25	41
+52c7a8b4-78f9-4fb0-b966-f25c469bc2cc	SAI SRIRAM S	2127230502088	Artificial Intelligence and Data Science	\N		21	49
+c11a4726-5dab-49e2-ab1b-d0e12c2772fe	SAKTHIVEL S	2127230502089	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=19HccYyiYo9hr9mYRxzwzPXhH0ZskjAgc	34	43
+6fac89a8-6b12-4ad4-a843-25787a65191c	SANJAY D	2127230502090	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=14ORWh2KMeq98Ry0qBrxTpFycUKHo_W7j	31	42
+f889fe75-2cbd-41aa-bf26-65a01bc45dc3	SANLIYA JOSHI	2127230502093	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1hv0sdDuR3tqnx2YBQs-aTRP1yGDEgJDw	33	37
+d11da8ac-540e-4349-98cc-1153d77d15ed	SHIVAKARTHIK S	2127230502096	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=11MCeNnto56K6dptMieIKWS6QXTn0Bm3Z	35	47
+cb736e31-1f1f-4ff1-8a5d-4e1764056372	SHRIRAM NARASIMHAN	2127230502097	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1n_6zhb_-B60Tw8Ldzns69W6f4vFTfRvt	26	48
+e94b7290-f968-4d27-aaa7-4f344240fd6b	SIDDHARTH J K	2127230502098	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1uyLPIJFLBvdoXK9vi5STCVHlGktesKb1	22	44
+f3aff576-c4ce-4294-9ce6-2f07a64b2736	SUBASH CHANDRA BOSE S	2127230502101	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1LH8lFJl291DCADZEfWmG9D7WtbzziuM0	28	45
+3cfa988f-f2fb-4680-b37f-da399bb1ccd1	SUBBRAMANIYAN S	2127230502102	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1s5q_PFdvtOnCXv8cqHUwUmBbNVQwrkqj	26	38
+31ed9ade-f540-4519-aa84-0b552bee05a3	SUDHARSAN SAI K	2127230502104	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1oHmkmC3ma-6feOMT-eYOpsrGRhzvj8aG	30	41
+457593a4-fc2a-4e96-a551-0b7519c98c1f	TEJASWINI K	2127230502107	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=18yO68WCM1A5z5gQoc0w8H78-TqQXCGJJ	38	47
+d9fe8497-24d7-4b60-93c5-35a498c21c03	THANNEERMALAI S	2127230502108	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1Et9UyMvopkIHvvH2_sLLtyKDZq36O2ZW	22	33
+5cec8765-2310-4e4b-a145-6c52295e3acf	THARUN G	2127230502109	Artificial Intelligence and Data Science	\N		23	23
+b2e6ed6a-6161-4488-8922-4fad36c750a4	THEJAS AVILA MARGRET YP	2127230502110	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1mo4MTidwG9HAl5pYG6-dEk4X1W2U28wU	26	42
+d4553524-4039-41d3-b339-e7cd47a556ff	VAISHNAVI D	2127230502111	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1U45UG6L8P2UY-Na-L9hs9PqlflxeLLFn	25	23
+48865e86-b110-4bc0-9166-657d8bcc2bf5	VIGNESWARAN S	2127230502114	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1Y1E4lfmp0r5rYmEd97Ju9fB7rVNTvvyo	28	23
+28f78ec8-69ec-40c9-a80a-e805c018ab24	VISHAL R	2127230502115	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1NN4eB0q59vlzYaQgwLCuLK1yreq0A269	24	23
+59b80357-a5d5-494e-9401-082565edad34	VISHNU K	2127230502116	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=13ACT2J36orNeJkrTLeRdz_UvQbKGPlpf	26	37
+76b5ed92-8fb0-40af-b2a2-c74f713da496	VISHNU PRASAD P N	2127230502117	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1B6Rq026NcO6iEOSCJPWorT27XPXf2FG-	33	50
+48646124-2c77-4b4b-86df-6a49ee43c5cb	VISHWA A	2127230502118	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1FJ12ccifPW6f5DFZBgc54AqJdmN_GsF0	26	40
+d4422035-cfac-4864-8aae-18462ccf4db1	VISHWA B	2127230502119	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=12NPlM4xgnGYp620H3TJjXgcN2oASX7PM	11	41
+a9eba93b-ca4c-46d0-9909-7973a9b02955	YAMINI K K R	2127230502120	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1_S1X1dZRly3W3F43UFqpdfFLByqHYuZi	31	48
+975fc7fa-6dc8-4999-be19-de354af57f2e	YASHWANT KUMAR J	2127230502121	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1Ri6LAGNB45WnCWu_lMxwB2s_KHCE0uhS	15	46
+b4e04de8-d5d5-467c-b212-40c427412e6e	YESESWINI S	2127230502122	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=14pL1_QqOZPmMC-NHlNnTUWEhLGa7HLLM	27	39
+5c71628e-d3d9-4811-b021-998b2b388e6d	Hari Prasad	2127230502301	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1ZPSpQP-35NQ3az_E2meP0kABMkI_kJk-	19	41
+f8aa2e65-f30b-4130-97be-d7061471137a	Tharun k	2127230502302	Artificial Intelligence and Data Science	\N		25	42
+827958e8-0aa2-4a7a-a039-2eda28985b40	ABU SATHIK AFRIDI S	2127230601001	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1XBWxT7OQSpdEXC87vQDVN8QY0UynmvqG	28	44
+49582330-db2f-4df8-ac75-65452143ef48	ANAND D	2127230601002	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1xM1a1-z3LbVIcG8Rp08SEEbLxoo6lfIE	17	37
+9c15faaa-8504-456b-a94f-b07b1f643286	ANISHA O M S	2127230601004	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1YVDL12tLxbfvtR-cb6QDvhvzOxoJ5ufV	33	40
+6a128d4d-95d0-458e-8f12-aff8d84c513c	Antony Xavio Immanuel W	2127230601005	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Ubr6x4h_pjxwFnY220JFESmAGJfijgbB	29	40
+017979e2-4e7e-46c7-8c27-e1831083e0c0	ASHVATHA R	2127230601006	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=11nRKD9c7zg4RC8SbNuH4j5BNQtWNaRRx	23	42
+d3c4aa28-5568-46c1-b182-5f4ecf0c0ca8	BHUVAN VR	2127230601010	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1s5RH59U07Z75-ZXkdZyNiyEVOjRofN6R	25	39
+fdcd5fe5-ddf6-414f-9f0a-5ad6f3f5f04b	CHANDRASEKAR R	2127230601011	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1hGHyBsi6EcEDGzUVMCrcaq6gGyVOX1gH	21	39
+7a485330-a3aa-47d4-85e6-2d94a93379fe	Deepthi M G	2127230601012	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ewltAhTMsDQxVN732qDoSn_Hp-2jRx9d	26	42
+13747260-4500-407d-a22d-9edaf730391b	DHARSHA M	2127230601014	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1PpWdXDuhMEb8oCs3sNYUA_ItmGyKWQJE	28	0
+06391f38-0b76-4f71-a34b-357913ecf0c1	DHARSHINI M	2127230601015	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Idw4mEF6vRw9smkPFvlPXvV20uESDp96	21	28
+097ab68a-caea-42b9-9629-e3a8632e30b1	DHARSHINI R	2127230601016	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1DW0f1dpuK7APg-NSGbOA4E_0Keo7ZZqo	21	0
+e3b63cc6-5eaf-4135-a0ab-8717eeaa8917	DHAYANITHI G K	2127230601017	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ZeQAXJimAJVFPx_cVA0ODEYQVxJMN_Ar	19	36
+81161e9f-b1ea-43cc-b3f3-40089e9c5f89	DINESH T	2127230601018	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1OssBiz_o1QjzleNBA-zm20WlC1b_mrAd	21	36
+3ab64ac9-34fd-4129-830c-67cc5a3b0df0	DIVYA BHARATHI D	2127230601019	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Z1-cl2OI1ohyhobfbeQOWrm7E2de95rW	18	38
+74016b70-42ea-4ac3-b617-f712e213b73d	HARINI D	2127230601021	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1LtA37y4t2jR9Pbstq6tFq88YYTd9PZRf	25	38
+7a866359-ddd5-4d92-a9c9-3e811aa732fb	HARINI S	2127230601022	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1AzEM6LLvnB5G0IqKyB-_ERdEXecIlOCU	19	37
+fdb28f34-668e-43b6-8056-ba67ab24ca39	HEMACHANDER T R	2127230601024	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1zRAbFqYlF75vFzrS8saeIqIE0fMq9Z6W	18	39
+0c9d2979-1569-4502-9e48-0008e7739608	HEMALEKHA V	2127230601025	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=156LJdRrJTaZ9wTjk0qq03bUTmATXpbBB	27	41
+6771ef7b-7731-4fb2-87e1-11b1e3684a2e	ISHAVAR PAUL A	2127230601026	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Rx7M7YZONANVMuDCCjwUiut-IqrSC91M	26	39
+832729d0-3036-4f08-9fba-636241118dfd	JAI KISHAN J	2127230601027	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1-3A5LxKJOPBySrRp5I1ezQiN05ATqPCo	22	0
+dc10ab1b-7a37-44f6-b436-9f56f13ff909	JANANI B	2127230601028	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1lCJROVqka--BAhIMDlABpiGV6RjAYszL	23	37
+cf173827-b85b-4166-93b7-e8f744f96635	JANELLE REBECCA J	2127230601029	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1tVl9imz5XQy1DCZZL1EBFQJaKuZmRbZW	22	44
+a200e835-4285-4b3f-84c9-dfe5a0208061	JAYAPRADEEP K G	2127230601030	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Cj4fUaANxt7W3xh9gVfcl28ZnhUpb9Wb	28	41
+5aa2ff6c-ad0b-452d-a783-075099ab05e2	JAYASHRI M	2127230601031	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1KbzIhPktQthxXGOngrENaJDFZbLnvDlK	14	40
+4ab87f11-2f55-493b-b76c-2a3866ec8770	JEEVAN PRASANNA A L V	2127230601033	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1he8LBKLUivNSQ2mXgaWKcJQ_hksVTzuA	27	41
+3b5c35b3-bb05-4422-bfc5-e794ae7e008d	KANISHKA S	2127230601036	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=17J2m8Vax-uFD3gpj1FXHYsWEpPEK9h3m	18	41
+0c0abc94-afd4-40c2-950d-6ae600f718c4	KAUSHIK A	2127230601038	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1pYps58NMNH989kE7EMNnzz4Dl_EfG06G	22	42
+8459b99f-a6d2-4738-a0f8-db738281fe36	KAVIN M	2127230601039	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1nSS_4BUw5K4Lt2G01BKO52-0EeNVa9pe	23	41
+4ac9b461-c380-4539-bcf7-f721b1579f87	KAVIYA S	2127230601040	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1CSW1kfdLjUZ6Qz8ZAyL4jzFfPuC4QxBF	18	45
+17a520b1-b8d1-4d10-9a53-b61030713f9b	KISHORE S	2127230601041	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1812dMZ2KFIH1aGbpfrvDp2GLGW7-Cudn	31	39
+21f94e64-3391-466d-994c-c2f32e3a2822	KOUSHIK ADITYA V	2127230601042	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1uz1JVFWXV91FtuvxMTf86KcSkoiP7Wgt	29	31
+96588a04-c5d1-4a00-a114-a57767ee9bc8	LAKSHAN VIDHYUTH L B	2127230601043	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Ziwi7eUSgWthFOBaXfKMANFNsHpsPUfk	25	40
+8c78cabb-901a-428d-9da8-20ad69f016d7	MADHUMITHA K R	2127230601044	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1LdIG2UujXZXUnTgP2JKs5gPy16Yu3llr	18	40
+7f281677-c4c1-4683-a5fb-82e2fc583317	MITHUN R	2127230601048	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=141bRDhielBvnNdO5mVUHl3xa2UpQp8T1	24	39
+518233eb-899a-4997-8204-4491e1e448ad	MOHAMMED SHAMEEM M	2127230601049	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1s01jQ6kz5QfOsgjf9TKIOOlvutf_oJMK	25	39
+c75c960f-0bf5-49e5-a7c2-9ae8226943c2	MUKESH MADHAVAN S	2127230601050	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1B17Lx0TOuUdAionQxbgToikZMfYKX_pE	22	36
+00df0dfd-b646-4698-9d67-f008dabfac30	MUKUND A	2127230601051	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ZbWbPzsGPdhhe7A3wHYgFJZSXAiHTeJn	29	28
+3a563ca7-2d45-48b1-ac03-f54fafd4b153	NAMRITH M S	2127230601052	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1yvrufr4Qj_hQeQiah7yORMj1kQE0TqhS	12	35
+14940b5d-bcbc-42a6-9a47-6bbf2246066a	NAZIRA A	2127230601053	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=13EG8jSOvnlIdUqvVgEA0zhfg41tcVLGX	15	36
+30993443-fe2a-4153-b01d-8954d067ddc8	NISHAL S	2127230601056	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1o9mS43o6K477gIjIWbqzKvgFtZgYxhOS	26	41
+16cc8606-5683-4b62-b9ca-2a050d4421f3	NIVETHA N	2127230601058	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1k36o1uzf0nKQnu74pdlt39swFvHRwHqg	20	42
+5608f4ea-371d-40d2-b459-907909f2921c	PALANIKUMAR S	2127230601059	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=12uL2mOKm74g7RWVGpP_lUuPZ8MK4TepX	27	35
+79e7b7c4-a3a0-4ce6-be69-3a0be89fdbcc	PARKAVI K	2127230601060	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=16VRf83smjTSRbEuyHw-3cGpqKO9ghsnK	12	34
+9436c480-79ff-40b4-9709-eed6ffa15957	PAVITHRA M R	2127230601061	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1FjX0YeSIsUQf6pJcLr9pn-LtQHXJwShK	16	30
+f8ba3ae1-753b-4648-99d3-7d645ee5069f	PRARTHANA G	2127230601062	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1rag1hIBox1T0H8PAZ_0Pv13Zb--jdSbn	28	36
+b346998c-a243-4803-b486-0dbac551f44e	PRIYADHARSHAN AN	2127230601063	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=10HlT57OssHxNVFp9zhXA-fYcQ3dVi2Rn	22	38
+515a153f-7744-4b50-81b7-4e1f3da115bf	RAHUL S	2127230601065	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1oE-irZ2wHjMwnCnJ9i_yDOKRip1p9yA6	28	38
+74e1cbe3-e416-458a-9872-0fe06eb6d553	RAMANAN P B	2127230601066	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=17ftnOlHlI1x-DRnKV2NEWZgG78uqZ9KJ	31	37
+3d3274fa-1c2f-487f-a398-792904bd338e	RAMKUMAR KUPPAN	2127230601067	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1oCxeIwgR4OJWPpTfcT-_mpuoTRwAIMz7	22	40
+916f0a23-5484-493e-849b-0b6eaf408918	ROHITH V	2127230601070	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1FkqK3p0RMY-F4eOwjdxgHdTqL62ZwlLe	27	41
+ed146e19-1056-490a-a4f5-7bd3cc0a5a4f	RUBAN KUMAR M	2127230601071	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Qk92Xiv6AoLfN8mA5ikdWQ2_ukH5hHb_	24	30
+e6ce598c-450f-431a-9985-0dce3fdf7b7e	SANGAVI D	2127230601072	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1JhfP3lqrFVCU5wCcoK_Tse8yc5XaGguf	26	38
+5c2c5e74-41ec-4d37-bb3d-5d76fd098794	SANJAIPRASATH S	2127230601073	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1zxthN9YucmszzeYWqEvNDceyOssN8q5v	19	35
+67846e25-22cd-4fea-88c5-72f3da58acb6	SHARVESH R	2127230601076	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=12SKlMRjCJbLCtXrVLgYlPKcXYjepUQNo	30	44
+73528f23-8053-4ac2-84d8-0220e7e90c90	SHREE NIVEDITA M	2127230601077	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ppk52X4ChkiEaQghWpubWNsGKssz1LOt	28	47
+a06028cc-b930-4d88-9680-49407552bf0e	SHREYA R	2127230601078	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1qyCeNtnKYSJkpYs30SxQ_u4Dlz-PoTew	28	40
+aa3327de-22c1-4c07-8c2a-db9f30261b94	SHRUTHI S	2127230601079	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1_fbgqoRdZBoo5_0ni8DkaXqkAGbD9CF1	28	43
+1ee882b4-b855-4889-9864-ae050e2c6674	SMIRRTHI S G	2127230601081	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1tIeG1gvzuAKZbMkTphzAkJh0hrpFsDsf	26	32
+92fff2a5-b37f-4501-a8f4-be87c3e0ceb7	SREEMAN M	2127230601083	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=16JRj1wowJQpGntnKAxEmawh8TKecUIO0	23	39
+4a85bcd7-28d3-403c-aa12-64facd5a4c7d	SRIRAM P	2127230601084	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1qkj39M63C67_fDG1IfU7WYtVXRSd9lMh	13	40
+b1dd9bc2-c844-41d3-a5b5-ebfd335dca8b	SRIVATHI Y	2127230601085	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1JtPigjo_gPm-rb76l0rswLYQscW7RWR0	24	22
+2466da94-3b2f-48db-bca3-517ac14198c9	SUBASH A	2127230601086	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1XcBQLuyyqizuwwjt1zuTcV18za9SDbka	23	38
+4febad14-2825-43f7-b20c-46a2c524981c	SURYA B	2127230601088	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1rLREV262aLamW_DEvCGkWhfC4qUMtxss	26	33
+15bfa627-6e88-4cc1-ae8c-ea47301ade75	SWATHI P	2127230601089	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1z9Ak1bX53NFGTfTSde2NwvpsVwwS3p2k	25	27
+61799af7-e5bb-4976-8f7c-7066f06eda9f	THAMIZHINBAN T	2127230601092	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1KGKCHDPqUPdzngFcp_EfCSE1SW-jszw2	26	33
+64ac3963-be12-4b37-8760-66d94a6576d1	VAISHNAVI S	2127230601094	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1iUPolXkJQU6NM36hE-HoG-EUNbicFimz	18	38
+35a45c28-731f-4aa4-b1af-2a3b2a2271b1	VARSHA S	2127230601095	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Jrwg2KEdH5Fr2-RfwDCCJppZY3S6MPkH	16	38
+4af10704-e3fa-4c73-9cf0-3ab817ada940	VASEEKARAN S	2127230601096	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1vbD76Zxtn-QG5sjCz-jyIvuOYofBnKUL	28	35
+20394d07-6d5a-4d6e-a328-ffa9f50f2bd3	VIJAY ADITHYA V	2127230601097	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1aERawGJqvKySpBxpoC2XI2cKMr4uQM7q	28	27
+9d2b280c-9b22-41e3-ab77-8ca3377858f2	VINEETH KUMAR P	2127230601098	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1pxpkeXfViU_8ziVYwcNKFGuwvQU39zfk	29	31
+7f0b3f4f-7937-4a47-9a1d-075480009d60	VINOTH KUMAR R	2127230601099	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1FBcWkzfumC8-ZOJCndGDxMUzhpfucmdm	23	38
+4936e1ef-ea2a-4463-a331-f8254d903601	VIRUTHIKA S	2127230601100	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ROkQmUSyWkshnnzqmwgHglJX6uY89NK0	28	45
+f95b659a-8113-41e9-aeef-d03567889485	VISHNUPPRIYAN C	2127230601101	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1UBvppnIuFMTGW78BKnXRSZ1d-YdBbf47	19	37
+5742405f-cb58-4ed6-9d16-66b29b7e5e87	AKASH KUMAR S	2127230601301	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1rel2_lpc49T4-6i2kU1NF9vShxZLfIPU	19	43
+0ee9cc0d-0540-410b-a6ef-7c88e3dbca3d	ESAKKI MUTHU M	2127230601302	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1_CqF6B_Tt2pZiicsijCqbiWH3BSEaxtf	16	39
+374967ac-ad14-4bc0-9cb0-cac87fb4a794	HARISH B N	2127230601303	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1IEfPm7yDwDuGzXPgeiAYdxvbsAvekPhi	24	42
+e934297b-ff88-4426-bc7b-7096c31d1030	JAYASURYA S	2127230601304	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1juACDsi9653bUdUHXdWUEfx6iDxM3aVc	18	39
+4c8ee3ec-6087-4e18-a3e7-b20bbb68cdb9	MEYYALAGAN T	2127230601305	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=15alf7sF_TmWeQfB9x5EqOAM6NP1PyqFb	18	38
+3cdc243b-1991-4aab-bc8d-3b404d065153	NAVEEN HARISH B S	2127230601306	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1G3UUTbUaOpTUynbO5sNj_TBNE-RuK4Wc	18	43
+65790262-91ac-460f-8f04-fa6025015552	SHRIRAM P	2127230601307	Electrical and Electronics Engineering	\N	https://drive.google.com/file/d/13NrkukVZHvkdec1pAXPNhIX9tAv47r5C/view?usp=sharing	12	37
+5a3ec3ec-8ee5-485f-8c2f-252dce79b5c9	SWATHI P V	2127230601308	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1YEkS-PuFCFtzL2m2-IsFR7fXjvFfs05k	17	33
+521466be-ed8a-43d5-91fe-a63c5b9f641a	THIRUMURUGAN K	2127230601309	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=16a9xIs4zROcPqg80V3shEaJWXd8jUP3L	18	36
+8405f208-f1e0-48ae-a38d-6649fbcdd7b0	ABISHEK M	2127230701002	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1sxJWNvRWaIl-o7hxzyujCcgZNDpWZygi	27	47
+8efa7788-bc3e-4ab0-bca9-5d044cf49b0b	ABISHEK T	2127230701003	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=16ZCrKQrb3cHMMa_bHl9P-XswbtFn0kCV	31	40
+c753b9a7-d75f-4818-bdef-05f4b2f575fb	ACHUTHAN B	2127230701004	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1gv_EKE3yz74L86RrFx5a29mOzstgixR0	27	37
+7ca3b870-f658-4be3-9391-841b1ea1f8cd	ADHITYA M	2127230701005	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1r-m2P9BGtKpxy0doYB-9ONdBUSNsMiqu	36	46
+bb6335ce-3a63-4955-824b-61380ba0bb27	ADITHYA A	2127230701006	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1gwVFq8ZE_846PY2Sz4fQ_cn7ZkZTOw8O	18	36
+0db94485-72ad-4b42-9a20-8253c5230d8c	AKASH RAJA T	2127230701007	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1O6jO7f7IB8gMI-DCw8RVDX0S3FTUhhpQ	27	8
+e90afeab-ad47-4551-8bf6-aee10385090c	AMSAVARDHAN J K	2127230701008	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1zMnwQUmutNJGrC9LvDJ0gRkQfMs7sxY2	27	25
+3445d8dc-afe2-48fb-ac17-a5dc9db5d729	ARJUN SIVAKUMAR	2127230701012	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1u41VCW7SWG0HnXMMmjAN27vnsNnzOlpF	19	34
+c297f3bb-14aa-4978-a02c-adcaa3837baa	ARUN Y	2127230701014	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1GFDJFrRQxINXK7QBXsxbNy036p4ouIaJ	32	38
+5b439ef4-d685-4e7d-b797-221f281ab248	ASHIKA L S	2127230701015	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1sSeiT2DXODb92K7PP4BDW8RVcpldhYnu	33	47
+27309d23-1de4-40d4-a448-eafe3dcb127a	ASHWINKUMAR S	2127230701017	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1vD10LWUdlloNZ6_9Aku1yZoQ1eudT05D	23	38
+01fdc8af-d1f8-4352-b3a2-a9c161ab5971	BALAJI R S	2127230701018	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1R5aZ0Id5psZ5UL8I-7Xg3LRiSmB49dAJ	26	44
+9a19beee-f9cc-471b-b95d-04d8b1c22296	BALAJI S	2127230701019	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1byLcKIbn47NaiY6itY9i2HWvyyT9LGoR	28	44
+c6d445a8-7dc3-4999-a3f3-28c1496bdc0c	BAWADHARANI SREE R	2127230701020	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1YvCxXCiLEmtZsXMbYq8SR266wVUvsdvK	31	42
+00e02cc4-bd8e-401e-86c2-5f2ddbe473fb	BHARATHRAJ R	2127230701023	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=11dPQpyDjxqMh96JXlvXAFml2-qto8Tdu	28	43
+b6729536-3ebd-4861-86ba-d778b29de32c	DARSHAN R	2127230701024	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1vUai0xlpgcD9UHT9D3zOVyhaW8nbRJf8	24	38
+1404ca08-8c2c-499b-be0b-7df146c60c95	DEEPA SREE S	2127230701025	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1qv8zFNE1bMoiF5ZfMf2cPE3iQyyxrt4u	28	38
+3678a622-3c5d-477b-abab-89a3c3b33a16	DEVDAKSAN S P	2127230701026	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=194AzXePDwwXNLNRa94JKCeRftPdU6brc	22	41
+e21dbadd-ebc7-43a5-8d54-f6288592d881	DHARSHA M	2127230701027	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1vBUwqIxFoMSm-3p-STHICOE8qNxRtqNQ	22	40
+6d4cb6d7-08ac-4748-8b69-89460528c291	DHARSHINII P	2127230701029	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1x3Il2NyZD0YN92USwkP-U372_u00iq_F	26	33
+bb92de16-e8b9-4b99-b296-e740bdf01eeb	DHEEPAK K C	2127230701030	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1cKbjkXcX-btjPZp2MvbZHMtJxCmfOopl	17	38
+f4a8afda-b740-4297-be95-2ff01b02a2ea	GOWTHAM M	2127230701035	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1koBJQJsAYuTZgMFvNivuy_9OTbA4Lo-E	12	12
+81bbc788-2417-4dab-ae90-481c93e668bd	HARI KESAVAN RAJAN	2127230701036	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1pXTtaHVkocny5wijIRPJZJAZexP5--Zf	17	38
+979fa66b-39ec-45ea-9cb5-3e31f2d4a638	HARINI C	2127230701037	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1dXA0SCilCjJo8MTmuAQPDQ9lETQNJgxf	32	46
+18c87321-2bb1-48d1-9c81-bcd350d02bff	HARINI S	2127230701039	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1fNL0n_4GEoq4Rk0UVinmIVY74rOKEyrp	25	43
+6ad84eb2-e148-40ba-98a5-80d3cb5aa5c3	HARRINI R	2127230701040	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1dHQtakMDxDUeX9wq7hMVK3xg5yDjRdd5	23	41
+77f96cb2-66b6-4fe9-9c5b-c2d4aa4b470d	HARSHINIVARSA S K	2127230701041	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1rUmPuW4W5aP4yWkuf0FevC3uoWV_L1lz	31	42
+12cf3c64-1ea2-4665-985b-7cc784fddf2d	HARSHITHA B	2127230701042	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1LVe9320t8pUIiER09tuEdDhwcN6l6b5w	17	35
+91394923-4666-4e48-83cb-a07e7f572742	HIMAVARSHINI K R	2127230701044	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Jq6RwjBOZECazNISJNvzmd2EbEO6b1hO	29	36
+ecda5d7e-db39-4e32-8ffe-13771f69f988	HRISIKESH S B	2127230701045	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=11tQF0QX2JtcW5zZ04nmmNSud5wnuTX40	19	42
+baf4752f-7cc5-4399-9e3d-284d794abb4c	JAI AADITHYA M	2127230701046	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1wYHn1RphYSje1HVIr4hrMtEZUhDoo5xP	34	44
+1ec8702f-66a7-4d65-86f8-2c562f622308	JANARTHANAN N	2127230701047	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1WDJUHqCKjpsU_ARsuvNqeGuMjW-YcJfn	27	38
+4b8698d4-a70b-46b0-9e52-b217eb0ba82c	JASWIN B	2127230701048	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1odTwFlx2gl-Gph48e-cbbFJtDGQjlT4v	22	40
+e5faad65-1789-45fa-8674-fbb33186d231	JAYAVARSHINI K	2127230701050	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1n7ZyrQdc-kkk4nqlSnzM3NmjZv1Wr6Vq	25	40
+db13ea9f-42f8-476c-a85b-88c332d0682e	JEEVA S	2127230701051	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=11MUcEHAmCDv0Yndvti_Y2Yi7ATb_UydQ	23	33
+518681cc-dbdd-4b1f-8c2e-a5a7b8d7d83b	KALAIMAGAL S	2127230701055	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=14TIy3YnE5Y1uHie3QGjQEnRQ9atd77GS	26	39
+00ca3a1a-7279-46af-a5e3-5b9e66e7a780	KALPANAPRIYADHARSHINI A	2127230701056	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1h-IZ476iZuGizu8zxM3QfpesGK39joXS	24	39
+bee4d295-9e11-46a2-97a7-1457eb9fa02a	KARTHIKEYAN A	2127230701058	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1EEvzbukbazbj6Cu4sQQp-SZYjAEOxCpi	33	38
+d9ad2bc0-04ef-41e6-be61-d06c53525282	KARTHIKEYAN K	2127230701059	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1dFHokIoY1AXiCUKM07FBGw84Sfwk35e9	25	37
+c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	KARUNYA D	2127230701060	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Bmd4VEm2Pn5JEwWd9zpeCLYkATa1JfGp	28	36
+c1673388-cdfa-47d3-986c-eceb6031693b	KAVYA P	2127230701061	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1wt-RgkA5xx_eRKG1rOOXZVX8Q5Kr2xat	24	41
+2008a9f1-f949-4a61-94f1-489cb40c308a	KEERTHIVASAN B	2127230701062	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1om0SF9QdpaAuDYwpeE_jpRUfD7uOowjL	14	23
+a6ac5b6e-a338-4c58-ab4b-e437d30429ea	KESAVA G	2127230701063	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1RWwsK3LV6QxcGOSyvjCDno2MIWDgXrzB	18	27
+75312d77-2d8b-441d-85b5-538b3262bec4	KISHORE A	2127230701064	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1ANlQi-uY4_C7JklxDuQ5h62rb1l-dn-X	28	48
+65883298-b905-46cf-b270-acc84d7f838c	LAKSHANAA A M	2127230701067	Electronics and Communication Engineering	\N		28	47
+3aa60d21-a753-4480-a5e7-ba5115d17c80	LAKSHMI NARAYANAN S	2127230701068	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Aq2HjgMKLQrazyR609DfB-1KiL7Teo2q	16	31
+a19fd527-9d8a-4b07-9ed9-b65b089da329	LOKESH M	2127230701072	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1J2k8iX8RjaLu-nfL0n2MQOVGNvkXZR68	25	40
+46669730-b7e6-45cd-b77b-bdb93f4f1e30	MAHALAKSHMI B	2127230701074	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=12kP_C5AxgRoYZnrhS35mQtVvJN77qkHS	32	42
+2f758b98-8e1c-4cca-a7bd-44e24eeab4ee	MAHESHWER T U	2127230701075	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=13aDfxVD1ljbPpmVyr53sCwvT6iUQmzDA	16	22
+2f90df91-adfe-49e4-9598-52a7a6414cbb	MITHUN KANNA U	2127230701076	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1QXDmkk0wv9FjqUjVfeWWsd0ALeWxe-Au	25	40
+8f40c921-bf3a-474c-a155-aae7bca001da	MOGHITH KUMARAN J	2127230701077	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1-P8J4ikKqcgg2TzH3tv4b1s067ZAlNCH	22	39
+ba890160-2fc3-4e71-8601-ffc154fa51f2	MOHAMED AASHIQ J	2127230701078	Electronics and Communication Engineering	\N	https://drive.google.com/file/d/1YrpD5fSz6bPrGssqWaJYwebybwKMbol7/view?usp=sharing	19	45
+3b2808c2-550c-430c-9a05-76c247677dae	MOHAMED ASIF A	2127230701079	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1yu1aEcPp5Rsevt3-MA5Zyc5lkK7Dl5OV	16	37
+e61be007-bd54-4a84-87a6-365d82a1443a	MONISHRAJ R	2127230701080	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1AWXqxptryuYo1xjuUV2JkKjAnQCosQhT	23	39
+fc951226-4cc0-4849-b9fa-4c33cf19b954	MUHAMMAD ARSHAD K	2127230701081	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Xff1zlLVkYynQB8WClSWBpIczGJhzcr-	21	36
+92145202-0a70-459b-9a07-15f113215bee	MUHILAN S	2127230701082	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1GBLvUWBMUeoMG4WW6cjtABoeKXQbkfh7	25	41
+14c7be43-3524-47b4-8b2c-0e62ecd15e1f	MUKESH K	2127230701083	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1YuzCuNrkdSim8_8KuaPyoz_jNULoBEVF	33	29
+edfee3c4-06d4-4ecc-bb4f-567642da43a9	NANDITA S	2127230701085	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1180WWLfgvI8f2vwuH3U_73uR8DPN0x5D	29	46
+9932284c-8a74-40e9-b879-cd61a9f6405f	NAWIN A	2127230701088	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1_NLmOCuwjBKlYix3Fact4MWyJbB6c06f	30	43
+937aa4e9-09cf-4578-8714-a978476edda0	NIRANJAN V	2127230701089	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1ynBNE52SRrbnhW3QWNbCEHumsNHq3GqC	20	38
+89fb7844-ef4d-4d7c-b5d3-8d99eac3ce71	NIVETHA HARSHINI J	2127230701091	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1utTS9vpVxzjgxuARTNiqc4mMwzeiW0py	30	44
+6f3fc290-2f18-458c-a410-199c71c03ca6	NIVETHALAKSHMI C B	2127230701092	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1K-Zb3-_CDlgZJ9xEla4MuV-zz-RKGZ6H	20	37
+2b48be84-3b07-4621-bd3e-7ecaa4be953d	Pandian Balasubramanian Priyadharshini	2127230701094	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1mPG7H2zpW9DW_alBtBXUtnytZ-l3QQiB	22	37
+7e3bd57a-0d7a-4a39-a30b-27dc29058f1d	PARTHIBAN V	2127230701095	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=12CmqBJcMSvW27ju-7pwJ6-55XHH46d_L	29	43
+690af39c-84f1-41fa-bbe4-33dd46f3b055	PARTHIBBHAN A	2127230701096	Electronics and Communication Engineering	\N	https://drive.google.com/file/d/13moPRiaHaTnw4qIydkylPDWyA5GXStqN/view?usp=drivesdk	25	38
+b235fcfd-e97c-4047-bd07-08947b15d278	PAVAN P	2127230701097	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1jTF_lk905hz2FlmzmK9C8qwQBfN7we7t	27	46
+049027f3-734f-42a4-aa11-543caca8629d	PAVIN KISHORE N	2127230701098	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1JUeCKDiQZXskVrHoftWHqveausrbJ1UA	28	37
+30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	POOJASREE V	2127230701100	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1efNfyC-49n-suD80QG6SixHzRW4Lpsra	22	40
+cf4a8285-f6c2-4860-8f8d-3529a1374be5	PRADEEPKUMAR V	2127230701101	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1HdP1TrqP82_fdyvznHLpO2fG0fhUovJA	20	32
+4d01b614-4498-4332-ad23-eb89e9dc607d	PRANAY V	2127230701104	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=192DVwUtEml_C4PUURiyIsFX7zbhej47y	23	42
+3d9a9dd5-3386-4583-94ba-4a5c392706a6	PRAVEEN VASUDEVAN	2127230701105	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1mzeb5AHgA-6wO0mu0XMiDs1zuEmPdA1V	28	41
+6cb101f4-05e5-4a39-b29a-b0f16c1cfed9	PREETHIKA R	2127230701107	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1PyKHFQ6aTk3UaaJWXj3gvYuAfWEajDnk	36	41
+9a91245b-5335-4ccf-82e7-4fb245d9da8e	PRIYADHARSHINI R	2127230701109	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1M9EJ3lIumyKZY48x8wIEgm7UY7B4-8ew	24	41
+582a2700-7ed4-4c5b-adc2-00805984ba09	PURVAJA K	2127230701110	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1WDAbvTYtSa9koZtyJ1-3H1aHXgF12V_C	31	43
+9f1571c0-8b72-4fba-bfa8-c4ce64a3ebef	Ragavardhini R 	2127230701111	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=124XUckQXJhXWGYaHCgKyQ55J8U5KO4e4	32	37
+e04fd488-1dd8-4680-9115-3b88dbd70ba5	RAGHUL M	2127230701112	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1u5QtH4mCqNj_YwJjK9xfgMsAvtYstvw1	30	44
+3a483c87-9f09-41d8-8e4b-3a2acc49699e	RAHUL R	2127230701114	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1iJ_ii8q6vT0BJ7m4h9Pqxn3CQZTuTTpB	27	41
+8acb85d7-1da3-4d1e-8e2a-614924fdc441	RAM PRANESH S L	2127230701115	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1xe_vnc0bkIZlyM9dyMD4gixgOL1LeqoH	27	36
+4b4c247a-1503-41c1-bc7f-203a916783c1	RAMYA V	2127230701116	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1egzrNwalV8He0gmMghWDLzJ-2dr0G1yy	29	40
+727f98ba-12c3-4c2b-9005-efe81f77cdf5	RAYEESHA BHAT P	2127230701117	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1u5RO0s-xI3m_tZf95MTUrcL9AOcNacAu	33	39
+b2729f01-8b62-4b16-a606-bd26db233b68	REJOE RUPHAVATHI J	2127230701118	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1mJRmfhbZWlPWwS5zx1v_NvTp_h82bXoO	32	40
+0ee6e922-bc7c-47d2-a0c3-19a3f64c3347	RITHVIK R	2127230701119	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1UTj7NPXopjDVMt8F_kaEMn-y-y7fsffL	29	39
+1396f983-745e-4c42-a6aa-4ee5a6c6e425	ROGHITH KANNAN G	2127230701120	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1-20BDezsWWvv19AOfs79Us_FG7v6R9ft	22	45
+3b3398cb-c423-42de-bcb7-dab17eb40bbf	Rohit Kanna S	2127230701121	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1prYW4bsU7V0AkPF7btK3GPaIF2yVnZeJ	35	45
+61aa0167-efdf-4ee9-b35a-fff5560a5313	SADHASIVAM V	2127230701122	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1YHUdIWsH_2NhaX6cOvW4orxSoe8FWNwD	21	23
+cd078007-069c-484e-8e17-2b6d70baa040	SAI RAKSHEEDHA S	2127230701123	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1cS4AKW2SqmCiWPOHZHDN_iXUsvShJ9-2	31	41
+fb942579-879b-4cc9-8f18-df45cb144123	SAM SHASHIKIRAN P G	2127230701127	Electronics and Communication Engineering	\N		15	34
+b239dfa7-0b62-48f8-b5a8-1bd418235318	SANJANA PRAVEEN KUMAR	2127230701128	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1HD6_wXIYAZoXFFyPBGpHR4XBfaGIC0sq	31	41
+11e58be4-dacc-4a99-8e1f-40634bd01ab4	SANTHOSH M	2127230701129	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1SUV63su-6R4gJroWUw6HXK60t0XqLJ3C	30	41
+fa007fc3-3760-4eef-8198-c7cf668ac63a	SATHYAPRIYA P S	2127230701130	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1KfpMlZE82dhad7WaiN2JI5HmHRBEDF6u	14	38
+32c86b70-9817-4baf-b2d5-3c73100c7fe3	SHAGUL S	2127230701132	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1q4xtGvesBltX88b3YFid2DEbP86xE9QA	16	34
+80fe8e49-55fd-4bbc-9dea-5565805573cc	SHIVANI R	2127230701134	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1pVLImmCJMWFziy9um3RNQE-42uRR4zK3	31	43
+86f9e436-0d0e-4efa-9ef1-5b415b1f67c7	SHREE DHARSHAN S	2127230701135	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1RzImFEYboDToVBEszXAaHM_IPSsxYVUl	31	40
+5df56423-f02d-450d-8bbd-19e9e8e8d6a5	SHREE VARSHINI M	2127230701136	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=14xLuThm0Bh9Frj6HqnpvSOPay-D6Xa3I	26	40
+857a5785-53d9-4d0a-9592-856e7dde125c	SHRIRAM KUMAR V	2127230701138	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=13v8RaT5iKp6PYymFDKVRcMPHg0e_B-D3	29	43
+ca328ed9-29c1-4a6e-b784-11b375cd2d54	SOPHIA V	2127230701139	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1eVg4PoQs9v1ma0UvSROezO3L5_9zyhPU	28	40
+4e9357e0-bbc7-48f4-b629-17125f1053ff	SRINIDHI S	2127230701141	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1KXCINiL1IvQXRvnoyU4BlCsC3MVJeM61	31	41
+c8c41f49-f44f-452e-bed0-b84ad3a33013	SRIVATSAN S P	2127230701142	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1sbyzM_HKdFcLlLDdkowaJgemuacqIDCq	26	35
+819f57ff-943c-407f-8c87-383dc70624ea	SUDHAN S	2127230701145	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1zeMS8opgXYx4mSUVj7q30kVM16Hm0OkI	38	40
+c3dd69c0-218a-41b7-9653-811aeeea470d	SUNDARESH K	2127230701148	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1LNB7SR_kAJQaSQe35HjZL2zdb0OqEdd5	22	30
+52c13b7a-c16c-4e33-9e98-048dfc6862e1	SURYA K	2127230701150	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1E34Y4HU2ND1QUmmE47xYVbE0NUtLFRyq	32	40
+e82d565b-3684-48df-b91a-066fed1b192b	TAMILSIRPY T	2127230701151	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1uXQOt8O0bEw4YaTpcEd-HBk1JRbjSyjI	21	32
+37e25cf8-0358-4150-9210-a003a7d4644f	TANISHA S	2127230701152	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1xV5B-Dc8AMqa_5MsaY556-35Iirycw73	33	39
+14b19f4b-1dd8-429e-81d4-b53c22a43de0	TEJASWI S	2127230701153	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=18y01huYPem6oD2p-BqYA3oamU7mJbc8s	26	35
+4a7ae7d3-2e24-4b59-9424-05dc02c16507	THAMIZH ELAKKIYA A B	2127230701154	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1fNrIfYtSskM8KIuE04LLAahQ3-AwCVMb	24	16
+719d8448-c347-417f-b320-5489e3976132	THISHAN B	2127230701156	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1WZNsIzAWAoMloCh5Cy_i3lZlJS6px4ae	20	21
+acbeb8b7-d83e-4e39-9e93-40f3ff1e4652	TOUSHIK G	2127230701158	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1kbNzHsPOphsdFH6Zr1roa__40IX5PGzh	24	37
+38640d7c-eacc-45fa-b2e0-c0f9c8b6939e	VANMATHI SAMIKKANNU	2127230701160	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1grnTa6ORmnjshfJSuKJQVZ7oE0AxUsem	22	39
+09b435e0-dd2e-4875-8017-465133c1e7b7	VENKAT SRI CHARAN U	2127230701162	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1ZAwsnvbfkAgs3yAaLyyd_YNdtG0d9XFE	23	39
+1596ace4-f53b-432c-8fae-ecf0e06039bc	VICKKRAMAN KRISHNAMURTHY	2127230701163	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=19QloBWW39OQNufAUh_4oWXjKxHt7Fv3k	27	0
+bdec500d-37a8-4e91-9da8-0e972b2100f2	VINAYAGAMURTHI E	2127230701164	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1X4yMdGEeQ-WMtJHod-0NPCNpxb8RgSMd	19	31
+0beb221f-c93d-4913-ac9f-ca176692aa79	VISHAL SUNDARAM	2127230701165	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1uQPmmu6d1yKH2q4Ll3b3F7s8kLmDiAEr	24	43
+051982ff-cea9-4e77-8b15-8fa9f829dca4	VISHNNU P	2127230701166	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Hifdb6CsEfZ48oXxq-wdS7DfshVADW8r	26	43
+7ed08a96-2e2e-41d9-8002-1867736b95af	VISHNOOPRIYEN SRINIVASAN	2127230701167	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1094VW3Zs2pRObGu_dU8ABGig4Vrecprg	19	40
+5f49a1a9-39f5-413f-848e-995b9d09551c	VISHNUPRASATH V	2127230701168	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1gBX-mnJQoRAvI_kDh2eh2HjXRhmCPPgx	30	39
+58d3056a-842e-4572-b696-5fd0e679cc10	VISHVANTH K	2127230701169	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1xiukNQZA4WRlWmrZKcCemqExU_xNmqZm	27	40
+265e16cb-d2b6-4cb4-9644-e6d82b6a2a49	VISWA R	2127230701170	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1-hcppR-yxYJhOIRUz9PMlavIktyrE5JX	27	37
+f794cdd6-fb55-4a0d-be72-fbbfaaa7203c	YESHWANT V	2127230701172	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1C2ODGFiGRkCJP3qJcJP86IpJXm8O5DPS	20	40
+0eac51f3-e454-4cba-9bba-15372ba4f166	YOGESHWARAN K	2127230701173	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1IgH1PGoCfqdROPU56zm8Oads-7tKLRTj	24	19
+1f971b7c-3cdb-477b-a69e-3e5218e7ea0a	YOGESWAREN S	2127230701174	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1ZTScOLpes6gCC0R1MuepwP8HAjRU29BY	37	40
+c2217e7b-378a-4b09-b4c7-bc84ec1948ed	YUGAL KISHORE E	2127230701175	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=13XFhQJsJ6Awd-ZFZxDdskJoPBh0EUvWt	29	42
+8fd067c7-0258-4300-9ea1-799f8f55a68d	G. Akbar Basha	2127230701301	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1WPzwRCw9KjH4hcGIyhEJ_OihVyEL0d9H	21	37
+0e8d6d22-baa3-4b56-8e7c-42d6459c039e	P CHIDHAMBARAM	2127230701302	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1rJnKR7vaYMz9-P0ktDExcSbOptrNHo4i	22	38
+675d0f9c-86ed-421a-9052-c8c229dd7e48	S M. Sivaa	2127230701305	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1MuzLvR-ceWBNocpg5UvQOxbZbjGP68oU	9	22
+1fdec66b-6677-4cbf-b320-a65e5abbf864	V. Saikiran	2127230701308	Electronics and Communication Engineering	\N		18	38
+0aeb7b42-3ff8-4e01-b77d-55658a2eb123	M. Vikneshwaran	2127230701701	Electronics and Communication Engineering	\N		23	38
+f591bfcd-b45a-4145-b40d-e0dfdbfcb228	ABDUL WAHAB BASHEER F	2127230801001	Information Technology	\N	https://drive.google.com/open?id=1S0gbZ9XLvmVU5oUWUMbHmuSbkYCynq3y	34	44
+de857289-e368-4a9a-afc8-c7d596302ae9	ADARSH S	2127230801002	Information Technology	\N	https://drive.google.com/open?id=1cXlqcxtupHideTnITnGJSbJQw41O8dkt	23	40
+e1a724db-ad29-4995-8706-0e51d6c90785	AKSHAYA K	2127230801004	Information Technology	\N	https://drive.google.com/open?id=1CvAtW41Hjlb7M0WccUTSkiu_zzO6Bb3Z	20	37
+8bf9da40-3967-475a-997b-8f011f4765c0	ALLAN SAM JEYARAJ D	2127230801005	Information Technology	\N	https://drive.google.com/open?id=1XbTYHT7jy_f6_jlEp_1i8GbT2CJ6u_Ka	29	41
+574a486c-cc53-4f41-9f4f-ab13dd5fdac3	ANAND R	2127230801006	Information Technology	\N	https://drive.google.com/open?id=1wMaWbJpua1iHc15mNqEyADNI6S7J9SY4	21	29
+26462040-10a9-4d94-aba6-43b88de4be63	ANIRUDH N	2127230801007	Information Technology	\N	https://drive.google.com/open?id=1zoAe7BQhAP66XbK9ou2YCV1uWisdHXgV	38	42
+ef918fbb-58e9-4568-8a53-4ed3c0d4de5b	ANUSHIYA M	2127230801008	Information Technology	\N	https://drive.google.com/open?id=1ngdeKtOBEkKBlOQpfGs0BICDQ5VhQyNS	17	35
+3ffeba9a-cb3e-4903-b749-78111733bc45	ASHWINI P V	2127230801011	Information Technology	\N	https://drive.google.com/open?id=1NMNJYlwjsAHpp4wNEsoV5bdrrjxkRxzy	21	41
+22318afb-352a-4ac5-9f84-9fe879e1c61c	ASWIN KUMAR K	2127230801012	Information Technology	\N	https://drive.google.com/open?id=1ttIBmD-sRn15DdC6lbii8nGvWd2F-ezD	19	41
+0b9cb6d0-b456-4508-b183-407ec4c3de5a	ASWIN S	2127230801013	Information Technology	\N	https://drive.google.com/open?id=1v5794naBuNzxKiWXkmrS5mTfgyEA3x4P	21	41
+d722a94d-417e-4b9b-bc02-67cc6059bc17	BALAJI SEKAR	2127230801014	Information Technology	\N	https://drive.google.com/open?id=1UE-qPvvbTZ_GWq4Abp5ZkW-GePgqGXAr	15	42
+f17eb218-bdfd-406c-9a82-1b516e6f963e	BAVADHARINI M	2127230801015	Information Technology	\N	https://drive.google.com/open?id=1LaO3yx5FWeP_s3ykpIwOvCRfY6XK67XK	28	45
+76ea3054-5739-435e-bed4-55df6682b0c5	BERSHAY R	2127230801016	Information Technology	\N	https://drive.google.com/open?id=1hVS6uuDau5KbwSKJH2kyyAFrUjo5haNt	32	44
+1e3f2e84-d2b7-4d91-b173-2ce30503c135	CHANDRASEKAR S	2127230801017	Information Technology	\N	https://drive.google.com/open?id=19zTf-fTIhBePrm6XDNEs8JoAxgGKzFFF	40	40
+2e6fd048-8246-4f9f-b9aa-b89f1306789f	CHIDAMBARANATHAN R	2127230801018	Information Technology	\N	https://drive.google.com/open?id=1JxKgBnElqiPlfCKw5srPPJte2tcq4iM1	21	43
+36d64737-8b0d-44fc-88b3-3e2ddd8142db	DHANESH SIVADEEP P V	2127230801020	Information Technology	\N	https://drive.google.com/open?id=1fNovKhzggdzYfh5WoNVq7imBqzEUCUQZ	31	35
+3b9b89e6-d606-4889-bc90-766e44d78d13	DHANESH V	2127230801021	Information Technology	\N	https://drive.google.com/open?id=1fZzAjq3zZQBZZWk6MhKqq4gOZdo_Mtv1	28	45
+8bd13ece-e3aa-4437-951a-5b214727dfd5	DHARANEESH V	2127230801022	Information Technology	\N	https://drive.google.com/open?id=1huoINp-J0jj3-JlxihQWd3eQqk-dpoUe	17	44
+10f00b58-28ea-491b-bc12-2cf5a3365514	DHARANISH A	2127230801023	Information Technology	\N	https://drive.google.com/open?id=1ghEA9tHvdMZzOBHt2kY2w6TSDQIfbprN	26	43
+32d30682-0493-4c13-8736-8859cdf18ac9	DHINESH RAGAVENDAR R	2127230801024	Information Technology	\N	https://drive.google.com/open?id=149wQghcVeXpVn_H1GjOLOW0W805GIa8O	24	49
+58a10c53-f356-47b6-ab20-5d02b48a9b20	DINESH KARTHIK L	2127230801025	Information Technology	\N	https://drive.google.com/open?id=1n5YXFPp95-XH4j2D_SDU59phDmDaMDpT	28	49
+546eb85c-485b-4b8c-a4aa-71351fe8ecc8	GOKHULA ANAND S	2127230801027	Information Technology	\N	https://drive.google.com/open?id=1SkRKAWE4YLMWEkrS5iufu7KyvQ2WznCA	27	42
+f16421cd-7697-498e-87fc-c7b3325d01ee	GOKULA VARSHINI R	2127230801028	Information Technology	\N	https://drive.google.com/open?id=1jiRSfI_eSZ4jehPQk2AY7FDKp2-K9HrV	23	42
+b2889d4c-2f58-4c09-a37a-9eb6ff98bb81	HARI KRISHNAA G	2127230801030	Information Technology	\N	https://drive.google.com/open?id=1NuXrAkfSv8EmTUIJAC3E-a2AoF5cwTtt	27	38
+430eb6f9-98e6-4e5f-a1a8-a355b8f20d55	HARINI K	2127230801031	Information Technology	\N	https://drive.google.com/open?id=1JfGhEuLe1qBVYQkb_qaAvxrs3JkkiCZX	18	38
+580fed09-f65c-4cf7-9e42-89a0ce25da0b	HARISH RAJ KUMAR A	2127230801032	Information Technology	\N	https://drive.google.com/open?id=1TQjXHbNZWSU0f6ic7D4qky6JmwlNgH60	26	38
+32a5441f-9dfe-4bb4-b903-e43f54e07df6	HARISHA S	2127230801033	Information Technology	\N	https://drive.google.com/open?id=14F4P4AJxF82sG4G71iVQQ-Hgxs667AIM	26	39
+17c6e987-b4a0-4726-bb15-c85550251455	HEMADRI R	2127230801034	Information Technology	\N	https://drive.google.com/open?id=1_-nyaZ-01JIFmdsWiLyBBQvt2IjX6wWq	16	36
+b965f962-07d0-476f-8f45-bc8dd781059f	HEMANATH B	2127230801035	Information Technology	\N	https://drive.google.com/open?id=1AVsV4ZNEs0NTW3lKwdHpXJE4EqLfAzvi	29	42
+2fb7cafe-3473-4028-952a-f81d3d22e09c	INFANT ROHITH A	2127230801036	Information Technology	\N	https://drive.google.com/open?id=1bOlYl_e76-HhNB2xqeNrPfBPYZolW4wI	18	23
+9c309958-f36f-4a63-a3fb-df80102ac9f9	ISHANA S	2127230801037	Information Technology	\N	https://drive.google.com/open?id=1C1rFoWvMosuvFv28DFjDaTQ536KEdShc	20	40
+877d567d-d403-46fe-a03b-2395c6ffa751	IYAPPAN N	2127230801038	Information Technology	\N	https://drive.google.com/open?id=1zsp7rzlKng4uUc8I_YUUJXxW64berfwY	26	42
+371b7559-58a1-4cef-99a8-549134d5b2d2	JOHN BELLARMINE G A	2127230801041	Information Technology	\N	https://drive.google.com/open?id=1ePQRq0bLmNzaJN3chBjBWpkmrw6rjYji	33	40
+dbd68461-6833-473c-a763-0954ddc0f89f	JOTHILAKSHMI R S	2127230801042	Information Technology	\N	https://drive.google.com/open?id=1vQtyNfzsqGLic-CfMQaZa97lUrGj4ppi	29	41
+4a45f5b3-531b-4d4d-8f8c-22dafad93229	KAMALI K	2127230801043	Information Technology	\N	https://drive.google.com/open?id=1Fa-m3WbWEZGCQRW_zktJR09bCZxtogrn	29	40
+4ecb2c09-1b00-49f8-b239-9d32f0f49c9e	KARNAN S	2127230801045	Information Technology	\N	https://drive.google.com/open?id=1UyVI-6Cx-9zPh7ko91FAe8NE7KPpq27f	24	39
+d7fffa7f-3970-4301-b3c9-8e6aa9432b68	KISHOR G	2127230801046	Information Technology	\N	https://drive.google.com/open?id=1NNP2gYGGEYvRqASsMqgtcpLywwe8NFCF	21	32
+ea65df8f-57d8-4c98-b8d5-f0e7231e0c54	KRITHIKA S	2127230801047	Information Technology	\N	https://drive.google.com/open?id=1gLFguwzVlFy9DaOrf6xQd8MAkKnelQFf	27	42
+f32ca38e-8e1c-4ed7-b40a-0845c4b91b76	KRITHIKA S	2127230801048	Information Technology	\N	https://drive.google.com/open?id=1BEdR23ZynItgHYsfdoxUU-4_HsDC33np	17	44
+78837ca5-3bcd-4ea3-9b05-6ccd4a11330b	KUMARAN K S	2127230801049	Information Technology	\N	https://drive.google.com/open?id=1R9DXr6WW2tFlIrDIjgOxRUF4rr1eM6hV	21	34
+7857e076-b7bf-4d26-b7cc-197ba20c43d5	LINGESH L	2127230801050	Information Technology	\N	https://drive.google.com/open?id=1aX62wXQa743JY_hnguyAsZw_zMfcmzrF	26	32
+719adc50-7d3f-46b3-969c-dc9b9cbb67fa	LOTHER A	2127230801051	Information Technology	\N	https://drive.google.com/open?id=1dindNCkKl9rpBcCLTzYjcSJoYLzKOwLJ	20	32
+fd6e47be-3fe3-4522-8a3e-aaad21e92c4f	MADHUMITHA B	2127230801052	Information Technology	\N	https://drive.google.com/open?id=1FeKECqdB7spCgEuBBFDD9ZR0n32vQqBY	26	40
+6d54e318-b4e5-486a-b96e-213d099e4e73	MANIKANDAN D	2127230801053	Information Technology	\N	https://drive.google.com/open?id=17rnK_406pvvNWf3eyzli9fTDxo1yKRjB	23	38
+5acbd521-d3c7-4ca5-85eb-1d3623d9e3a1	MANOJ S	2127230801055	Information Technology	\N	https://drive.google.com/open?id=14i9jbuMbAFG5u9bXkrs_pUVXeuPLW9wV	18	31
+5bb92392-f8e7-4e72-82c2-f0efd9fe47ae	MARUTHU B	2127230801056	Information Technology	\N	https://drive.google.com/open?id=1oEPJN-JaOEGsE0xVu-YojUlapC5Lqo7D	20	39
+d3ee3f01-ad54-449c-98c0-187678402c2c	MEGHADARSHINI J	2127230801057	Information Technology	\N	https://drive.google.com/open?id=1M2waOjM8shC3_P4RhFGyJ2ZNDqB8F5uQ	28	35
+ca28ffb7-6bbc-4c94-8054-3e3d76127750	MEGHAVARSHINI S	2127230801058	Information Technology	\N	https://drive.google.com/open?id=1OeEzIzQ0TSkzl4Dz_AhhWSD9y5ZKcfbp	36	47
+15f56565-c0ef-414f-b7e5-ca8ade61a571	MOUNISH J	2127230801061	Information Technology	\N	https://drive.google.com/open?id=1OjurXHuIPSrgRzvX-K1KSQLSdLUZP14c	23	35
+f5f09364-d077-4fce-b924-2af4aadf0036	MUTHU DEVISHNI MALA U	2127230801062	Information Technology	\N	https://drive.google.com/open?id=1Fiir_kRvS0rk6OXDG33zf0SIV8SSYjji	20	48
+d0d86feb-4639-4f63-9705-e3bf400959b5	NAVEEN S	2127230801064	Information Technology	\N	https://drive.google.com/open?id=18fnqWU3FTJH8kha_82ndJSFyWFAM9_oy	28	37
+db62c697-47c8-4f98-99db-91fec9280a14	NEHA S	2127230801065	Information Technology	\N	https://drive.google.com/open?id=1UzJaOuTOxYLP6ZJqVt7LTs82T0RxaaUx	28	34
+abec54d8-a30e-46f7-8b2f-6d60890c89bb	NETHRA R	2127230801066	Information Technology	\N	https://drive.google.com/open?id=1QsZvqBYmwKsKxrFDWtuxzyxqKmlgCtqV	15	44
+5f4430f1-0e87-41f4-a65b-205808b37c38	NITHILA M	2127230801067	Information Technology	\N	https://drive.google.com/open?id=1ab2eJttdQOC-1p1X971p5UM57alR2Un-	31	37
+aaaa1c88-0aa7-434c-990e-a366d21a9d10	PADMAJAA P	2127230801069	Information Technology	\N	https://drive.google.com/open?id=18xEuMb2NuPk6PUfHAnMoPztEncakaAEZ	27	44
+5317e5ef-237c-4391-a797-d04938a63d7c	PAVITHRA V	2127230801070	Information Technology	\N	https://drive.google.com/open?id=1UoUR35h1FNnGkC3NryDEHnInWovFAOUU	16	37
+91c696c6-919a-4a5a-8088-1ec2269501a5	PRAKASH R	2127230801071	Information Technology	\N	https://drive.google.com/open?id=12priiNDQUg5xVULMk8O5MCUi7Li0H8en	19	35
+dec78d09-5642-491c-b319-f4a527bf39b4	PRANAV A V	2127230801072	Information Technology	\N	https://drive.google.com/open?id=1PKjjHkDOSkb6vHBFLY7s4u2jFdsiqbK9	30	44
+b88c2921-5150-4b37-9d20-e0c86e95ef05	PRAVEEN PALANIVEL	2127230801073	Information Technology	\N	https://drive.google.com/open?id=11G11gF3kCbjTS38qjlgCVnOWmdTbg9Tk	32	38
+4ea3b42f-1ac6-45b1-87e5-ef808b71df0e	PRAVEEN R	2127230801074	Information Technology	\N	https://drive.google.com/open?id=1JdXVGMRoUFOxz7mJ7EIap8OqKt1BMfcH	26	41
+b5578fe4-9b9c-4a97-a4d1-da1da30038e1	RAMKISHORE A V	2127230801077	Information Technology	\N	https://drive.google.com/open?id=17P-aS_-AfGiC-FPoe8eUtHBGCwbE8PHS	22	39
+404aab0b-dd4e-4768-9b6c-a9551c16aaf6	RITULAU S	2127230801078	Information Technology	\N	https://drive.google.com/open?id=1UiBzaLFog44exGD_UdhrZtV7DfHNjbZN	27	39
+50213a8c-0cab-46ad-92d9-31dcc8f58978	SANJANA MADANKUMAR	2127230801081	Information Technology	\N	https://drive.google.com/open?id=1SFnOlUHRJWnjIA3D1D9Vr1GOmw6j4C-2	27	45
+ea739780-6712-4a90-b489-8221729f109a	SHAHUL S A	2127230801083	Information Technology	\N	https://drive.google.com/open?id=1jXwh5JJvTQV1vqCtKxfoa4N8WeveC2pv	30	39
+72dc8022-2093-4088-8522-71bfcab6b6c5	SHAJINI A	2127230801084	Information Technology	\N	https://drive.google.com/open?id=1d1e70ujloF1wfKjd4nYaD46A6m6tUEDh	34	38
+468a32d7-b06b-4c7a-a7c5-6b28b3bbd21f	SHAMITHA K A	2127230801085	Information Technology	\N	https://drive.google.com/open?id=1f5rCDGlE3lFpnxpf7sfBTLLgW6s7T_7m	18	38
+d20c3150-2af1-442d-bb13-0b8b1effdf99	SHREYA V	2127230801087	Information Technology	\N	https://drive.google.com/open?id=1EpyKEQ9fxBnkzvy9C3NBC52lhu0TAJtE	29	42
+2f9df7aa-6b11-4dc7-af3e-52ed6809a759	SHRI SHIVESH V S	2127230801088	Information Technology	\N	https://drive.google.com/open?id=1Ksmxz8_jUwp1SLPajtRABGSz5OO8tINA	28	39
+cfac5947-64e2-434e-b2e0-daab571c4391	SHRI VIGNESH S	2127230801089	Information Technology	\N	https://drive.google.com/open?id=1te9jgOp3Y5eDm5VCOv0CdrxoAmmW808G	25	40
+a80fe26f-fd9a-48a2-92e9-c144bb6f03b2	SMIRITHI P	2127230801091	Information Technology	\N		25	48
+bbea4cee-54bd-480b-8367-dc1c42df510a	SRIHARE VIGNESH K	2127230801093	Information Technology	\N	https://drive.google.com/open?id=1WCXN1wBNctYPfzEpe8JMNgmRFTIGIF42	17	47
+76d9dc51-8924-4faa-baa0-79b5a2502b7f	STEFAN K	2127230801094	Information Technology	\N	https://drive.google.com/open?id=1B83jMuWrEjSVh0MQaVKWTi6R-h-E9nsy	30	47
+76e5c632-c0bd-4d10-9a43-e1cdd666094d	SUBIKSHA M	2127230801095	Information Technology	\N	https://drive.google.com/open?id=1i8aTk7kltX7jUiwOP05yNi5tMPUaa6yH	22	46
+3a3f8598-6244-438e-9bd2-ad004d3d4b8f	SWATHI A	2127230801096	Information Technology	\N	https://drive.google.com/open?id=1FhD-BTyT1hK7flnFWNk4vK88dWvlhlBq	39	46
+738cf145-81dc-4961-9dc1-bbcd2c2f81b7	THANUJA M	2127230801098	Information Technology	\N	https://drive.google.com/open?id=1oB0aU_jp7qsRg9CpGhungumRadxIOq8Q	17	46
+34dba1d8-2998-4a89-9495-24140cbdacaf	VARSHA K	2127230801100	Information Technology	\N	https://drive.google.com/open?id=1KAId-icyj9sADBh0okoUBWj2-FFvr2LH	26	48
+b3585119-d9be-44b5-9533-7e4e7de35f73	VARSHAA K S	2127230801101	Information Technology	\N	https://drive.google.com/open?id=1XRectm0Ddvtlf3lEUTl3O5fmoYd9iC5t	26	38
+03dca943-4e3d-4ae4-9958-ce5b56d854d1	VARSHINI M	2127230801102	Information Technology	\N	https://drive.google.com/open?id=1wjJBECHq7-iSki-BPAF9S3nNsNPQzJZ4	31	47
+07c8122f-edfc-4540-b167-3c6e5558a073	VENKATESWARAN A	2127230801103	Information Technology	\N	https://drive.google.com/open?id=1xerUqG9JoBSuK8PaNZKmcOEjD-geZERm	21	31
+3871102a-3f7a-42e2-94d3-37c2188f72d9	YUGAN T	2127230801107	Information Technology	\N	https://drive.google.com/open?id=1Po1Psyr-2xf6-crZChP-Hy1MSj0PggG4	29	47
+720ffb17-f674-4701-bc09-b053cc4bd440	NITISH RAJAN E	2127230801302	Information Technology	\N	https://drive.google.com/open?id=1qTnhRIyQPf_y5zw8qqSzAo5aOxmhbSIj	20	18
+5c17ee0e-3e33-42e4-9fdd-0deb1d59c2d7	Nithish	2127230801303	Information Technology	\N		13	27
+17e77478-bad7-4a3b-b036-019ea8ededaf	Monish Ram J	2127230801701	Information Technology	\N	https://drive.google.com/open?id=1MxKtAXRdPZWuVdJ-Jr71VWD_kIUZlP9p	21	47
+74d96280-2a0f-41f1-8a40-c09872f47623	AADHAV THARSHAN C M	2127231001001	Mechanical Engineering	\N	https://drive.google.com/open?id=109bNg6_3L1BM4A57VMuDLY2rRgnUp8Ep	19	49
+31fc7a75-e7f1-48cc-916e-f8d9e05c9d58	ABISHAK K	2127231001002	Mechanical Engineering	\N	https://drive.google.com/open?id=1ZX1Rgx-0zUemC-QZ1gA0_jLbXrJa8zr_	21	46
+0e8156a3-36d1-4b01-9deb-bed8f404355f	ABISHEK HALLEN RAJ M D	2127231001003	Mechanical Engineering	\N	https://drive.google.com/open?id=1hr6Q5fLmb3KiiKXbWTXlV7gwMvDs99Ti	23	41
+8f86c362-ed56-4a1c-bd86-a8f3548baeb0	AKASH G S	2127231001004	Mechanical Engineering	\N	https://drive.google.com/open?id=1RpaC9MYVxJ3_2KaNdgNUakafx8SyfVc0	22	48
+803a0f9f-e2f6-471e-98f2-4152b192bcb4	AKSHAY V	2127231001005	Mechanical Engineering	\N	https://drive.google.com/open?id=1i8BAvFgT3JOYGjXa1FAO-IC5EzKkT9G7	22	47
+9da5810c-7e15-4ac3-9c44-92ced255d7d2	ASWANTH M	2127231001006	Mechanical Engineering	\N	https://drive.google.com/open?id=1FwFAx_O_OXZzbc_Zsb7FgwebTeQ0f8-y	23	47
+43456f5a-82c8-42d7-a00f-ef97682ee8cf	BALAJI S	2127231001008	Mechanical Engineering	\N	https://drive.google.com/open?id=1RlyQAmLtLEPc5nMbLP6HeXhmsjltdEkU	21	47
+d1813b21-d52d-469e-978d-8f257c2710cc	BARATH KUMAR M	2127231001009	Mechanical Engineering	\N	https://drive.google.com/open?id=1JK7101MomPUls5cBsdt5zTw2bYhMroNU	19	33
+d3018481-8b17-43c8-91b3-9cdbc74181dc	BARATH SRIRAM S B	2127231001010	Mechanical Engineering	\N	https://drive.google.com/open?id=1A6YdJbAABUmf4eynqvvyqAiokhqc1oTb	23	43
+2c5c5ea5-9b49-456f-8f9c-4c0a613d815f	BHARATH RAJH A	2127231001011	Mechanical Engineering	\N	https://drive.google.com/open?id=1pzxlUpqX9xA-ru8D5UaaSnyAXfR_p4VD	19	44
+35094eb1-6c96-49ef-97fc-7dee66ffa0d6	BHARATHI S	2127231001012	Mechanical Engineering	\N	https://drive.google.com/open?id=1ZTzGrqAK61cEvBQS6CfzqQ1TzVIv2IPD	24	38
+617842e4-70f0-4bbb-8f46-5ccf0a0efb2d	DEEPAK KUMAR A	2127231001013	Mechanical Engineering	\N	https://drive.google.com/open?id=1uhN9xlDwePJPHMqCmopnY4YNFdh3K40S	21	0
+6521583f-b680-45c4-ae72-16e9ae3b781b	DHANUSH KUMAR S	2127231001014	Mechanical Engineering	\N	https://drive.google.com/open?id=1NCJCGgI5UyJRIcEYVSrq83EyJq7eVv8M	22	27
+40c288c8-ba89-4043-b3d6-b4e5e06d10b5	FRAGERLEE RUCETIN JOEL K	2127231001015	Mechanical Engineering	\N	https://drive.google.com/open?id=193NkLJODwvKn762WeSowj2JCasUGda2H	26	36
+aa6d3136-87d4-49bb-901a-0f758fda5bfa	GAYATHRI R	2127231001016	Mechanical Engineering	\N	https://drive.google.com/open?id=1QUWL4o3-Y6FApGt-eJ9gAvuLxyyMb5_h	21	39
+e6c12135-0959-467c-965c-e4ae64ca74db	GOWRAV K	2127231001017	Mechanical Engineering	\N	https://drive.google.com/open?id=101W-kYrSR7a1DWsWfRmxZ5wj2Q8rPDz6	21	36
+638dfc95-d701-4824-8e18-74135e91c599	GUHAN M S	2127231001018	Mechanical Engineering	\N	https://drive.google.com/open?id=1gvNLCsF-OYaY_YOnN2czeMBxkDr6KMl2	25	22
+fe8510d1-d9a3-472d-b13b-9bde47186bee	HARISH M	2127231001019	Mechanical Engineering	\N	https://drive.google.com/open?id=1Pw2gyVnKc8RyHj4sXQ4K4Ba5nsX5cA3L	22	47
+c3a4772e-435d-4d4f-bbbc-f6a0544412db	ILLAYAVENDHAN A	2127231001020	Mechanical Engineering	\N	https://drive.google.com/open?id=1v0MmzSZj3t9L3UXhelIXrWnZUivUShBD	20	42
+d9a71c3f-dc83-4078-a11e-eee13b95f44b	IRFAN SAJITH L	2127231001021	Mechanical Engineering	\N	https://drive.google.com/open?id=1fDt9lacZh0MrAJsNZdD3uU5RuR_vSduV	29	42
+f5f18e57-403c-4a0f-9280-6231ae7196f4	JEEVAKARUNA S	2127231001022	Mechanical Engineering	\N	https://drive.google.com/open?id=19ApUIwdmTnZTAcWoMLWKOxJlHk-p-K_e	20	42
+4bd872f3-f2f7-45d9-87a3-883483694a70	JETHNIEL BRYAN CYNTHAN PAUL S	2127231001023	Mechanical Engineering	\N	https://drive.google.com/open?id=109CKKvVNehniYHJqEVjJhHEkzVVHaQ6x	22	45
+96e81ee0-b055-41f5-88ff-36c74bd1b24f	JOHAN RAJ J	2127231001024	Mechanical Engineering	\N	https://drive.google.com/open?id=1mRPCyoSSw5LsXnZcKdZrAJbVYVwF-7gn	16	42
+33cb2f15-2c22-4e9d-a574-97823977b9cb	KAMALESH A N B	2127231001025	Mechanical Engineering	\N	https://drive.google.com/open?id=1Bi7cYStQJ3sqG-wCCu5iRigmAp4uQDQm	17	41
+866f1f13-6339-4371-bb05-3d8479783721	KAUSTUBHA KUMAR MANCHI	2127231001026	Mechanical Engineering	\N		23	44
+0e858322-6088-4b40-852f-ca2161dce50f	KIRAN G	2127231001027	Mechanical Engineering	\N		19	40
+f9e203e4-91cb-4363-a68f-c6fddb659248	KRISHNAKUMAR A	2127231001028	Mechanical Engineering	\N	https://drive.google.com/open?id=1sIj8o8Fr7ScXEmTKVG-LTTgtggrXQTT6	18	39
+4d7f9320-8a13-4f93-92e6-794cdabfd1ce	LOGESH K	2127231001029	Mechanical Engineering	\N	https://drive.google.com/open?id=1VHc0S_sbv1oU5KcXxyTSPvpQ-ktDwWDW	24	41
+e11e1f9f-81b6-4410-bb12-48fc58cefd1b	MADHAN MOHAN M	2127231001030	Mechanical Engineering	\N	https://drive.google.com/open?id=1c6AOsHa7erXOcVzebRunDjXs4JbHfHuw	19	41
+15dd7f45-75f4-44b8-aae8-8500d95fd3eb	MAHARAJAN S	2127231001031	Mechanical Engineering	\N	https://drive.google.com/open?id=1lgoQBWXo0I0ZYhqjNl_O4Dzr0wQeU0PZ	26	37
+bb876cd1-5922-437c-b6bc-4b1b4f9d51de	NAMRATTHA M R	2127231001032	Mechanical Engineering	\N		25	40
+30d250dc-3e68-4ef9-a01b-868cd6798153	NARENDHARAN M	2127231001034	Mechanical Engineering	\N	https://drive.google.com/open?id=10fg-GK_t6t6vkmXoBDtLvswFoqNdbYmO	19	44
+cbf02b07-cb7c-4393-8942-2cf6b06768e5	NITHISSH V G	2127231001036	Mechanical Engineering	\N		17	42
+bc1178d4-1a56-4281-9cff-b480d228b94a	PADMALAYA SESHADRI B	2127231001037	Mechanical Engineering	\N	https://drive.google.com/open?id=17-wF2wthjNj0-B6bUCb2xKfBhYkPOSXp	15	42
+ee18151e-d43c-453b-8a7a-2a3c31be9f5c	PRIYAN S	2127231001038	Mechanical Engineering	\N	https://drive.google.com/open?id=1qvMkVwvlPisYXIqqyuKp839iwlFk1NiW	21	47
+3c6a274a-1bb2-4e33-87cf-32445b975b08	RAGHAV A R	2127231001039	Mechanical Engineering	\N	https://drive.google.com/open?id=1Ep-0F3WtsARfu4DnoRPpPxNqzeQxDACd	18	48
+983d604d-e045-4ab6-bd69-b4d6b38adb06	RUTHEESHTAA SU	2127231001040	Mechanical Engineering	\N	https://drive.google.com/open?id=1On77mJa8fTAnEtGRkjlbnkdA2Pd_nuFT	24	49
+7ccc8ee0-b315-4142-ae09-df136038cf15	SAI KISHORE M S	2127231001041	Mechanical Engineering	\N		26	45
+9d3a2dcd-f06d-44c4-bc63-f1f1befd1a9f	SANJAY M	2127231001042	Mechanical Engineering	\N		20	44
+a3f7387d-fd40-42ac-9cd1-670a21ea547c	SARVESH J	2127231001043	Mechanical Engineering	\N	https://drive.google.com/open?id=14yMpciUpjRwpHDErIEPC9n74aq7vaLQa	20	40
+e97776c0-bd1c-47de-8780-4720b2aac7ef	SHARATH V S	2127231001045	Mechanical Engineering	\N	https://drive.google.com/open?id=1z9ztaffjzm3H4PlKmsE6b-moHp8GBONx	22	40
+52661308-ca35-4237-942f-4b4665dd8b95	SOMASUNDHARAM S C	2127231001046	Mechanical Engineering	\N	https://drive.google.com/open?id=1_Hrl_9TD5jHTdwjVV71T46B2N2c6YQgO	18	33
+bd69e8de-814b-4b14-a390-891d73d3438e	SRIKANTH M	2127231001047	Mechanical Engineering	\N	https://drive.google.com/open?id=1u43pJ7MkpGZbpyG-6IsLhvTkMEdrxlP2	19	40
+594f3a35-7849-4af8-bea5-22682bea7578	SRIRAM G	2127231001048	Mechanical Engineering	\N	https://drive.google.com/open?id=1UJ5ajsy_0DRtCkvapz2v6t1avWKQY7Ji	26	37
+f77cb046-1218-4edf-9c74-2180509f828b	SUDARSHAN MANOHARAN	2127231001049	Mechanical Engineering	\N		25	45
+fb900dff-7928-46a8-8424-14a487867e6e	SUJIT M	2127231001050	Mechanical Engineering	\N	https://drive.google.com/open?id=1lxyrWtqbzdtlq29jqNQHoNY0tcJlkTi4	15	37
+39ec48de-2e94-40bf-a7a9-41b90a37df05	SURVESH D K	2127231001051	Mechanical Engineering	\N	https://drive.google.com/open?id=1EVkS-oeqfPJAz0VBPVJDptgcGWbilaGT	17	38
+68e6b815-d0ed-419d-91ca-f5f2daad27eb	SUSHIL S	2127231001052	Mechanical Engineering	\N	https://drive.google.com/open?id=1-Q0xIRszHaNd0Ny0ODRl7-VlidL2ZH7J	19	29
+2779e96d-ab5a-44c5-adef-e5557a3843de	SWAMINATH P G	2127231001053	Mechanical Engineering	\N	https://drive.google.com/open?id=1ga1ms1fvuuuZEXoX511-ZFNF27AFd58A	21	49
+1bea7427-ab7e-41f1-98c2-54b88a802245	TAMILSELVAN P	2127231001054	Mechanical Engineering	\N	https://drive.google.com/open?id=1qP_Mc5tPRCqXTbBHnr9mMIihuyxRmEFF	16	33
+03fa8173-d5ce-477d-8813-a8e61bdc0e55	THILAKRAJ S	2127231001055	Mechanical Engineering	\N	https://drive.google.com/open?id=101y_Twfyk8gF_wU7ZDNij7Vg6AoLb1Ao	22	44
+fdcc6185-de94-40d7-9a7b-c32f1e57377b	Adithya JHA	2127231001301	Mechanical Engineering	\N		14	46
+370ee3ab-6ca4-4427-9d2a-a45f2a1686e5	Hariharan p	2127231001302	Mechanical Engineering	\N	https://drive.google.com/open?id=1DbHpuwvLr9jKbpfLkK6-_k4GdwHROVIb	17	42
+f61924b8-ca98-4aca-95df-be4cd1b9237b	Kabilan R	2127231001303	Mechanical Engineering	\N		12	0
+e2c9e952-7b86-4b7d-84b3-a1769e4fdee8	Santhosh Kumar A	2127231001304	Mechanical Engineering	\N	https://drive.google.com/open?id=1gA7lejDDxy8BN1hos9U3SKR5w3X3wqn1	16	46
+25f66b04-a5f8-440d-963a-4445bdbba059	Sivaraman S	2127231001305	Mechanical Engineering	\N	https://drive.google.com/open?id=1SW_ZPfFo_R3kDf1qCybJXvkn2wSJLx_h	13	45
+ba84fd9d-d2a7-47f0-af0a-6ee538d891bf	AAKASH RAJAN S	2127231002001	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1ZBsWYOqlU1rEeGY73hQnATsRycko4D6G	20	21
+a6c53b46-1fb0-48dd-9a57-a663bf586902	ABHINAV B	2127231002003	Mechanical and Automation Engineering	\N		15	8
+9977c7f7-712d-4983-9cc2-3109b62b6803	AKASH M R	2127231002004	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1iChgsl8Qo90BQvlS3ZAbBrkTCb-lmndd	23	31
+1a61a996-00b2-4caf-b268-2d3c952b64be	ANIRUDH R	2127231002006	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1YauQeKOjZ6LNPnBZ2g7dDWAPa-cgHR6N	28	37
+9eb8bae3-f0ee-4d99-a6e6-ff55c9b538af	ARAVAMUTHAN S	2127231002007	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1dfbqOrnKS5qcxoEqJh8dJAL0E2FSn8fB	23	45
+bc2c6c62-b374-4b84-be9d-09bff4b9b136	BALAMURUGESH G	2127231002008	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1tc3V_uAKwW9NXftzX3sALZiK98CnFhvL	25	32
+2902d589-dd45-4a97-aace-b8643f323183	DANISH JERAN S	2127231002010	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1LdCsRvRsFEODfMUJJeKXdNl19zmQf0dn	30	47
+ce9fdd10-4d23-401c-9af8-64f10db56b21	ELAVAZHAGAN S	2127231002012	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1_niCNwT_5GzJep9vnqZOmsTeG1PzRoTe	32	37
+5445087d-4411-4ef9-8f7d-26be93329455	GOWTHAM R	2127231002013	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1XfzweZxaW30KrQb0Ky6CGX0iQU_ZRxde	25	45
+6147b941-97d6-4163-8128-ac0be61591a2	HARISH RAGAVENDAR M	2127231002014	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1JJG-GdUhno50ZQ3ZFn5OXbGvDHZGLv40	18	38
+f3e0c5c9-0ff2-4c17-ab8c-c914f3f46221	HARSHITH B	2127231002015	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1f7qUxnug6Fy75-Vh3OwpGp2Y5cQNK6OT	23	48
+f39dac84-18d9-44f1-85a0-1f9228bbaf7f	INDHUMATHI C	2127231002016	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1S9lbm_rWSdi9OuIDQXsBCU8mEzANUMoT	20	36
+99427901-273e-4a96-a8f4-8337f1003d02	JAYA SURYA S G	2127231002017	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1LHDf_VOX6s-dTP9MvQ2hpHQKO2jw5B7M	27	42
+50b44118-7ce7-445b-aff6-ee2a805bca9a	JEREMIAH JOSEPH RAJA B	2127231002018	Mechanical Engineering	\N	https://drive.google.com/open?id=1NDP4_ckMTra_Xs886t5aOKGtvSu8Ixsi	24	38
+4e7c2d61-8ba3-4cfe-92ab-58042652ffce	KEVIN EDISON A	2127231002019	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1hKENLBcTXzs1TNGpnskq8Ydoqf4Y6hPo	27	44
+5823a7ba-d544-4c36-a97f-6e75ba5eea57	LITHESH C	2127231002020	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=11LN269i5BmE3wB09YJi0i894cq0UGsiH	26	42
+b7c744d5-ba09-4762-9fec-519fad8a9229	MANOJ G S	2127231002021	Mechanical Engineering	\N	https://drive.google.com/open?id=16w_rgeKlkXNrl9OjvfyKgA3kx7uBdobe	15	36
+a484b78a-791a-4420-8ae9-05d8b05290f1	MUGUNTHAN G	2127231002022	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1O9RdPN0rkKmZa8QkuOQCcwlcUtf9isKv	25	43
+53d12a77-fd17-44ce-89d6-04a0e6823246	NAVIN KUMAR S	2127231002023	Mechanical Engineering	\N	https://drive.google.com/open?id=1mK-ikNVlpgmYyTJtF-RJXI2_vFI8zh2P	24	36
+e6e195e9-3a95-4b1b-9154-0ca5547d700c	NAZEEM ZAAHID A P M	2127231002024	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1Tx_pUNiEv_XLXyDQd-PRGXGI-id0sdMn	22	41
+e8275e02-6e21-459a-881e-cc70d37299c7	NIVETHA S	2127231002025	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1msuLA-glh15wftj43TpIzR-9X9w5omNu	23	44
+8c924911-9a4f-4b17-8574-a10b3e3c358a	PRIYADHARSHAN R	2127231002026	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1D0Dvg_LzIonH_XR1ECzJhHSoOevBK9FV	28	44
+e243d102-ad72-47e3-adb0-0f756d39e12a	RAKSHITA M	2127231002027	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=15d83AIsZcsWNTwvtV7-ELM327z7vRo42	15	45
+da40cfe4-560c-47de-acf1-475126110b2d	RAMKUMAR G	2127231002028	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=13xuL-buixos3WdAuQhwvP8cTB_K0i7Sw	19	38
+7f103da6-43e0-4e2d-b119-878d1591b62d	RAMKUMAR R	2127231002029	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=19K2UjnZI1veS9X3mxRWJMzGg8P0BEju_	17	38
+b9b3c1ad-adb6-4e08-aaf2-4c949c40c569	SANJAY CHARAN S	2127231002030	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=11ApoinzMyThYJasHANE33N6M1sciaCyt	28	44
+f1f6b1de-e4c4-456d-98be-e21848fbd7ef	SANTHOSH KUMAR K	2127231002032	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1GtarVVwBcatkiMVDmMC7FKMStuLo3ykV	16	33
+f036a6d6-c2d2-4e3f-ab25-a17fed5bd228	SARVESH K	2127231002033	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1fECmZ3Xv-66SZYsssLUgNkz-IjewDSuj	22	34
+6093556d-ab37-4888-860a-39581a91817b	SATHYA S K	2127231002034	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1m4kdqRe78_Vyno6O2vuBGlmJGmxaDZob	26	33
+e62f0331-7617-455e-98c2-ee93d9b8b96a	SHEIK MOHAMED FAREETH A	2127231002036	Mechanical Engineering	\N	https://drive.google.com/open?id=1cxvJdd2xMlTnDSgQ1-LlBSv743b_jw-n	17	33
+fc520f0e-74df-4416-ad21-64e639ea7663	STEWART IMMANUEL A	2127231002037	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1bmj93bp0BWSv22WJx_jtqedez8pm0k7J	26	38
+be7081e1-0629-4adf-8e68-0a47ecc0e0ad	SUDHESI J	2127231002038	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1EjwiTmoJBF3a0S2WXDsD3BfVVIXw-wyi	22	35
+ca7b2899-e2be-4d5b-b8ac-41a02e97492d	THAMIZHARASAN U	2127231002039	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1KfmjncgdGbGhCtUsIH2otPi8bC3JLDEY	27	33
+9a20421b-0f1b-4692-b5fa-8e9936aa635b	THANGASARAVANAN M	2127231002040	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1dtCoMQy6KtQq8ovYaAJSJHorOuZAivur	26	26
+62de75f6-d302-443f-a7d7-2fbdb6afd7db	THANUSHKA B	2127231002041	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1VgGHQr4lRVaaQTBmT18NkpP16vdsPYks	18	41
+6e5af564-1f45-401c-bdec-d8132508f6e6	THARUN P	2127231002042	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1vS7FqJW9ap56WuxNhwCTqXvZVDzLmGGH	14	0
+824a7919-b727-44a1-84be-e3d933e2ad45	THRIYAMBAK C	2127231002043	Mechanical and Automation Engineering	\N		19	5
+457003dd-60c6-4054-bad1-67a14e775717	VIGNESH R	2127231002045	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1LqBKP3V929v73-lN6_TLqaRHUqmLDOBB	18	0
+c7f92bf3-bfba-4ebe-b01c-f112db793536	VIJAY R	2127231002046	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1OEuzrq2nkzzB2cHbweBy_HaurkrbR63J	27	49
+522f00f6-aeb3-483f-91ac-b6647fc8dd8f	VISHNU CHARAN V	2127231002047	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1qXpMMlsmRejFlNkrNKaJHIGXeaIeOumS	15	38
+c889cbbc-49cd-43e6-b792-993b0e2aa41b	YASHWANTH H G	2127231002048	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1mAxVLtbSNusJWbHlXyh8XLwYy-c2SWmI	21	40
+52365878-f846-4c66-8ef2-205a7eab82f0	Dhaneshwar	2127231002301	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=187HLHX90nw6yShMTUl-VZep2vCpvHmwv	11	36
+8c9a0674-a68f-4591-926c-12210bc80c62	DEEPAK N	2127231002011	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1A2ivkljBO6eUhbnB-chdk3fuqzMxW-N9	0	0
+6a65de32-2fe0-44e5-8c99-e919a952ab28	NANDHAKUMARAN S	2127230201033	Biotechnology	\N	https://drive.google.com/open?id=1rrUwekOZT8n8KgtaYDLZgE0KskCNZECD	0	0
+252358b5-6c12-43ae-b19d-b65d2ee063f2	LEENA K	2127230201029	Biotechnology	\N	https://drive.google.com/open?id=1Z2vbxaKls3VxPRbExS8lU3MnQypQtvX6	0	0
+8ba7158e-6280-4631-b300-a8639eb31cf6	SENTHIL ADHIBAN A	2127230201047	Biotechnology	\N	https://drive.google.com/open?id=1ikRb9iOBZ2ztRnPmXVINnDhtEdY2-HIj	0	0
+38056ce0-e257-4f8e-ad6e-b1faa5154b5c	https://drive.google.com/open?id=1ikRb9iOBZ2ztRnPmXVINnDhtEdY2-HIj	2127230201031	Biotechnology	\N	https://drive.google.com/open?id=1ChX6-uhO-jZHP9YlIRMCo7JtHzsQ9Yfr	0	0
+4eb50c5c-8472-4d14-af27-714a38e5e788	Vishal V	2127230801105	Information Technology	\N	https://drive.google.com/open?id=1ZIGU2UTUpbyeGVtkKTSEzsAkx6syxIY9	0	0
+d121fb18-a3d3-4a85-880d-765613d31a95	SAHANA SUDHAGAR	2127230201043	Biotechnology	\N	https://drive.google.com/open?id=1M65bj7wGnTZICyWsN4F8YQ5iGEORAqPL	0	0
+7cd187fd-5474-4b14-98e0-65fcfadf0926	DIVYADHARSHINI P	2127230201011	Biotechnology	\N	https://drive.google.com/open?id=1NWCK4DkxZ4JZVoDOm8XUEEss9ltyKmEZ	0	0
+9ff92a65-fa65-41cc-ade4-45a0930d20df	SIDHARTH S	2127230501147	Computer Science	\N	https://drive.google.com/open?id=10IMzfjJysycyG2CjX9pvdETR20SHIBSq	0	0
+617ee0b2-750d-4e87-9063-255852fe966e	VARDHINI B	2127230701161	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1VGW6dPic5EvwFRpOnAHTuWx4s_a7eYqp	0	0
+ec242199-a7ae-4794-a9d9-5992dde0f637	ALDEN MICHAEL A	2127230301001	Chemical Engineering	\N	https://drive.google.com/open?id=1QbyrFvFvidu8Lcj3-9oSdPFEm6338EvP	0	0
+7e899857-f303-47b3-8549-57517cf6e233	ANUSHA R	2127230301004	Chemical Engineering	\N	https://drive.google.com/open?id=1lty8dBq6ZXv_5-0EkJT_wBdOpsotYMUW	0	0
+d2839665-643c-4f92-940b-56f141d31acd	MADHAVAN R	2127230301022	Chemical Engineering	\N	https://drive.google.com/open?id=1iSZdV2z54NMxtLs5RHg2wuD6SgfKGsmu	0	0
+e2086818-8da1-4fcc-9f4d-3cf2ebd42eff	VARADHAVALLABHA T D	2127230201057	Biotechnology	\N	https://drive.google.com/open?id=1rBQ1-3ohBvzStMg_4jrtVyrJWXJ8Z1vU	0	0
+5c71319b-3279-4bbc-b582-c419b20a9cae	DISHETHA K	2127230201010	Biotechnology	\N	https://drive.google.com/open?id=17L5sALi3zEFp9-mp-VMd3llvmY1F-21n	0	0
+001ea126-d19d-4cf8-8736-7101b50ed87a	RAKSHITHA V S	2127230201037	Biotechnology	\N	https://drive.google.com/open?id=1u4_4cMjXWGWyBQrlUF1a-hUlEVK-zZ78	0	0
+a2cd74bf-5e29-469d-8834-70f8d8d6b4ff	BHAGAWATH KUMAR M	2127230201005	Biotechnology	\N	https://drive.google.com/open?id=14wkr5-YODQGbdoZonngHJXAOt5pZm_xh	0	0
+b24243bf-9dd1-4cf7-ab29-36fa3d549f5b	HARSHA VARDHAN M	2127230201019	Biotechnology	\N	https://drive.google.com/open?id=1O3bJufyp-cyjTwLkxPt5GX6qsELAuRjt	0	0
+a741a522-b2a7-4a15-aad2-e19e9dbb95b0	SUBRAMANIYAN G	2127230101012	Automobile Engineering	\N	https://drive.google.com/open?id=1XAjHbT8MiYjkkrn8zvwsptml5fzmfM88	0	0
+c8c26219-699d-4edd-bb38-21ce307014dd	SURENDER SAH K	2127230701149	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1aR4ByXB8STG70K6hZhjTPoNZ1FpqJGtW	0	0
+e245fac6-bc7f-4551-a2ac-ccc03f7366be	G.A. Lokesh	2127230701304	Electronics and Communication Engineering	\N		0	0
+1a15d587-ec8a-4bc3-8fff-fb99e73341e5	PRAJEETH S	2127230701102	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1mrZchgF2sBpluNbvnIF9DYEWpYFImMSr	0	0
+439ebb71-0b7b-46fe-b3de-3cdbadde2eb0	KANIMOZHI H	2127230501068	Computer Science	\N	https://drive.google.com/open?id=12r7iVmqg4xyaTzc4EVTnxqidJB2tjMq2	0	0
+1339d205-d499-475e-a4e9-0bac38f9b9dd	RAGUL P	2127230501112	Computer Science	\N	https://drive.google.com/open?id=1hkUU0cDzft-24NdAel5Fuq8S69BaYM8j	0	0
+3dd14844-1e5e-4683-a86b-b05c04c0a2a1	BHANU POOJITHA M	2127230601008	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1WjQUEujasdllBHfRioyXEGW_5JKF7Im6	0	0
+064b4b50-d7ba-4f10-b35b-cb4702424938	PRANAV V KRISHNAN	2127230701103	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1fXNnVLBNoLnCAlbGI2hI_O7nvba6I94u	0	0
+a20ca561-ebda-4c4a-aacf-f5f69c9c37ee	KATHIRAVAN S	2127230601037	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=111fJbELbo7tmhRMYm3OAqmxv-7bi7HOG	0	0
+985cba0a-84b2-4292-a7b2-71e63fa75c2e	KAMESH R	2127230601035	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Legb1Db81Dn70y_7_Db4CPD9q4F0xzQt	0	0
+a2197f4c-b857-4611-9031-2b6a23239b24	NANDHA BALAN T	2127230301029	Chemical Engineering	\N	https://drive.google.com/open?id=1fBOpgKYsMeKim8n3gLegYCG0qqewemO1	0	0
+fb534978-892f-401b-aa84-e5ec3c495812	VISWA M H	2127230301054	Chemical Engineering	\N	https://drive.google.com/open?id=1zPdc6XEzCc1VI2SdsIfrKzSf2VMb9ZjL	0	0
+17d704f6-f2b5-4d34-ac51-9fa746aa2d36	DEEPA S	2127230301009	Chemical Engineering	\N	https://drive.google.com/open?id=1zXdo8V7pqbapNJdcMq9tJzVnDE0X7Cef	0	0
+3f6742dc-f094-4cf6-aae2-c054490f5bf0	AKSHAYA M	2127230502005	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1DWe8HBu1jg7PKX15Ic1yhL_tUsNl2tXw	0	0
+eaedba7e-7c02-4b0a-b05a-21dac78c3dbe	JAYAGURU RA	2127230701049	Electronics and Communication Engineering	\N	https://drive.google.com/drive/folders/1MBBgMrgQ3SbXIEB0kHLndN8grh07VmPb?usp=drive_link&authuser=1	0	0
+f8f5fa2b-d308-416f-9b6f-795abaae257a	NIMAL S	2127230601054	Electrical and Electronics Engineering	\N	/uploads/resumes/2127230601054.pdf	18	35
+2c871563-65ac-4ef1-8fda-ca6c28afb823	ABHINAYA V	2127230501003	Computer Science	\N	https://drive.google.com/open?id=1Vuen6csijdNl_s29HEUke_0Jf6Kqo5IP	0	0
+c80c0576-d1bb-4e0f-b430-3b714ec93586	PAVANYA K	2127230502073	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1qim5tb_ElX0kUqFUloyREQ3k00LUklKk	0	0
+32e6245c-f483-4eb0-8829-942dca8c3d55	HARSHITA SOLAICHI C	2127230502043	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1yPC-VdboCkR1GIpSd7IxoW9aZDxXhcPx	0	0
+a22b33fa-0901-4f81-ab1c-3c8c67b437ef	DIVYASHREE M	2127230502029	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=10CVv_jcKGAXLZ98uEByOJTFyMtliyqYU	0	0
+c96bf50a-7be7-4426-a830-95a7eca92cd2	MOHANAKRISHNAN K	2127230801059	Information Technology	\N	https://drive.google.com/open?id=1XsflIwy6_ws6sPb_MHh-gGrn5r16Mp7r	0	0
+bc345b3b-a0f3-4b64-ad46-e1adae8ec97a	ANTONY LOUIS J	2127230701009	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1bTzTQdesi3Mv5xlE70FeQKpwTrXs-0zy	0	0
+c5e76483-5372-4722-b138-1a543b373c16	SRIVATSHAN S	2127230701143	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=156qMQVaRgMCf6GXtxnBq7rEubIJ7zMo5	0	0
+c25e65ae-fcfa-485a-9aa5-b171d72aa82a	DHARSHINI S	2127230701028	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1pK4KfooRdxgFnO_IXxjl25Yad1FQzyMu	0	0
+5a45464c-a601-40a5-b44f-0f1fa3e2bcd8	INDRIS P	2127230502045	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1qQIVA7wQRYmvGo_Gr5PNz1wlEF3GC18N	0	0
+e82007fe-2394-4f86-888b-785fd7a27021	SIVAKARTHICK K	2127230502099	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=10thtd5ccGvE9VPGhAbpKL1Ab6BTDQU99	0	0
+7bffe557-d591-43c0-874c-65b80111cac8	SUDESHWAR T S	2127230502103	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1SWyOsREOL_RIdRsybd9fVSTbfkKbaYyF	0	0
+a61f67d2-43b7-453e-916b-bfa40bbdf74c	SAKTHI PANAYAPPAN P	2127230701124	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1MHaBHaBb5rATdyDVuKGMZfsccgR-v4WA	0	0
+fdfd2cf5-90ab-4f8a-8e96-3db6966c8850	KANDASWAMY M	2127230701057	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Jf97aPA5Mr1Z3K9RkZ1MAOfr90p0WiNp	0	0
+2fc8dd8c-4a6e-41de-a45f-6893de433bdb	S. Harshath	2127230701303	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1xmrdBjt4LUAZfDdaJuwEfx3aGv9ZoZY5	0	0
+a1c3e7ce-1dd8-42ce-b912-a4604d936f70	BHARAT S	2127231002009	Mechanical and Automation Engineering	\N		0	0
+973a26a1-19dc-4c70-b8c7-861411a655a1	HARISH K	2127230501047	Computer Science	\N	https://drive.google.com/open?id=1AY7hA5Fml5v5yx5DNQjiviSIHUB6ZN_8	0	0
+d106315c-716d-410b-832e-0514731527b4	MAHATHI R	2127230601046	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1r993hfgyTgaE-PEJYSjd5NfTQ0CVutqC	0	0
+8d73b47b-ce1f-462a-b234-223beef43c13	JAYARAGHAV V	2127230801040	Information Technology	\N	https://drive.google.com/open?id=1CeANI4ZgQx8uqR95dmDEhagwDvJUarYG	0	0
+421451e7-a61f-4dff-9e7c-3e8b9b8ea2e3	DHARANI D	2127230601013	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=18dFQgRTfcfGXfIYwJH1DNvSg4qElLK3A	0	0
+dfb4d338-0cd7-4252-8f5e-9773ec6c9ed3	NITHIN V C	2127230601057	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1Q4A1YNn6hQhWbWL1-fs0Z0m34yOhZVX7	0	0
+16485858-2df6-4b52-b567-52ccc8943851	SHREE KHEERTHI AGRATHAA N	2127230501143	Computer Science	\N	https://drive.google.com/open?id=1l76EJL-mR3H59hJQl7VAwQrbHV7-pzvo	0	0
+d1e6c7a7-1118-4731-92d6-f970bcb59b0d	HARINI K	2127230502038	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1SygdE-VOAYZvZyC6TNQM8gyfn7E58ywk	0	0
+a42a78c8-5c8e-43d0-b2b3-051eda4cbb52	Bharani T	2127230701021	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=10qH4HuAa3K1CNr3kbdJYqvNMYi1L1q_G	0	0
+b2c56a10-484e-4657-a107-a6cd702d045c	SHRIKANTH N M	2127230701137	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1HdQjsmkNwjsTdM4HAOyxtUd1PwPJmbnK	0	0
+bcafdf88-6a99-4e29-9ea8-95fce540f1b7	VASANTH R	2127231002044	Mechanical and Automation Engineering	\N	https://drive.google.com/open?id=1C7FqUmpra7tKunvYGEbNAH_UrsR9eG1n	0	0
+19d0365c-e44d-420f-bbda-bb80e09e7662	KEERTHIKA.N	2127230201025	Biotechnology	\N	https://drive.google.com/open?id=1ooNKt5TDKYHmMka9p2Ikd3aipCbWHtJu	0	0
+a376f133-7a24-4b7b-9a24-683de717e390	SANA	2127230801080	Information Technology	\N	https://drive.google.com/open?id=1FRnYah1t4tIqMoTmBwh2wIYahdksAjR5	0	0
+c200dfd8-fd66-47ff-813c-25325aa3bc73	GNANAKIRUTHIKA G	2127230201012	Biotechnology	\N	https://drive.google.com/open?id=1y_6_AqvPfP19fpmWewvjQDvl2yAdEXxD	0	0
+dc5d753e-b685-429b-84b7-5f3d8983b5b1	RUSHIL P	2127230201042	Biotechnology	\N	https://drive.google.com/open?id=1GTMfZP9tMMRz2VvxMXo2prMaz1Vve8Hg	0	0
+b6ef8838-ed1d-45a2-86d5-d563133ec76c	DIVIYA SHRI S D	2127230801026	Information Technology	\N	https://drive.google.com/open?id=1KvXPFtoiAf0892M9MUgahN1sPrxPOY-M	0	0
+49eec49a-462d-43aa-bca1-363c0d6b08cd	PRABAVATHY L	2127230201036	Biotechnology	\N	https://drive.google.com/open?id=1j7xo4IZK_AGRkDfYDmVR3MpsAdWtQuD8	0	0
+dc4a43af-3059-4ed3-8a4b-4968716ad34e	AKSHAYA N	2127230201003	Biotechnology	\N	https://drive.google.com/open?id=1Ezd0Nrfw9W8xn3WQKTgN7g8SOs70KEtE	0	0
+c0516714-28bd-4610-859f-1bbbfc26f8a5	SUSHMITHA I	2127230502105	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1W5W3TSQGv-vT8gseTXqMhiHq8c-vSluo	0	0
+46b0a193-b783-442e-828f-2fa1c48e26e7	DHINAKAR P	2127230501034	Computer Science	\N	https://drive.google.com/open?id=1BKpLOhblkLz4-E3WHO0akw_GT3OTksRO	0	0
+68c923d8-49ec-4a0b-936c-cb435095c46c	HARINI R	2127230701038	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1bbd3jwjY5PbFl0d103txdjRuFdcUnsDS	0	0
+aef6e97e-ff16-4bac-ad7d-57eb26627e50	NITHYA V	2127230501099	Computer Science	\N	https://drive.google.com/open?id=1QExOdANOtIDv6cb-cSCCuYKXorCgOtEP	0	0
+71301d6d-ebe0-476c-b97a-6aae8c59c02a	SUNJANA MANASSVI V P	2127230501156	Computer Science	\N	https://drive.google.com/open?id=1oenwrMlFxPPCis15jkYtUepDhtduIzP3	0	0
+d24af4ca-00c9-4fa5-acb4-412ef174e2c5	RANJIT S	2127230501118	Computer Science	\N	https://drive.google.com/open?id=1XGOTtp0UJYBaPqNuMqywhJPpEvtNnZu2	0	0
+b1b1be82-285d-4313-b50c-82ec04ecc331	THANGANILA T	2127230801097	Information Technology	\N	https://drive.google.com/open?id=1kxArC-zEHNkxAJLRz0ZJSM2K9lZJ2V-T	0	0
+5fd2640e-b4da-4940-aba4-f00a33498231	YATHEESHRAM S M	2127230801106	Information Technology	\N	https://drive.google.com/open?id=1OHC4bTOLhQ2if9oCLQHapL13sTICXIPN	0	0
+86d09afa-c8e7-4a65-9465-5fea7fdfc275	BHUVANESHWARAN B	2127230502020	Artificial Intelligence and Data Science	\N		0	0
+aa8228ac-abb4-4714-bdaa-71f5909e35ed	Stefan K	212730801094	Information Technology	\N	https://docs.google.com/forms/d/e/1FAIpQLSc-OCQJxmFisGPx4l_wT4fKZ2U9oafFodeq2vXshHQPknZV0A/viewform?usp=publish-editor	0	0
+b32f14a5-bf79-461a-953f-52290bc0ee41	LOHITH ASHWA S	2127230701071	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=16vvM_pwMGL59nk537wvkQ4BMx_Gc9yXF	0	0
+95bf410c-d41d-47cd-8658-a13f696f9e16	Anjalidevi C	2127230	Artificial Intelligence and Data Science	\N	https://drive.google.com/drive/folders/1E6gbIQoA9nLF69p1H8VjRaVE2YUpyt7e	0	0
+d52e0bf2-db05-4709-adb5-50083dcbc130	AKASH S	2127230801003	Information Technology	\N	https://drive.google.com/open?id=18dxUs1yvcfHkJ_STbB6YjdKT6xIirSv_	0	0
+4cef0d4c-f866-4d08-9d69-ede456e1c64c	NARESH KUMAR R	2127230701086	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=15Zf066yzKQwHumKVdJlP9X6NXFQH8aPV	0	0
+130ad1c0-f847-4760-a686-0b8ae1eeaecf	BALAJI E	2127230501022	Computer Science	\N		0	0
+5e7443f0-9d4c-46c3-8c92-bc8d90eed3c3	MHADHURRA CHANDRAN	2127230501306	Computer Science	\N	https://drive.google.com/open?id=1xDEiD1YKqFkiVbU__bPHr990LquOur3i	0	0
+c0f4af70-33d7-4dd0-aa1a-95434b6ca284	ANUVARSHINI A	2127230801009	Information Technology	\N	https://drive.google.com/open?id=1NU99rsfP1TxwoOT7j8g3tVXYK_v0saCC	0	0
+8957fe91-2b5d-40b5-b517-7add7765754a	JANANI R T	2127230801039	Information Technology	\N	https://drive.google.com/open?id=1mpBKo8Oy6xsPDMbMqhsMuMe16ADYfgwI	0	0
+d29ed03e-5f40-4d17-9c2e-8e53f83fe5a3	HARISH RAJ S	2127230502040	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1ltYF3J3l4m7gDoSezZdf6kpC6W64lb1H	0	0
+18ac9154-59f7-4213-9971-6c3f05611af7	Ayush Nysik Joshi 	2127230501	Computer Science	\N	https://drive.google.com/file/d/1zy1EkHIvuWO8YbqNlFhQD6zzaIoT6jDs/view?usp=sharing	0	0
+bb71eecf-6e70-48bc-8f4e-be1809bf46c3	SAI SHRIKAR	2127230502087	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=17WRsM2P2tw3aERt53L2XjZZSog827pvQ	0	0
+a3a263c3-4f5f-4d1c-a236-a790de3eaf5a	BALAJI B	2127230502015	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1dsLgflUHY_YtsISut76GkCcV8jnCOKye	0	0
+a5a1951c-4f46-43ef-af83-f56ae93dfa55	KARTHIK SINGARAM M R	2127230502053	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1l_Lee_KL-WWmnkgQagCQG4Gf1e-VpJIS	0	0
+c463162a-cd93-45a1-8816-06208f316f12	HARIHARAN S	2127230502037	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1acVZR1333ybpJLj0IvTxfs-qw_23V3Ls	0	0
+7737e46d-1e93-4bd2-90ae-061eef9e3e6d	ABINAYA P	2127230701001	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1tmg-Q2qg9nMKHzEwj7GjD5sTFxG3XrPK	0	0
+f49bb6e2-a8f2-4c1c-8fec-6881660f6823	YAJNESH JUTTU SUNDARAM	2127230701171	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1zeMS8opgXYx4mSUVj7q30kVM16Hm0OkI https://drive.google.com/open?id=1Gtiujv_8YrPZcZFANRdE3xHvJh2cs57D	0	0
+97814d5f-1678-4e45-9d8b-06f1f65135b2	KRISHNA PRASHAD P	2127230701066	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1gP3v-MH43QMDgSnZVtfyPDEgGgwkk8SJ	0	0
+aa42183f-7b31-4c49-9d4b-6a010c3c065c	JEEVANANTHAM S	2127230701052	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1cJtS2mzxnZVm8vdM_Yote-1SaIjuhbjl	0	0
+797c7fdf-cd2a-4f23-a3b5-4411ee4b82d4	MANIMARAN M	2127230601047	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=10cPrkQCgBPEdkLnxcgGsogYsOzeZXQpB	0	0
+b6ed4bd0-dd4b-4e88-b362-f59a9d1fbe8a	DHAKSHA KALIDOSS	2127230501030	Computer Science	\N	https://drive.google.com/open?id=1jO8QVSzXNbZ2zzwAvwIcMvWgoAxHZUSi	0	0
+81cc7224-6cea-42f1-8473-a765b1af80a3	KAVYA KAMACHETLU PRAVEEN KUMAR	2127230502058	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1XZjHBTQGULMzrKmhZWP26YXkghBAqPEb	0	0
+2aa771ff-0292-4ebf-b253-f7bd5903a285	HARIIS P	2127230501046	Computer Science	\N	https://drive.google.com/open?id=1g6_xWbYNm6ylTvpJSzgwqm2Fk7i3FPE1	0	0
+a2e0f3a4-5806-4250-ba3c-bcd02bc53a2c	JANANI S	2127230501059	Computer Science	\N	https://drive.google.com/open?id=1uHZDoyayaVYPDTl5Sc0fWjRjzDyepIgE	0	0
+0c126d35-19f2-4288-8f94-4aacd7881983	GANDHA KUMAR G	2127230701032	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1ZqfqDnZC9j1Lu4fsK_UZF_ZgNH1YJUxU	0	0
+712a89a1-933f-4087-b1ba-101e986d2c9f	ASHWIN J	2127230701016	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=11i5lkSjAbUUrfG2kOiGFPgJqrIXUocjo	0	0
+4c5c8579-b043-4971-b48c-e065b63ba524	LOKKESH V	2127230701073	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=112gCfv26HXt3Fuf8K7_xWZ19zOD6z8I9	0	0
+91cc3204-8000-40f6-a361-0d2e106924ca	PREETHI P	2127230701106	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1sJHJhp-eppiWPxENkhZ-mS5uIp1286Yp	0	0
+4055ea3b-fdfa-4010-bc27-cae32a72c854	DIVYA R	2127230701031	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1BbtmfcVFjujqemGfbd9oMV6uUfOeUtfp	0	0
+2fd6d890-d6a7-46bc-a01a-4d09d9fd0066	M DEEPIKA	2127230501029	Computer Science	\N	https://drive.google.com/drive/folders/19sg-8fkPXl-6WVNozymiqrtEtCjJrn9w	0	0
+c923edab-f218-48a5-a9b2-52e7d02901f8	PRAVEENA G	2127230301033	Chemical Engineering	\N	https://drive.google.com/open?id=14yIi-T4sJ9IGX6R0jeKlPNDzDfWjEsc7	0	0
+c2ea66e1-f7a5-4f7d-a2bb-fe3fda96c8d0	SIVAMANICKAM G	2127230801090	Information Technology	\N	https://drive.google.com/open?id=1BYp4p-Mxepixg8ZEi4kzobZbodCjGdnM	0	0
+f51be337-a107-4bc3-9411-e2db1e2982a1	SHANJANA B	2127230201048	Biotechnology	\N	https://drive.google.com/open?id=1alVK_IDS-oR_9C-PPI_z9c1Nwooq32tX	0	0
+8e38ac15-a7cd-42e7-9203-16d74e841997	PRISHA JOTHI J	2127230701108	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1tjIHRkgt4sfoYy1RjthtUdbdvxp88DP2	0	0
+db5fc17f-e622-4dfc-af38-9e5f735c5941	KISHORE M	2127230701065	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1AYYua9-dbNjO5ZWj3h64Oli41h3HaMJy	0	0
+a05d0084-9da8-4929-b54b-b13d031c0e01	UDHAYAKUMAR S	2127230701159	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1eDEJG7q796_Y7R_BwTtSukH8gDF2bnDy	0	0
+75fa97e5-674a-452a-b506-edb4b706ea3c	RAHUL K	2127230801075	Information Technology	\N	https://drive.google.com/open?id=1L2R2L1AYIGm3oxtX_fCJVDQ0U_pIp01y	0	0
+286c6922-f303-4985-9ce8-77923659104f	VAISHALI B	2127230601093	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1FZuMgK6KUItHJMbRoJ1DQuHazhWVLBCk	0	0
+92f5d5f5-1286-4e19-ab96-57626ee6226b	KANISKA DEVI B	2127230801044	Information Technology	\N	https://drive.google.com/open?id=1xv7GJKVQA75EK7t_-AHqneK1k7Q1PuLp	0	0
+4a94de9a-51a0-4e6d-bb01-76e66bb04ccf	Sathya Shree T R	2127250601089	Electrical and Electronics Engineering	\N		0	0
+3b38b3fd-2548-4568-b0e9-0a8b9aecfce5	SHARATH V S	https://drive.google.com/open?id=1z9ztaffjzm3H4PlKmsE6b-moHp8GBONx	Mechanical Engineering	\N		0	0
+08d34ea0-4135-45ec-a3d6-459cc17254cc	DEVASENA C A S	2127230801019	Information Technology	\N	https://drive.google.com/open?id=152MewSGjhoLTModvGNjiRgNYzHySkmrR	0	0
+e8ca44c8-f526-4838-9675-b6d26c88e283	ARUNPRAKASH S	2127230801010	Information Technology	\N	https://drive.google.com/open?id=1wjh6khbv215kP-NFd991IPlNrarcOell	0	0
+5269c469-3b49-4bbd-ac19-10823c1adcdb	DEVANANTH V	2127230502023	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1OriFFxv-YUVzosS6fD9qv37ZPPIKpHCx	0	0
+47f18a11-5a19-489a-99b1-43c95df070f9	YOKESH KUMAR G	2127230502123	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1R1Dg4cP81gYg2RORo5dtJl7wT7qruv-P	0	0
+2ba76c4d-e664-4b22-966b-e7fe6f822f38	RAAKESH S	2127230501111	Computer Science	\N	https://drive.google.com/open?id=1oM5iA06pFUuAW0yL0kxhgvSlD-pQmwqu	0	0
+151a0387-3e44-47bc-8f71-4ac8e00dc27f	MYTHILI K	2127230801063	Information Technology	\N	https://drive.google.com/open?id=1s3qY-48VUQDJ5w5Mx9UsgFVTicIrj6be	0	0
+536127a1-04e3-4ac2-b0a5-ec11d43ab844	SHANJAY RAM S	2127230601075	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1564SnalJvp6Y-nESJsffH-yl2dalXxDB	0	0
+295d5fdf-a7bc-4a2b-9452-708b88a403a3	JAYASUDHA R	2127230601032	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1T5bQpfhD_WqTGBbdflzHROW69NPq8d1L	0	0
+daef5ff4-02d1-4e03-8d5c-f87b02c5bbc6	VANDANA E	2127230502112	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1lRsdxJFtH5ESQ6csaKxCmjRsJ4IUmLtv	0	0
+86b71a3b-3a0d-4841-96ed-18405bd03cee	SUMAIYA R	2127230401021	Civil Engineering	\N	https://drive.google.com/open?id=1DaSkuX0c93AmLu-VPOfWz5HT-yL7Q0fc	0	0
+e96b16a3-3e71-4561-9803-4f6b392cce3a	ARUN D	2127230701013	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1-Wh_trBPam6GoPlCm1OKWxyHnLjWleCY	0	0
+dc0409e0-6205-49b6-be61-8798f6802580	KAVINKUMAR R	2127230401010	Civil Engineering	\N	https://drive.google.com/open?id=1SYW0runGF6LA0YhiriHI5r4y8Hy37NqE	0	0
+5872d4ae-7dc4-4e12-beb0-51715e698a94	HAMRITHASREE R	2127230801029	Information Technology	\N	https://drive.google.com/open?id=1cCAQe1ufFpM2Fkl6UQ-E-r225k2Dl6p9	0	0
+88af5829-1606-4737-9fe0-b34ad41c5fa6	SUGI SIVAM S	2127230701147	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1MxIkzMIqyKFpcgteoH4S0WJngGZ3zB7A	0	0
+a522f030-9169-4690-81bb-4e3dafed94bd	SETHUKARASI M	2127230701131	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1nABv-ql6IXmjsKpO-l8Iu3ngg-CqUsce	0	0
+b054dc13-abdf-4e54-8502-20cd3e700706	PAVITHRA M	2127230701099	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1LHxtDnmk_Lh0we2e5lvWfn1Eea5th05Y	0	0
+66b4ea0b-24af-4f3f-b2b5-3285db38a5f7	ANBILRAJAN V	2127230601003	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1esqayXLzpB_PUm3lv3QLHvYOaHx07to3	0	0
+4f83848a-f1b1-4680-8ba6-ae3afa9441f1	MONISH K	2127230501089	Computer Science	\N	https://drive.google.com/open?id=1-hQhHel0RP3KdE7Oih9aseDi98mH67rx	0	0
+e8b52e8a-883f-4dba-8e76-8663e8bc71db	RAJALAKSHMI A	2127230801076	Information Technology	\N	https://drive.google.com/open?id=1scLLX0PZj5tKyzq3rv98PIFE7dsccoVi	0	0
+0decfcd2-1182-47fe-9a74-d75d93615f83	SHAM KUMAR S	2127230502095	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=17pxk-DjkUh3y1jgX1SK3l783KYawF_YG	0	0
+a6c08021-377f-4992-9e26-cf8d600338ab	THAMIZHENTHI V	2127230601091	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1NlquyiEpQsShbt7jFSbQ2z6I3VuTbQw1	0	0
+243a55de-955e-4e36-a7e6-f436bc6c0944	JEGATHEESH N	2127230701053	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Uu7pUh2xuPgnZOgZvEYCh15-d52v2OPX	0	0
+1936ed82-6f37-44ac-9b49-c17bd6677fe7	RAGUL M	2127230701113	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1KYl-iXIhWecCFdh87wVO6-C9v99D0WVj	0	0
+a92ff7c3-5c4c-4f74-bccc-69ee57fe7c5e	RAVINA R	2127230601068	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1TXRURCaLhxdrNW5we7xTOuXj6So_BbIb	0	0
+2a468916-7c57-4b2d-a887-ad33003290ee	SANJAI M	2127230501126	Computer Science	\N	https://drive.google.com/open?id=1BEtPub8IP8ZSHeLaKvnQkjJ2pzliJXvT https://drive.google.com/open?id=11i5lkSjAbUUrfG2kOiGFPgJqrIXUocjo https://drive.google.com/open?id=1xDEiD1YKqFkiVbU__bPHr990LquOur3i https://drive.google.com/open?id=1JzR1FK9R0f9MZ_90ttR9fvuvLKlpWhLx https://drive.google.com/open?id=18IkWsSxKl0RlLYdz-ElEixdKmS6ue6WI https://drive.google.com/open?id=1pzxlUpqX9xA-ru8D5UaaSnyAXfR_p4VD https://drive.google.com/open?id=1A6YdJbAABUmf4eynqvvyqAiokhqc1oTb https://drive.google.com/open?id=1i189h0r50fLVPJUDrRQDCHbeJ3dXptTr https://drive.google.com/open?id=1dsLgflUHY_YtsISut76GkCcV8jnCOKye https://drive.google.com/open?id=1AY7hA5Fml5v5yx5DNQjiviSIHUB6ZN_8 https://drive.google.com/open?id=18ltaceZS1Un25U3Wj7TplAlzzfklqI-5 https://drive.google.com/open?id=12XBpsX7OUp5jmvDrzi--KGHLLT3tlFwi https://drive.google.com/open?id=1M2yloaWiikGICz4PSYCd8KdSad57D8Uo https://drive.google.com/open?id=1hVS6uuDau5KbwSKJH2kyyAFrUjo5haNt https://drive.google.com/open?id=1tmg-Q2qg9nMKHzEwj7GjD5sTFxG3XrPK https://drive.google.com/open?id=1kxArC-zEHNkxAJLRz0ZJSM2K9lZJ2V-T https://drive.google.com/open?id=10qwz5JQV7fyeukgA57K6dVCBi4BQXXXJ https://drive.google.com/open?id=1ikRb9iOBZ2ztRnPmXVINnDhtEdY2-HIj https://drive.google.com/open?id=1Q0n6nucYvXFqdzwAWxjp4Q4D8BcXh488 https://drive.google.com/open?id=1jlED_ivWFl9spyhpnc_ULcWpOy00gdOz https://drive.google.com/open?id=1uyLPIJFLBvdoXK9vi5STCVHlGktesKb1 https://drive.google.com/open?id=1sxJWNvRWaIl-o7hxzyujCcgZNDpWZygi https://drive.google.com/open?id=1FRnYah1t4tIqMoTmBwh2wIYahdksAjR5 https://drive.google.com/open?id=18xEuMb2NuPk6PUfHAnMoPztEncakaAEZ https://drive.google.com/open?id=19K2UjnZI1veS9X3mxRWJMzGg8P0BEju_ https://drive.google.com/open?id=1HPqP_BX1Erg9glvrtjkmXzD302fHg5yW https://drive.google.com/open?id=1XBWxT7OQSpdEXC87vQDVN8QY0UynmvqG https://drive.google.com/open?id=1K5pIrqS2IBSbvujIT5Jkk23d6hTWD2Nt https://drive.google.com/open?id=1BbuSd6X1x66QA-Q0HeuoPozFsk6RmE-n https://drive.google.com/open?id=16ZCrKQrb3cHMMa_bHl9P-XswbtFn0kCV https://drive.google.com/open?id=1JJG-GdUhno50ZQ3ZFn5OXbGvDHZGLv40 https://drive.google.com/open?id=1ezrCK3aeMPySuA9O9p_i-o2Fg-o1cs9j https://drive.google.com/open?id=1kUM-woobgwNCVHxfi5tnvQsom8RncoDP https://drive.google.com/open?id=1QExOdANOtIDv6cb-cSCCuYKXorCgOtEP https://drive.google.com/open?id=1BDZuS9eM6GmaGmXmuHRcx8JYaBgMGCLP https://drive.google.com/open?id=19HccYyiYo9hr9mYRxzwzPXhH0ZskjAgc https://drive.google.com/open?id=14PU6gZ1BTLbyHiStHTVPCVIYjXP2Hiyi https://drive.google.com/open?id=1xv7GJKVQA75EK7t_-AHqneK1k7Q1PuLp https://drive.google.com/open?id=1WSJCthBaIUrGx0Xog7s9xdQHPJMfwUpt https://drive.google.com/open?id=1P_QjUgPrU0BRHkTI96NY2FoY1tPH30eq https://drive.google.com/open?id=1XpUZoMc9R0geMJGRp9NeqjcH_qTy7LDA https://drive.google.com/open?id=1-sAmDAUyKCwHHW6sgzOwjT_ScANGLp9U https://drive.google.com/open?id=1iNrzzLy9CKhK2YFlbcGTRqx7w0r1pAJK https://drive.google.com/open?id=1lgoQBWXo0I0ZYhqjNl_O4Dzr0wQeU0PZ https://drive.google.com/open?id=1EqB-pz-doFNGwXjTHeSwXCcfbwDrLkYp https://drive.google.com/open?id=1lRsdxJFtH5ESQ6csaKxCmjRsJ4IUmLtv https://drive.google.com/open?id=1GD6PnysIvMlZ_5soFjka_BdiMrS_S4ZU https://drive.google.com/open?id=1bmj93bp0BWSv22WJx_jtqedez8pm0k7J https://drive.google.com/open?id=1i6rS6EjQXxd4ORtmQvZebGe23Qa71840 https://drive.google.com/open?id=1gv_EKE3yz74L86RrFx5a29mOzstgixR0 https://drive.google.com/open?id=1_Hrl_9TD5jHTdwjVV71T46B2N2c6YQgO https://drive.google.com/open?id=1UoUR35h1FNnGkC3NryDEHnInWovFAOUU https://drive.google.com/open?id=1IK3zafJzwXBunMb5EliJTMVDgIjOXvG1 https://drive.google.com/open?id=1O9RdPN0rkKmZa8QkuOQCcwlcUtf9isKv https://drive.google.com/open?id=1vS7FqJW9ap56WuxNhwCTqXvZVDzLmGGH https://drive.google.com/open?id=12r7iVmqg4xyaTzc4EVTnxqidJB2tjMq2 https://drive.google.com/open?id=1r-m2P9BGtKpxy0doYB-9ONdBUSNsMiqu https://drive.google.com/open?id=1gwVFq8ZE_846PY2Sz4fQ_cn7ZkZTOw8O https://drive.google.com/open?id=1aX62wXQa743JY_hnguyAsZw_zMfcmzrF https://drive.google.com/open?id=1ZazV7uFb83GfC1Lv0XzdhUV_hv2JbTJF https://drive.google.com/open?id=1O6jO7f7IB8gMI-DCw8RVDX0S3FTUhhpQ https://drive.google.com/open?id=1xM1a1-z3LbVIcG8Rp08SEEbLxoo6lfIE https://drive.google.com/open?id=1cCAQe1ufFpM2Fkl6UQ-E-r225k2Dl6p9 https://drive.google.com/open?id=1b0G2sWVV6rVKoOy1e6pYVo6E_4k8xWRa https://drive.google.com/open?id=1yqqZFVKCqik2axMCEZ7Ct0cYM_U605rF https://drive.google.com/open?id=1FXV0SjmHRaTwin8yOM084jITtHAyBlkb https://drive.google.com/open?id=1zMnwQUmutNJGrC9LvDJ0gRkQfMs7sxY2 https://drive.google.com/open?id=1R848LefZgzrSNMtQ_P4ztRHy_-7C4_yK https://drive.google.com/open?id=1791OFh1JtaK_mlF4Gnx2vnFA9NXWIQNu https://drive.google.com/open?id=1wjJBECHq7-iSki-BPAF9S3nNsNPQzJZ4 https://drive.google.com/open?id=13xuL-buixos3WdAuQhwvP8cTB_K0i7Sw https://drive.google.com/open?id=1oEPJN-JaOEGsE0xVu-YojUlapC5Lqo7D https://drive.google.com/open?id=1esqayXLzpB_PUm3lv3QLHvYOaHx07to3 https://drive.google.com/open?id=19owaYagzOfIDK5elk3q_Mc1w5q92HRcy https://drive.google.com/open?id=1bTzTQdesi3Mv5xlE70FeQKpwTrXs-0zy https://drive.google.com/open?id=1p6W0RJsSg2F2FpwVmx5Y79JBPQcZA6iX https://drive.google.com/open?id=1lWz67F-ISmkWMLZtyxIPYkW0lt73OtoI https://drive.google.com/open?id=1l9EAVX1yCr5hMg9T79IMGQVxeImyo7RZ https://drive.google.com/open?id=14pL1_QqOZPmMC-NHlNnTUWEhLGa7HLLM https://drive.google.com/open?id=1bOlYl_e76-HhNB2xqeNrPfBPYZolW4wI https://drive.google.com/open?id=1Y1E4lfmp0r5rYmEd97Ju9fB7rVNTvvyo https://drive.google.com/open?id=10zRiQXo8-SoUUA8YkD72hFfCdd7ObhCs https://drive.google.com/open?id=1RMIPxxgcvySqQLHtclbRyz4d1a4Uv8tg https://drive.google.com/open?id=19DF6-M9FZIwrO0Ta70LAofM5UdCcmzPT https://drive.google.com/open?id=1lls7w_XVy9GtrsLcO4nLVSN8bQ9hOUVq https://drive.google.com/open?id=1M2waOjM8shC3_P4RhFGyJ2ZNDqB8F5uQ https://drive.google.com/open?id=1Ws8F1NRwS7OtNc15Bpngj5FjR_w1gZzC https://drive.google.com/open?id=1SvGW4XO28JrTKKIvipx4t095d8QZgdrG https://drive.google.com/open?id=1NU99rsfP1TxwoOT7j8g3tVXYK_v0saCC https://drive.google.com/open?id=1vTdyrVkTnjuAG6m-gdD4HgmUDddydC7J https://drive.google.com/open?id=1yks94zh7SnF8b_Rh13-mmb0xHfts5UDt https://drive.google.com/open?id=1BEdR23ZynItgHYsfdoxUU-4_HsDC33np https://drive.google.com/open?id=1Pw2gyVnKc8RyHj4sXQ4K4Ba5nsX5cA3L https://drive.google.com/open?id=10HEuI4m9PxNqXyi9dk0C36sYR5r1F_eV https://drive.google.com/open?id=1bnmhxPlxENP9IyVmkxN4vrj8VRUm2tsU https://drive.google.com/open?id=1ltYF3J3l4m7gDoSezZdf6kpC6W64lb1H https://drive.google.com/open?id=1bl7LZS7uEfNNGxG7ki_HENCF9DlQ2vYK https://drive.google.com/open?id=1E6F2ulDE-AusuTpBfJyHGZb3B24ap0-9 https://drive.google.com/open?id=1dL8OfOTpzpj30zT7SNy0T3sNN0NiknKZ https://drive.google.com/open?id=1_eLW-kutLSuvNHjXAUcLpGGJPqVk2t6A https://drive.google.com/open?id=1gVmsjutwdduNeWqDaTQzg8d4BWg61kgp https://drive.google.com/open?id=19WTE9eXxW71R6rgo8aSuA_U8G5IN4fyi https://drive.google.com/open?id=1z9ztaffjzm3H4PlKmsE6b-moHp8GBONx https://drive.google.com/open?id=1SWyOsREOL_RIdRsybd9fVSTbfkKbaYyF https://drive.google.com/open?id=12Ymim9qLZmcdIms05nqCHmqtbAFUr7Js https://drive.google.com/open?id=10IMzfjJysycyG2CjX9pvdETR20SHIBSq https://drive.google.com/open?id=1cjiKy0mnbFS_UA7ZyMRRBdaVI-s8LKnZ https://drive.google.com/open?id=1u41VCW7SWG0HnXMMmjAN27vnsNnzOlpF https://drive.google.com/open?id=1-Wh_trBPam6GoPlCm1OKWxyHnLjWleCY https://drive.google.com/open?id=14ORWh2KMeq98Ry0qBrxTpFycUKHo_W7j https://drive.google.com/open?id=1Po1Psyr-2xf6-crZChP-Hy1MSj0PggG4 https://drive.google.com/open?id=1SYnOT0jjTgt9_NwEXgfi52JSn5zwOP3R https://drive.google.com/open?id=1GFDJFrRQxINXK7QBXsxbNy036p4ouIaJ https://drive.google.com/open?id=1wdhd1CqJtHAKqcsu78Wz33rhbsBH35HU https://drive.google.com/open?id=1szasdj_JiUqhn_VXpuX92hRPO6e7hHCc https://drive.google.com/open?id=1sSeiT2DXODb92K7PP4BDW8RVcpldhYnu https://drive.google.com/open?id=1vD10LWUdlloNZ6_9Aku1yZoQ1eudT05D https://drive.google.com/open?id=1R5aZ0Id5psZ5UL8I-7Xg3LRiSmB49dAJ https://drive.google.com/open?id=1qq2wmuEwVPSzpxiLmqyb5njZTVbDpmEs https://drive.google.com/open?id=1ziTYeUu_MjAMAxuWwVymJi4L-xh-3YlP https://drive.google.com/open?id=1YVDL12tLxbfvtR-cb6QDvhvzOxoJ5ufV https://drive.google.com/open?id=1Ubr6x4h_pjxwFnY220JFESmAGJfijgbB https://drive.google.com/open?id=1SkRKAWE4YLMWEkrS5iufu7KyvQ2WznCA https://drive.google.com/open?id=1byLcKIbn47NaiY6itY9i2HWvyyT9LGoR https://drive.google.com/open?id=11nRKD9c7zg4RC8SbNuH4j5BNQtWNaRRx https://drive.google.com/open?id=1WjQUEujasdllBHfRioyXEGW_5JKF7Im6 https://drive.google.com/open?id=1QUWL4o3-Y6FApGt-eJ9gAvuLxyyMb5_h https://drive.google.com/open?id=1zsp7rzlKng4uUc8I_YUUJXxW64berfwY https://drive.google.com/open?id=1s5RH59U07Z75-ZXkdZyNiyEVOjRofN6R https://drive.google.com/open?id=1YvCxXCiLEmtZsXMbYq8SR266wVUvsdvK https://drive.google.com/open?id=18ac1tZxWjD6Iow3fjIkHMPd_dn45TXal https://drive.google.com/open?id=1_niCNwT_5GzJep9vnqZOmsTeG1PzRoTe https://drive.google.com/open?id=1Vuen6csijdNl_s29HEUke_0Jf6Kqo5IP https://drive.google.com/open?id=1CvAtW41Hjlb7M0WccUTSkiu_zzO6Bb3Z https://drive.google.com/open?id=1O5nRQVyg77JcwhMKgHDGTv5sidBDg4YY https://drive.google.com/open?id=1MuezTheqtDOW-SIfNqMEa6BFpXuIP-Ab https://drive.google.com/open?id=193NkLJODwvKn762WeSowj2JCasUGda2H https://drive.google.com/open?id=1kWm1UVf_Ys6mWjF0i2kc29FMVg6z2Z3g https://drive.google.com/open?id=1hGHyBsi6EcEDGzUVMCrcaq6gGyVOX1gH https://drive.google.com/open?id=1kURhoExcXXaB8sRyQOt2_M5sufKxSafM https://drive.google.com/open?id=1Qscve1fEHC9s0Iw-izosWi_VC6QLCTgB https://drive.google.com/open?id=10qH4HuAa3K1CNr3kbdJYqvNMYi1L1q_G https://drive.google.com/open?id=1rBQ1-3ohBvzStMg_4jrtVyrJWXJ8Z1vU https://drive.google.com/open?id=1QQXNrxphYkbaPUdyH2gftj76iknGrUb9 https://drive.google.com/open?id=1CeANI4ZgQx8uqR95dmDEhagwDvJUarYG https://drive.google.com/open?id=1AXQNMrryKzcqYzo0VBi90LAJ6HdvH27k https://drive.google.com/open?id=1ethBNYYIvLNGY_Azwbwy1KjO04Net-Lm https://drive.google.com/open?id=1-XLe6GrlLJt2g6kP5u0yfzDr6d5UNfud https://drive.google.com/open?id=1wniqwvY7R3-OrBk2smeCue-lKCzTbKC2 https://drive.google.com/open?id=1ZWGSQJhw2-z4HHys6-MiHIyFxfql2jQ2 https://drive.google.com/open?id=11dPQpyDjxqMh96JXlvXAFml2-qto8Tdu https://drive.google.com/open?id=1quA5RLXYzlwx1xaiEJRd_LPneMH_MScR https://drive.google.com/open?id=1H8p7OdPqKtI3TYprFmwUa-ehqr1oC-63 https://drive.google.com/open?id=18dxUs1yvcfHkJ_STbB6YjdKT6xIirSv_ https://drive.google.com/open?id=1vUai0xlpgcD9UHT9D3zOVyhaW8nbRJf8 https://drive.google.com/open?id=1ewltAhTMsDQxVN732qDoSn_Hp-2jRx9d https://drive.google.com/open?id=18dFQgRTfcfGXfIYwJH1DNvSg4qElLK3A https://drive.google.com/open?id=1LdCsRvRsFEODfMUJJeKXdNl19zmQf0dn https://drive.google.com/open?id=1K6ltfiP6MCvEJuN0f6kbd0soXfTFRjgR https://drive.google.com/open?id=1qv8zFNE1bMoiF5ZfMf2cPE3iQyyxrt4u https://drive.google.com/open?id=1LHDf_VOX6s-dTP9MvQ2hpHQKO2jw5B7M https://drive.google.com/open?id=1_kU7QZdn9KGiug69xaS-1saMMv57FMZg https://drive.google.com/open?id=194AzXePDwwXNLNRa94JKCeRftPdU6brc https://drive.google.com/open?id=1vBUwqIxFoMSm-3p-STHICOE8qNxRtqNQ https://drive.google.com/open?id=1PpWdXDuhMEb8oCs3sNYUA_ItmGyKWQJE https://drive.google.com/open?id=1Idw4mEF6vRw9smkPFvlPXvV20uESDp96 https://drive.google.com/open?id=1WS2RoaZV7zoPjkDvseSgGZ5QmjZfLwlk https://drive.google.com/open?id=1UyVI-6Cx-9zPh7ko91FAe8NE7KPpq27f https://drive.google.com/open?id=1pK4KfooRdxgFnO_IXxjl25Yad1FQzyMu https://drive.google.com/open?id=1XAnmWEVLABDYnLV6GPeUhHCyaLtmtVkC https://drive.google.com/open?id=1U85vLqLYC3qp4tzGkiH8vRRCoce66amq https://drive.google.com/open?id=1x3Il2NyZD0YN92USwkP-U372_u00iq_F https://drive.google.com/open?id=1DW0f1dpuK7APg-NSGbOA4E_0Keo7ZZqo https://drive.google.com/open?id=1hOGnktYBv6n85PnyFNTI8dL8tssFlSIw https://drive.google.com/open?id=1f5rCDGlE3lFpnxpf7sfBTLLgW6s7T_7m https://drive.google.com/open?id=1cKbjkXcX-btjPZp2MvbZHMtJxCmfOopl https://drive.google.com/open?id=1ZeQAXJimAJVFPx_cVA0ODEYQVxJMN_Ar https://drive.google.com/open?id=1Z2vbxaKls3VxPRbExS8lU3MnQypQtvX6 https://drive.google.com/open?id=1tirdVWDUcZ2Gf0RrHKXECviVSLPi7CJW https://drive.google.com/open?id=1OssBiz_o1QjzleNBA-zm20WlC1b_mrAd https://drive.google.com/open?id=1J3UCsqRBaqNB3fQ8tl4GDnh-LubceL13 https://drive.google.com/open?id=1E1ZR8YKtTcanN13Oq6ONO594xffpChoV https://drive.google.com/open?id=11vCorDShlzGN2NW_jrGt8Rds7D-lNkgw https://drive.google.com/open?id=1BbtmfcVFjujqemGfbd9oMV6uUfOeUtfp https://drive.google.com/open?id=1ZqfqDnZC9j1Lu4fsK_UZF_ZgNH1YJUxU https://drive.google.com/open?id=1oenwrMlFxPPCis15jkYtUepDhtduIzP3 https://drive.google.com/open?id=1j7xo4IZK_AGRkDfYDmVR3MpsAdWtQuD8 https://drive.google.com/open?id=18fnqWU3FTJH8kha_82ndJSFyWFAM9_oy https://drive.google.com/open?id=11G11gF3kCbjTS38qjlgCVnOWmdTbg9Tk https://drive.google.com/open?id=1L2R2L1AYIGm3oxtX_fCJVDQ0U_pIp01y https://drive.google.com/open?id=1Tzw7dl-ovixTW-Co_fGIJS_NWkov9QnM https://drive.google.com/open?id=1dTP3zfPiRqCU6coBI1F-PKM_rKpaFdWs https://drive.google.com/open?id=1WmjPa7WvAzwpHtP7V7EC7rvIgh7CNLBK https://drive.google.com/open?id=15UuwNCsv_FA1HTB6Gmq-gCbWk-JqiUgN https://drive.google.com/open?id=1koBJQJsAYuTZgMFvNivuy_9OTbA4Lo-E https://drive.google.com/open?id=1pXTtaHVkocny5wijIRPJZJAZexP5--Zf https://drive.google.com/open?id=1dXA0SCilCjJo8MTmuAQPDQ9lETQNJgxf https://drive.google.com/open?id=1lWu3HDySTxbVYRPjNXyRIJYiQv4uIBj_ https://drive.google.com/open?id=1bbd3jwjY5PbFl0d103txdjRuFdcUnsDS https://drive.google.com/open?id=1cGwUHpvWTPtIOrbXUgqdpV9U_4I6bBvb https://drive.google.com/open?id=1fNL0n_4GEoq4Rk0UVinmIVY74rOKEyrp https://drive.google.com/open?id=1VolOF8WvcJ8_8sD_1GICgP0zwYjH7Jn4 https://drive.google.com/open?id=1UzJaOuTOxYLP6ZJqVt7LTs82T0RxaaUx https://drive.google.com/open?id=1d1e70ujloF1wfKjd4nYaD46A6m6tUEDh https://drive.google.com/open?id=1oRvvcmXeR57J7cUh37SGRJHlkPripYwd https://drive.google.com/open?id=1Z1-cl2OI1ohyhobfbeQOWrm7E2de95rW https://drive.google.com/open?id=1dHQtakMDxDUeX9wq7hMVK3xg5yDjRdd5 https://drive.google.com/open?id=1s3qY-48VUQDJ5w5Mx9UsgFVTicIrj6be https://drive.google.com/open?id=1rUmPuW4W5aP4yWkuf0FevC3uoWV_L1lz https://drive.google.com/open?id=1LVe9320t8pUIiER09tuEdDhwcN6l6b5w https://drive.google.com/open?id=1XRectm0Ddvtlf3lEUTl3O5fmoYd9iC5t https://drive.google.com/open?id=1ERY-uqmlFWB7vAAx9EgIuDDjoH3DH7jZ https://drive.google.com/open?id=1OacdTdyjZaIXm1PsPlTZL2lEn3O73jwI https://drive.google.com/open?id=1pwqc-eR3f73FgHFTjbzuNMRHR3zZjXtF https://drive.google.com/open?id=1jO8QVSzXNbZ2zzwAvwIcMvWgoAxHZUSi https://drive.google.com/open?id=1FhD-BTyT1hK7flnFWNk4vK88dWvlhlBq https://drive.google.com/open?id=1Jq6RwjBOZECazNISJNvzmd2EbEO6b1hO https://drive.google.com/open?id=1Ds2P4p4QQ-XmPbqui3w0yzRX17dawowK https://drive.google.com/open?id=11tQF0QX2JtcW5zZ04nmmNSud5wnuTX40 https://drive.google.com/open?id=1AwfmcYb603igYhEs3lkIo79rF7a7HLgm https://drive.google.com/open?id=1aTPCKYsQgjNqBiEAT8KNA9pjy3JksFfr https://drive.google.com/open?id=1wYHn1RphYSje1HVIr4hrMtEZUhDoo5xP https://drive.google.com/open?id=1rS4ksofbXnn6usk0cvnoadzX0uwcJYJW https://drive.google.com/open?id=1vQtyNfzsqGLic-CfMQaZa97lUrGj4ppi https://drive.google.com/open?id=1CCldcGjcVDjmDAwFkOeTCTNnmcidfVM3 https://drive.google.com/open?id=1XxZ6BL8t8FYfnI2y3AEWPY1gpXizYXCK https://drive.google.com/open?id=1S6uVOE9rvbcFiGc83e5P2_PFcqeDnUfV https://drive.google.com/open?id=1WDJUHqCKjpsU_ARsuvNqeGuMjW-YcJfn https://drive.google.com/open?id=1n_p_7Hg8awhzKEkmCeX0cn0_qfNEx3jo https://drive.google.com/open?id=1odTwFlx2gl-Gph48e-cbbFJtDGQjlT4v https://drive.google.com/open?id=1TmqDmKx-DyafhvN-uD8-TJlq_0fikX7L https://drive.google.com/open?id=1n7ZyrQdc-kkk4nqlSnzM3NmjZv1Wr6Vq https://drive.google.com/open?id=1LtA37y4t2jR9Pbstq6tFq88YYTd9PZRf https://drive.google.com/open?id=1AzEM6LLvnB5G0IqKyB-_ERdEXecIlOCU https://drive.google.com/open?id=1ngdeKtOBEkKBlOQpfGs0BICDQ5VhQyNS https://drive.google.com/open?id=1A1WoVyvocQUupAXX-9PDyAT2e3pp3ylb https://drive.google.com/open?id=1AeqTCODEaPLPswSAwj-DDDZdSYuM8ltu https://drive.google.com/open?id=184AF2v26ov-jdxhUWcBJZUn4Yzzxudaa https://drive.google.com/open?id=11MUcEHAmCDv0Yndvti_Y2Yi7ATb_UydQ https://drive.google.com/open?id=1NWCK4DkxZ4JZVoDOm8XUEEss9ltyKmEZ https://drive.google.com/open?id=1hPocYrLFPcb8kz3QvTFHRXOtYkrAlazl https://drive.google.com/open?id=1tuEJVtMexahvvpPoJUVHuiGXxyza8j_7 https://drive.google.com/open?id=1cJtS2mzxnZVm8vdM_Yote-1SaIjuhbjl https://drive.google.com/open?id=1M_wNx8ftRcgprpSn6gmzsiVw3PbR02kz https://drive.google.com/open?id=1KAId-icyj9sADBh0okoUBWj2-FFvr2LH https://drive.google.com/open?id=1zRAbFqYlF75vFzrS8saeIqIE0fMq9Z6W https://drive.google.com/open?id=1wlZFExsyEfwnqm5ge6OjWvilQf7s16Fi https://drive.google.com/open?id=15QyaDqNZ0P-rGah7h10mxsGi50PNR9ee https://drive.google.com/open?id=17P-aS_-AfGiC-FPoe8eUtHBGCwbE8PHS https://drive.google.com/open?id=1X-n8RAEQuUAUjILVkRZP_Nu7k_aUk2s6 https://drive.google.com/open?id=1IeEhh2MIE-h5vgpnUij_AfGJN7srB0tu "https://drive.google.com/open?id=1oB0aU_jp7qsRg9CpGhungumRadxIOq8Q 2127230801014" https://drive.google.com/open?id=1Fiir_kRvS0rk6OXDG33zf0SIV8SSYjji https://drive.google.com/open?id=156LJdRrJTaZ9wTjk0qq03bUTmATXpbBB https://drive.google.com/open?id=1nu3A7tGn5SenQI_9stXuMZrO8I5IDxKM https://drive.google.com/open?id=1KvXPFtoiAf0892M9MUgahN1sPrxPOY-M https://drive.google.com/open?id=1fOCp0jku3MD6cRe-7zE9CrHLI7gTNwrr https://drive.google.com/open?id=1Rx7M7YZONANVMuDCCjwUiut-IqrSC91M https://drive.google.com/open?id=1-3A5LxKJOPBySrRp5I1ezQiN05ATqPCo https://drive.google.com/open?id=1Uu7pUh2xuPgnZOgZvEYCh15-d52v2OPX https://drive.google.com/open?id=1YDHhhV7Jtd1nTWHHoXnjfiH53AXRv-ET https://drive.google.com/open?id=1xerUqG9JoBSuK8PaNZKmcOEjD-geZERm https://drive.google.com/open?id=18ul9ZxObvUnQ6RqTpNXHlPLS7uzHJB2M https://drive.google.com/open?id=1n5YXFPp95-XH4j2D_SDU59phDmDaMDpT https://drive.google.com/open?id=1lCJROVqka--BAhIMDlABpiGV6RjAYszL https://drive.google.com/open?id=1OriFFxv-YUVzosS6fD9qv37ZPPIKpHCx https://drive.google.com/open?id=14TIy3YnE5Y1uHie3QGjQEnRQ9atd77GS https://drive.google.com/open?id=1tVl9imz5XQy1DCZZL1EBFQJaKuZmRbZW https://drive.google.com/open?id=1FRfiPX7f0jPrXImMmwjMBaVb0jdric2m https://drive.google.com/open?id=1TQjXHbNZWSU0f6ic7D4qky6JmwlNgH60 https://drive.google.com/open?id=1NNP2gYGGEYvRqASsMqgtcpLywwe8NFCF https://drive.google.com/open?id=17D_dXOoz7coG6ho9GVu63eY1Vq-veEK0 https://drive.google.com/open?id=1xV9RYTcvz9bchqxjoe8OOzo6X7373ncE https://drive.google.com/open?id=1Et9UyMvopkIHvvH2_sLLtyKDZq36O2ZW https://drive.google.com/open?id=1huoINp-J0jj3-JlxihQWd3eQqk-dpoUe https://drive.google.com/open?id=1YZSa1KgxAb5mY57G3jynOlQoULy1nHI9 https://drive.google.com/open?id=1XZjHBTQGULMzrKmhZWP26YXkghBAqPEb https://drive.google.com/open?id=17pxk-DjkUh3y1jgX1SK3l783KYawF_YG https://drive.google.com/open?id=1nOO4yLD0JEzE1NAvBf2Ev-n9GQLoO1wp https://drive.google.com/open?id=1B6Rq026NcO6iEOSCJPWorT27XPXf2FG- https://drive.google.com/open?id=1uHE_EPM4ABboIier3ililmsQODZVD1oX https://drive.google.com/open?id=1Cj4fUaANxt7W3xh9gVfcl28ZnhUpb9Wb https://drive.google.com/open?id=1-FpIGEBMKRotSWQozHf_DxXv2y7be4e_ https://drive.google.com/open?id=1T5bQpfhD_WqTGBbdflzHROW69NPq8d1L https://drive.google.com/open?id=1te9jgOp3Y5eDm5VCOv0CdrxoAmmW808G https://drive.google.com/open?id=1qTnhRIyQPf_y5zw8qqSzAo5aOxmhbSIj https://drive.google.com/open?id=108uQuwvMk-cJ_cJGdEXQsC_gLZMlkiLz https://drive.google.com/open?id=1MT3xVjQAbpUFW_FKYJvo6FlNbtznEkBS https://drive.google.com/open?id=1U45UG6L8P2UY-Na-L9hs9PqlflxeLLFn https://drive.google.com/open?id=1bJtJDGO0_k9YiXkvd9YZ3TXcLBDBROun https://drive.google.com/open?id=1wjh6khbv215kP-NFd991IPlNrarcOell https://drive.google.com/open?id=1h-IZ476iZuGizu8zxM3QfpesGK39joXS https://drive.google.com/open?id=1BYp4p-Mxepixg8ZEi4kzobZbodCjGdnM https://drive.google.com/open?id=1ab2eJttdQOC-1p1X971p5UM57alR2Un- https://drive.google.com/open?id=1Jf97aPA5Mr1Z3K9RkZ1MAOfr90p0WiNp https://drive.google.com/open?id=1EEvzbukbazbj6Cu4sQQp-SZYjAEOxCpi https://drive.google.com/open?id=1dFHokIoY1AXiCUKM07FBGw84Sfwk35e9 https://drive.google.com/open?id=1Bmd4VEm2Pn5JEwWd9zpeCLYkATa1JfGp https://drive.google.com/open?id=1rj2OPfBgNDV_91NTSPYGewjSuf_Vv6je https://drive.google.com/open?id=1OA0NO6A9LQ-yp8PUTrGInf-B455Vx46g https://drive.google.com/open?id=1he8LBKLUivNSQ2mXgaWKcJQ_hksVTzuA https://drive.google.com/open?id=1rovHE4m7KPq16caxqXmPbxqlGr3j_uzt https://drive.google.com/open?id=1Legb1Db81Dn70y_7_Db4CPD9q4F0xzQt https://drive.google.com/open?id=1CoDM7PMfBEO6pVhrux842pQfoiN10ywB https://drive.google.com/open?id=1wt-RgkA5xx_eRKG1rOOXZVX8Q5Kr2xat https://drive.google.com/open?id=1A6c-1dHUQGVRMt7Udd_NlFHovM3vYL0V https://drive.google.com/open?id=1zoAe7BQhAP66XbK9ou2YCV1uWisdHXgV https://drive.google.com/open?id=1w4C7oLfA3iwRmYC5GsfuNhOAW3z0UXp9 https://drive.google.com/open?id=1om0SF9QdpaAuDYwpeE_jpRUfD7uOowjL https://drive.google.com/open?id=1jXwh5JJvTQV1vqCtKxfoa4N8WeveC2pv https://drive.google.com/open?id=1RWwsK3LV6QxcGOSyvjCDno2MIWDgXrzB https://drive.google.com/open?id=1ANlQi-uY4_C7JklxDuQ5h62rb1l-dn-X https://drive.google.com/open?id=1tjBIe78otyiinqs9h5OhyQq8M9sDj-dl https://drive.google.com/open?id=1dOXLHlLVpeJxYKjJ3GM3YncUg0RE5sBe https://drive.google.com/open?id=1AYYua9-dbNjO5ZWj3h64Oli41h3HaMJy https://drive.google.com/open?id=1YWHRhVpzEklTbdfGvpZdISW3cC4ZJf0N https://drive.google.com/open?id=138D0gSMlP9p_eS3pvjptXBBuix0zE2ZW https://drive.google.com/open?id=1gP3v-MH43QMDgSnZVtfyPDEgGgwkk8SJ https://drive.google.com/open?id=1Aq2HjgMKLQrazyR609DfB-1KiL7Teo2q https://drive.google.com/open?id=1__VjOc3TcGY0YLKSUfCK4iqEJbiXxxE8 https://drive.google.com/open?id=18ZLvzvAw31sQhd4pV4VrT0lAL6h9CuDT https://drive.google.com/open?id=17J2m8Vax-uFD3gpj1FXHYsWEpPEK9h3m https://drive.google.com/open?id=111fJbELbo7tmhRMYm3OAqmxv-7bi7HOG https://drive.google.com/open?id=16vvM_pwMGL59nk537wvkQ4BMx_Gc9yXF https://drive.google.com/open?id=1XAjHbT8MiYjkkrn8zvwsptml5fzmfM88 https://drive.google.com/open?id=1iChgsl8Qo90BQvlS3ZAbBrkTCb-lmndd https://drive.google.com/open?id=1J2k8iX8RjaLu-nfL0n2MQOVGNvkXZR68 https://drive.google.com/open?id=12kP_C5AxgRoYZnrhS35mQtVvJN77qkHS https://drive.google.com/open?id=1hmQXUFuE3eF6YrI0NyxcwHMX1YycU6vl https://drive.google.com/open?id=1PdoF90aclXGQ5GA3vPf38I-etKdF8MyK https://drive.google.com/open?id=1MWuUfpGMNtMIw04bxKkCyIk76d2x-gga	0	0
+e806bf21-c4bf-4e45-9b28-38bb6bc5114f	ABISHEK SRIHARI S	2127230401301	Civil Engineering	\N	https://drive.google.com/open?id=1J3UCsqRBaqNB3fQ8tl4GDnh-LubceL13	0	0
+76211491-be7e-4a05-98f8-a3ef059fe1f3	SANJAY K	2127230502091	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=12Ymim9qLZmcdIms05nqCHmqtbAFUr7Js	0	0
+7c9932c0-b2c2-4093-8f9c-ce9d2efa2c45	GOPI V	2127230601020	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1OacdTdyjZaIXm1PsPlTZL2lEn3O73jwI	0	0
+f7cc4817-a6d6-4043-9d83-f098b225792f	SUNDARAMOORTHY A	2127230601087	Electrical and Electronics Engineering	\N	https://drive.google.com/open?id=1ST_-FuQZ8OJAK_CpSbCVVxz4h3aT6IJF	0	0
+67baddaa-6f7f-45e4-80d2-1064011f339b	AKASH T	2127230101301	Automobile Engineering	\N	https://drive.google.com/open?id=1sn_RWdtJrhxJfdlSLdvlLD3tA-qwDrl_	0	0
+892fa408-4007-4f13-bd6a-abc0fab9c274	MONISH S	2127230301025	Chemical Engineering	\N	https://drive.google.com/open?id=1S4IWrzXmr-EJYjwve74SrO3akD93nPOM	0	0
+cfc32444-9f5f-460e-9c8a-f97045dd4401	SUDHIRTHA U	2127230301048	Chemical Engineering	\N	https://drive.google.com/open?id=1U85vLqLYC3qp4tzGkiH8vRRCoce66amq	0	0
+48e63db2-bb1c-4371-b574-a1cdcb3aad00	BHAVANI J	2127230201007	Biotechnology	\N	https://drive.google.com/open?id=1pacouyC08bQYDa7-QRTTedFXODye8PTX	0	0
+5be4642e-65f9-4b10-b9e7-02a1e62e58cf	MURUGAN B	2127230301028	Chemical Engineering	\N	https://drive.google.com/file/d/1o8cHEA-OA9JNXS14iE_IWIqEWDmF3D-E/view	0	0
+14827cdb-3394-45bc-95d1-8c0b7dae743c	SARVESH RAJESH NEELA	2127230301039	Chemical Engineering	\N	https://drive.google.com/open?id=1T_lCGj00R36zGwYDe2NpggkWLF_UgGpB	0	0
+128df9fe-d5be-43ab-958f-1d5088ffad39	NANDHINI N	2127230301030	Chemical Engineering	\N	https://drive.google.com/open?id=15QyaDqNZ0P-rGah7h10mxsGi50PNR9ee	0	0
+dfe59bae-f2b7-4216-8476-dd764a8bb26b	JEEVANRAM R	2127230501062	Computer Science	\N	https://drive.google.com/open?id=1OA0NO6A9LQ-yp8PUTrGInf-B455Vx46g	0	0
+126fe1fe-2052-490c-bbf2-ad0de6d0b79d	ASWIN KARTHIK C	2127230301006	Chemical Engineering	\N	https://drive.google.com/open?id=1Z-xskPC1cGXq8VIQilocr6c8zZB8awF9	0	0
+8f551e00-cb94-44ff-801b-71d377ddaa28	GAURAV DHARSHAN R	2127230501041	Computer Science	\N	https://drive.google.com/open?id=1YKs0V3Wt-zgkjZRiNMUDKJnAnIEsshI6	0	0
+23259f1d-418b-4d20-b658-e65abc871bdc	SRIVASAN J	2127230401020	Civil Engineering	\N	https://drive.google.com/open?id=17D_dXOoz7coG6ho9GVu63eY1Vq-veEK0	0	0
+c9c41cca-1e26-4dda-a968-fe946973e61f	SANJAY V	2127230502092	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1XpUZoMc9R0geMJGRp9NeqjcH_qTy7LDA	0	0
+1a3e452d-73f9-4fed-981b-d93363e2da80	KABARTINAA S	2127230501065	Computer Science	\N	https://drive.google.com/open?id=1yks94zh7SnF8b_Rh13-mmb0xHfts5UDt	0	0
+fd39cdbb-113d-484a-94a8-79d22e84680a	RITHIK SUMAN V	2127230501119	Computer Science	\N	https://drive.google.com/open?id=18YoJAaXDLUDUGQ0bP7OaoMg0v_ZxOtqZ	0	0
+57dd40e3-cc3d-49ca-b744-0908d42fd2d0	Dushyanth	2127230801301	Information Technology	\N	https://drive.google.com/open?id=1u1kHVv0wm5TCIhJXWSmOSAIJYiDeS-Ch	0	0
+00a12e23-c562-47c9-b6bc-203896635a6c	NETHAJI PANDIAN S	2127230501097	Computer Science	\N	https://drive.google.com/open?id=1t5SfS-PIf5dwhuM3NWZhQTgGc26aU6c9	0	0
+2e683e93-873a-404b-919a-463338292329	SACHIN KRISHNAA SRINIVASAN	2127230801079	Information Technology	\N	https://drive.google.com/open?id=1Tzw7dl-ovixTW-Co_fGIJS_NWkov9QnM	0	0
+8045c512-1ad9-4021-baa6-b1ab33ab59e1	S. Tharun	2127230701306	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Ljgsa2yJbctnyTd_CQJUfKwUkHE8UzDK	0	0
+de74f68f-f05e-45c5-b8b5-4269dabac5ef	SUNIL SUKUMARAN	2127230501155	Computer Science	\N	https://drive.google.com/open?id=1FYiddukmfaViXTLx3NHf6Li8evf8s_9i	0	0
+49e62352-4ddd-4285-a08b-275fd179918d	THIRUKUMARAN G	2023CS0031@svce.ac.in	Computer Science	\N	https://drive.google.com/open?id=19KIKc8ZJPOQIgT0AFGbqa53hFBpTk15x	0	0
+175a1341-ab76-428d-81d7-77f3b16ac17e	MICHELLE JEFFRIN X	2127230502065	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1wdhd1CqJtHAKqcsu78Wz33rhbsBH35HU	0	0
+53bcfe04-7e2d-4776-ac2c-11fb1c28e4d2	SAKTHIVEL S	2127230701126	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1FkqK3p0RMY-F4eOwjdxgHdTqL62ZwlLe	0	0
+d5b5926d-63ba-4a2a-863c-141133feb91b	VAISSHNAVEEY J S	2127230501167	Computer Science	\N	https://drive.google.com/open?id=1CF5uSta9XSzcPRlrJRmlCnrPlJNLjxwi	0	0
+35c0ff1a-6f4e-4055-a2d3-51738405cce7	LEESHANTH N	2127230701070	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=18ZLvzvAw31sQhd4pV4VrT0lAL6h9CuDT	0	0
+add8659a-2bc8-4111-a9e4-7280e5372792	SWETHA M	2127230502106	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1ziTYeUu_MjAMAxuWwVymJi4L-xh-3YlP	0	0
+20e9963a-ed23-4484-bf0a-e75251004a0b	SRIMAN D	2127230701140	Electronics and Communication Engineering	\N		0	0
+5bf4551d-4f10-4d59-8c0b-1deb7eaa6446	AADHISH N	2127230501001	Computer Science	\N	https://drive.google.com/open?id=1lWz67F-ISmkWMLZtyxIPYkW0lt73OtoI	0	0
+e1448bd1-dee7-4627-bf11-51eab6063206	DHANETHIREN P	2127230501032	Computer Science	\N	https://drive.google.com/open?id=1gVmsjutwdduNeWqDaTQzg8d4BWg61kgp	0	0
+4c482b96-1133-4e14-936a-09bda4a4e498	NITHISRI V	2127230801068	Information Technology	\N	https://drive.google.com/open?id=1n_p_7Hg8awhzKEkmCeX0cn0_qfNEx3jo	0	0
+1a4ccde8-19cd-4b80-81aa-4f4100f17c5a	R.Mithun	 2127230601048	Electrical and Electronics Engineering	\N	https://drive.google.com/file/d/1YHsZ_UzlePOmpTq7rS7WRPLiNyPM3PKJ/view?usp=drive_link	0	0
+82e508e0-2233-4a71-9d2a-99fe3e51cd75	SHIYAM S	2127230801086	Information Technology	\N	https://drive.google.com/open?id=1YDHhhV7Jtd1nTWHHoXnjfiH53AXRv-ET	0	0
+2a2c141a-acdb-4fe7-9d68-0f268945057c	KEERTHANA S	2127230201024	Biotechnology	\N	https://drive.google.com/open?id=19x4109r4LTtG3q5e2_9G8o2nS13SedIp	0	0
+0716c393-bd54-4be7-9c55-1fe211e4dc91	KRITHIKA V	2127230201026	Biotechnology	\N	https://drive.google.com/open?id=1D4cepENalptQbKD8YTh-kK_8kddV6oPq	0	0
+2374f5a3-b7c3-41f1-867b-88cb77d776bc	SANKARA NARAYANAN S	2127230201045	Biotechnology	\N	https://drive.google.com/open?id=10V8tJ6wsyL3WpdhFGpYDKig4XFMCP-Fq	0	0
+35a569b1-f730-439c-863f-10291647a362	ALAGU MANIKANDAN S	2127230502006	Artificial Intelligence and Data Science	\N	https://drive.google.com/open?id=1BDZuS9eM6GmaGmXmuHRcx8JYaBgMGCLP	0	0
+edd60c5e-975c-4f87-b220-98b1388d0b7a	NARESHBALA B	2127230701087	Electronics and Communication Engineering	\N	https://drive.google.com/open?id=1Fg9U_5WJZoCrCVa3sOn_gFZ9mQUeJewF	0	0
+2295eb98-2649-496e-bdab-b7edfaf18bc9	S Harish	2127230601023	Electrical and Electronics Engineering	\N	https://drive.google.com/drive/folders/1hr26SKWSDRKCFgKLG0t8Fj_fIVBxiKX0	0	0
+67ceac98-83a5-407b-ad88-8f89f2328ee9	Mahalakshmi	2127230501079	Computer Science	\N	https://drive.google.com/file/d/1_GgCtDWEzyRfzaUiFc4Wf-tgnFaODMV8/view?usp=drive_link	0	0
+\.
+
+
+--
+-- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public."User" (id, username, "passwordHash", role, "createdAt", plain_password) FROM stdin;
+00000000-0000-0000-0000-000000000000	admin	$2b$10$IErRmB05vqRMzOyUzKUnr.y5a6w2Ab7wGl1uMCc/02KbxFXb9yXku	ADMIN	2026-03-07 11:52:33.131	admin123
+4035df10-9201-4099-a43e-cca84b787aae	hr1	$2b$10$Zx62/SICxrDVXV3/3aNN6.v8N8xkya4slf9uapAIHjankr9w1Ovj2	HR	2026-03-07 11:52:33.282	hr123
+cf415188-a2f8-4630-8d83-fcc47cd12feb	hr2	$2b$10$YABAUKHqDk/DZs10ZkID.uVuXaZHHh4vh0fzojYxtIj8StwANfrVe	HR	2026-03-07 11:52:33.43	hr123
+836f143d-1d98-4bd6-9c10-6ce63f5823a5	hr3	$2b$10$bQSO6Zbu9Wp8EptvMd5o7.Ebq4HD619wopx3gTfrEC3CKGhvDMOrS	HR	2026-03-07 11:52:33.575	hr123
+8df1bbee-25fc-4f27-b669-90de0566b88e	hr4	$2b$10$kJ4IJ18g78FLutUsHvsYBur75tJqjQRhUYMV3sST1y5QYqaLzS.fC	HR	2026-03-07 11:52:33.712	hr123
+d87930eb-1abb-4d91-8cab-999af479a773	hr5	$2b$10$t5tqJ78XA5QC0VH3Nl8YTeJ/aexybPWiNRTrSCce31Bvj2xNkpg8m	HR	2026-03-07 11:52:33.852	hr123
+5365fead-bb89-4bb8-a71d-688c8ad831d1	volunteer1	$2b$10$NRE1U6EmDdxOBj3TJ21SM.aYu4JJVjtDTNWzLyfWT2bVMnSSIn3d.	VOLUNTEER	2026-03-07 11:52:34.002	vol123
+0b0282ae-5307-4baf-b01c-226d2ce2c61b	volunteer2	$2b$10$I2pQ3ucJRWmiOQB20fNdVuVZj6Ju6RNJHXsPJlNW7AhVtqH//.Rp.	VOLUNTEER	2026-03-07 11:52:34.132	vol123
+06ce5fb8-da0d-440e-af8f-2413be88e720	volunteer3	$2b$10$oWuy5VvLIISGjsR6fmlEa.AAQ6znZuNF1eSbOC9/0nthEeXkW8k3e	VOLUNTEER	2026-03-07 11:52:34.259	vol123
+f8c8bc06-7dd0-4359-9ace-f5f818ef1c29	volunteer4	$2b$10$qnHc5fzZ1OzDes/9PPZ1GOin.EdXR0vzQqwct8eQCtwquUxImrMaW	VOLUNTEER	2026-03-07 11:52:34.379	vol123
+5caaa04c-1ce7-4a6b-974e-3406b5a64c80	volunteer5	$2b$10$hlUixsx6krawDVLNMi/M/u/JiS8vQiokUr.CALG57NsVxp53ijedO	VOLUNTEER	2026-03-07 11:52:34.504	vol123
+0edade64-32c9-41b2-877b-4a5c32317436	volunteer6	$2b$10$21kMpvHIXk5jWbxcePj2Y.WZp/vOGkLyvfQJlduihyvPPj3a4VDhi	VOLUNTEER	2026-03-07 11:52:34.635	vol123
+a7f4182c-9e5e-4d02-988e-61bfbba4fa6d	volunteer7	$2b$10$ORer49Wrt189O8lQyiZeIexox4l.zXViEHcIA8cm.8jyGsvLIViDa	VOLUNTEER	2026-03-07 11:52:34.773	vol123
+a98825d8-6f55-4df1-b48e-b4b75b4ae341	volunteer8	$2b$10$W2f4.wGpG2vYEjz42AfpvOVDruAIKGFcR7o1/VH872QQhjv6roo.q	VOLUNTEER	2026-03-07 11:52:34.906	vol123
+0f8b9330-eee9-4bd5-926b-a157c0cd51e3	volunteer9	$2b$10$hotp8staJ4rpTknESwgXN.AX5/zZdN388HlkmhElmNOpfBL5BM1/.	VOLUNTEER	2026-03-07 11:52:35.036	vol123
+6e3a7bbd-b6a3-49cf-8a87-c9e4c0ffdf9c	volunteer10	$2b$10$GaIPnbgu2P1UwSwxVFUYlOgfQoTAuOiPguV1NORGsLsUIJAzzk0je	VOLUNTEER	2026-03-07 11:52:35.166	vol123
+d6400b5f-5117-4826-8aa2-20e215edfb2b	niranjana@4iapps.com	$2b$10$sMdH8hviEDl3uCBlYrC6cuHv8Qbs6rHLKdD6jZoB2B1ebqL7yIdhe	HR	2026-03-07 11:53:42.365	training2026
+ae997d6b-df7d-4502-815a-0aa529067bd1	arunraj@accenturehr3.com	$2b$10$aCJDGfBINa4xQo6edz5l1.Olsi8RlRNYftK52eK7KdMJfwStH6E2K	HR	2026-03-07 11:53:42.594	training2026
+a895d6bc-408f-4590-a7b2-d228d3627109	vanitha@agnosticsolution.com	$2b$10$IRzLg141FOsAugtif9OW9OFB.EWgoYznFkZUPhhMD.Orj3S9r0n.q	HR	2026-03-07 11:53:42.73	training2026
+e5cabf10-53a9-430a-a64c-34eaa3fffdb5	balamurali@aigilxhealth.com	$2b$10$V4HoQ5BmNqKJGsGd/lfiv.13L6Bea8BzqCSFHd.tW8m6UILebC.He	HR	2026-03-07 11:53:42.884	training2026
+e10c2e0c-a564-4758-845b-f0c1cf560f7b	david@aigilxhealth.com	$2b$10$pI/FHKA6bWCt2pO4S6r0cu.FKhI0DUd3yUgiDqOr8G0MKxZ/aS9X2	HR	2026-03-07 11:53:43.041	training2026
+8886fad8-d8b2-4d0f-8868-77b08b8497a9	anithav@amazonhr1.com	$2b$10$ehHKwlKa/qNQaxAIi2CneubrzwUyq5o.mtyLuEpVBzhUG.yGhqgGS	HR	2026-03-07 11:53:43.163	training2026
+7d959ecb-3999-47cd-ae17-5aab0405cb97	rammohan@amazonhr2.com	$2b$10$G/A6G7V/Obn4s7Kbc6Gbsum97vGz0tjAJ4q650j8rKE03aQ2Yhs3a	HR	2026-03-07 11:53:43.288	training2026
+e13fa7d8-959e-4caa-b474-1e839b1b7a5b	balajiarumugam@amd.com	$2b$10$eVn6.DLEJO4C182xS2d3remfxrtfHpJIzkSxTYUSC8if7DkqFqKfa	HR	2026-03-07 11:53:43.4	training2026
+4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	sriramvenkatesalu@annulartechnologieshr1.com	$2b$10$rIS6ommsBM1iSvTebQ6fyuk.7EPQiraFy6CtVpiA4w9ZsIobgmLhq	HR	2026-03-07 11:53:43.523	training2026
+ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	selvakumaranbalraj@annulartechnologieshr2.com	$2b$10$DVl9NLoJRi/7BY904lwGe.KqEGYi3plwGvROWD7C6Cw5qymeGJ0W2	HR	2026-03-07 11:53:43.642	training2026
+4755002c-b849-46a3-8d7d-09a6f0244fe0	sarankumar@anubavamhr2.com	$2b$10$I4aOXvde4DM4IWwJpyQFgum31Ge2IZ2g/epI5nyqClKjiZ3rSpGVq	HR	2026-03-07 11:53:43.767	training2026
+0d77a15a-eaec-418e-93ba-7317ea498599	karthikramkumar@apollohospitals.com	$2b$10$Ao6CpVGriP96eQdhmusQhulo1Df5yHt4DALqDTXACDX5UlTNQUQja	HR	2026-03-07 11:53:43.889	training2026
+6a497e8f-dd59-4675-b85e-34a93e32d4b0	nityaananthanarayan@arivaraairoboticsandinnovations.com	$2b$10$Ea0AVXqC33bFvY8Aydxc2.Ky4AgnBrXu1S1029VuDZuOYomR9W8G2	HR	2026-03-07 11:53:44.021	training2026
+2a227454-03a0-441c-9b10-480f36a9d715	valliappannarayanan@att.com	$2b$10$InjVPO6FimXoAULH5Ni5o.eZ27nq107YswwM3gOZ0kTjLY.DCo5ve	HR	2026-03-07 11:53:44.143	training2026
+75a6826c-d81c-4a4e-bd2c-108235b551e3	merlynnishapeter@atos.com	$2b$10$0BLXhsF1oUgUHIO3fIQIqu5RrS2ZZCY3GHSQ5.1pmHcXbpXuwGNQe	HR	2026-03-07 11:53:44.269	training2026
+ed67443c-9181-4796-85bf-e211c619f335	balajivaradarajan@bigtappanalytics.com	$2b$10$D06gaRbTvyUFqhKbtWlGFOgg.JU05snxkaPrh645LFxExoIE5eIv.	HR	2026-03-07 11:53:44.391	training2026
+1da76e1a-a0c3-47ad-a2c5-656406fd12e2	joshuahfrancis@bioconbiologics.com	$2b$10$d/kE4Ui7192trTLqruNO8eXMULCZ5nTJ9gzKhlj3bm4xxXLrxvguK	HR	2026-03-07 11:53:44.51	training2026
+c4e22006-3ed9-4250-91c8-6618d57253ed	archanarajamanickam@bonfiglioli.com	$2b$10$bX8s/hJEQF3F0iHio1irfua7oY87XZaz5IthaeSYReRAKOPvBmfuC	HR	2026-03-07 11:53:44.858	training2026
+662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	revathi@boschhr1.com	$2b$10$uqKjZ4ked07GRRLCaOjbju6J3HVOBlcGXpvMzEk4dYAD3vS0p4pMW	HR	2026-03-07 11:53:45.382	training2026
+a16f26ae-83b3-4288-ba7d-7efb541104c4	yashodasingh@brightstarfoodsindiapvtltd.com	$2b$10$S85H071Dsye5DLBQd4NNY.1PK.17c0Ql3Yesx.k86rLLBBw/WMyb.	HR	2026-03-07 11:53:45.995	training2026
+7a5b4ddd-9942-4ad0-9e3e-f47322600108	sudhachirladinne@c2e.com	$2b$10$spbFIKdbOndQ5M7v4m2/buSc20YFX5tchnowXW9SJsfNNLRB.SSvG	HR	2026-03-07 11:53:46.559	training2026
+670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	aarthydharshanalipton@capestart.com	$2b$10$TmpQ4Q9R8TzuxEbVrvn7o.HsDPf79hGgOzdNdCenNo49mcnF7Gaou	HR	2026-03-07 11:53:47.049	training2026
+eee239d8-0363-488a-80c3-0c415c7b2217	santoshkumarbodi@carborundumuniversallimited.com	$2b$10$ZW1XdDQLMsl4MWx4ocPIl.LmXEY3zG4tQQYDeEQkfKqax6i9uxRhm	HR	2026-03-07 11:53:47.248	training2026
+be09fd13-7df4-4c1b-befa-693875fd4fc7	vivekmathanasekaran@castrol.com	$2b$10$1GRa5N9vvy2bosK8S9zTRu0JeFnAjs5R1zeX6xOSSjNuUViw4hFcO	HR	2026-03-07 11:53:47.449	training2026
+1222491e-2d54-48f0-9552-8d2a28af1c4f	nandhakumar@caterpillarinc.com	$2b$10$S8FnxwYpLii1KHqubDK35.9FvL2y4UdoZ43xiCnmu1s7Biyn2pbr2	HR	2026-03-07 11:53:47.645	training2026
+a0df520f-d839-4acf-b594-7cad857eeaa7	pravithalakshmi@certitudeworks.com	$2b$10$O7C6d7OTEtGLlI.gylNPwun67OuZZm.BCDhbLjHJO8TzcbuKNv.3C	HR	2026-03-07 11:53:47.841	training2026
+7e9ba3b4-5cb9-4ec8-b9d9-64111de58a10	ravishankars@ces.com	$2b$10$HN992MLPu7nY9mNZH5MdveGs5AE2SZnl1Z.y2GHdI7znW1WkR9iwG	HR	2026-03-07 11:53:48.041	training2026
+3cdd50e0-99a6-43aa-8f8c-aa9f3662ee85	sabarigirisan@cipla.com	$2b$10$pFyWh6cMTeDyT.DRxs.MVeKJg5aBPJVrTyiuSXZbmVZ9j1oF7B49G	HR	2026-03-07 11:53:48.239	training2026
+a76abe4d-2ec1-4a41-bf2f-0dc0fbea095b	gautham@claraqua.com	$2b$10$u8wHZeEshs9pCtPC/uGhVObpRwY.aa0yMXHL4epesF/Sb4qE1gnOy	HR	2026-03-07 11:53:48.436	training2026
+bf71f55b-86ba-46b8-afa1-1aea09f829e1	shyamalanagasundaram@clounomytechnologiespvtltd.com	$2b$10$2.tp/Xd43I6QuqLOzNMPMe0BA7nCiZeQhJI4q5G6XoVPoVyrclNiS	HR	2026-03-07 11:53:48.634	training2026
+f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	kishokkumar@cognizanthr4.com	$2b$10$NHjPALNbAq8ZWrpsYHi1bugiS6JOfl.o2OwdDRSWw7s3WJDsixCyW	HR	2026-03-07 11:53:48.831	training2026
+6a9107b1-6b87-42c5-8994-967a28c2b0d1	raghulsj@comcasthr1.com	$2b$10$c/BWmdvJMTLIrt9jZ/GaLeRP75QSrsjfMmQ722O5w56l3oeiOjXga	HR	2026-03-07 11:53:48.952	training2026
+9ecb3c46-4943-4255-8f07-ee963f9a7b4b	ushasripaturu@companyadaimlertruckinnovationcenterindia.com	$2b$10$Fw77Deo8ttrqxbjflr.21OmoEexb5kfZDAne38kwPtXqwWwFNlCsi	HR	2026-03-07 11:53:49.076	training2026
+964b9c92-19e6-4140-8be6-a64973f93bfa	ambikasrinivasan@companyenihontechnologies.com	$2b$10$xCdldc5eiQYs9WUIFGiOSecvC6F/F7rICoaAVBfRWheTTDu7Fk8jy	HR	2026-03-07 11:53:49.188	training2026
+2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	kannan@companyf.com	$2b$10$Vaji9iAadflKfpUyoKND8O5/mgrTq8xB29xq7NEszqguaa3CED/ci	HR	2026-03-07 11:53:49.302	training2026
+3bdac905-7cfa-4a31-85de-39ec2f854afd	subramanianramanathan@companygdisprz.com	$2b$10$DtX.jNtQFOyI95KGjfCGPehJaAMpTdoE2rBwGnJSYxpqbU3tEinFC	HR	2026-03-07 11:53:49.418	training2026
+d4cf1e25-663d-48a1-806c-b1b4a72b5e34	vishalirajan@companyh.com	$2b$10$xrkWznu.sTM8fXiOXxl4re2jawmiPJl4OHa17nU2v7KXvVKG6cet.	HR	2026-03-07 11:53:49.541	training2026
+5cb3705c-557e-4ea0-82c7-efe26cb3386d	sushmithapatil@cornerstoneinformationtechnology.com	$2b$10$JCuMnbWj6AX/9tUjp1GaGOcgn2fWsskt847efaXVcBcp.Z7s1kHj6	HR	2026-03-07 11:53:49.662	training2026
+52535048-47f2-42cb-91ec-65a4824c9908	isaiarasiraja@cprimeinchr2.com	$2b$10$DBwflEOhN8SwLL7jXijg6eV0pJmg69f1WKXUYdIoQn4CdCCZL47MG	HR	2026-03-07 11:53:49.816	training2026
+42dbf0f4-4340-4d04-b344-a249cd2b25ba	badri@daikin.com	$2b$10$EHWjtlyR3W2tSjMD89aKQeu8wEwQl/DzdWUStT.UxOxe8wZDna5fK	HR	2026-03-07 11:53:49.943	training2026
+104e34a6-fd53-4012-a0f0-41df6842c833	sudarsangp@dayatwork.com	$2b$10$4vggQUzIGT4EeiO73w8kmeBffcr40.85o8uaeWD9WbG4VIHPnuFUe	HR	2026-03-07 11:53:50.059	training2026
+990d6c56-fa9b-4848-8696-21e832fbcfd3	aswathsampath@dell.com	$2b$10$AjcutmPnNmqsQx8mxJK7e.NjvjMuFi7B6ofT3BBC0k3UeyBDBtS3a	HR	2026-03-07 11:53:50.177	training2026
+2422aedc-4c1f-4a1e-842a-d0e4212dd7a3	nageshwaran@dhl.com	$2b$10$w0dd6DiuGr40hfhn8w9M4.uBs.Plui12FosUDPm94v0fnba9iSMyK	HR	2026-03-07 11:53:50.304	training2026
+99899cab-68ed-4572-9c0e-aba3021e37f5	vivekloganathan@digiwinmediasolutions.com	$2b$10$8HJd2SfGuqVlK4pEItjvk.1XGLvAFs6z2gOadzsp6VLUFEL97bwm2	HR	2026-03-07 11:53:50.423	training2026
+39201be0-22a9-4afc-8bbf-9a7dd43637e6	vigneshsundarrajan@dpworld.com	$2b$10$.o.d7ZmkUbQ3.gLYg4E/aeG593KX/4MCueik3WtthLT5U34oKuHe2	HR	2026-03-07 11:53:50.544	training2026
+6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	madhavanb@elgiequipmentslimited.com	$2b$10$QTxTIdeF0amTIQap6ItXmedCtGT/7QXaSfLXbVXyhHUc./hrHydqa	HR	2026-03-07 11:53:50.671	training2026
+f9313801-25be-479c-8f3d-352c59c9166e	mrprabhuselvaraj@flipkart.com	$2b$10$lWZRRv4QSSJyVXf.42T9/.P9WUujG1Lq89ER4drKUG3c53koe/FBa	HR	2026-03-07 11:53:50.794	training2026
+db338578-8876-4dec-a6d5-2d0094828b16	gopinathsonaiyan@flyerssoft.com	$2b$10$iSfwjfVYrGINCAkYq0/55.XrCvzDYBU44BkC4A9hKMmTWQ1Ks0Pfe	HR	2026-03-07 11:53:50.913	training2026
+1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	kishoreeakambaram@foxconn.com	$2b$10$2ypBbxf4k81orUv8yX49G.WpvSj6xm3beVgZogkDZpLu8AGZssKJu	HR	2026-03-07 11:53:51.033	training2026
+a3ca42d8-ab64-421a-ab67-aeb12925661e	venkatesanm@geneithpharmaceuticalslimited.com	$2b$10$AgvLYCubkVXl/Y2uyUH1nOtSpjxxvvkaW/Qt9L145UByHTDhLG10K	HR	2026-03-07 11:53:51.158	training2026
+6f127d1b-9a45-41d4-9fcb-da121c576e16	jeevanandhan@greenpodlabs.com	$2b$10$bnX2Zv5c8jLaIEtJ5ZN9uudhT8xd9ezNarP1RFqrGWSUkgyUfGSkm	HR	2026-03-07 11:53:51.288	training2026
+5715a9d1-abdd-4c08-8c98-647024ebd6d6	srinathj@guardianlinkhr1.com	$2b$10$44Eho1wtSPXRhvYj4j/OxO4xajDY09zMyWUOcNUd/sxOqaDcFXUfK	HR	2026-03-07 11:53:51.411	training2026
+2fc20e91-2e7d-467b-94da-2f73a380bf37	anithajosephine@guardianlinkhr2.com	$2b$10$CHsk8Iutbv8jUh/GTNTvIOTTxk/EjuVlcHD6A7ViHkwlbCec.T1BK	HR	2026-03-07 11:53:51.534	training2026
+7ffe825f-1a1c-479d-b53a-6b359e2b0fb3	gowthamprakash@guidewire.com	$2b$10$8VpqwqtBkZKsvO/X7WwXz.eVvK1dx5yBdaIjQxGwkostCaXZG52Ve	HR	2026-03-07 11:53:51.654	training2026
+d631f416-b5af-4ca2-956f-da772aff5f6f	senthilashok@hcltech.com	$2b$10$xZo2H63lzT6HsWSIvYeU6OS7ypkKPPlOXssEPXfq2vfu69FivNLLC	HR	2026-03-07 11:53:51.776	training2026
+f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	revathid@hclhr1.com	$2b$10$.sKbAGUaAQ222Gj4WJklPO3sCVNjQo.WO09sAA7w0u5klQJjR5Mcu	HR	2026-03-07 11:53:51.903	training2026
+3f2f858e-a92b-4440-98b6-0a25ca5ea3b1	gopinathv@hclhr2.com	$2b$10$tXUYeiczDT.mRF1WyFOeDOHGBbhuEUY79hB34gjGTTJcFSsQauP/S	HR	2026-03-07 11:53:52.03	training2026
+920b5fba-b331-4010-8858-8a5b3fb29a02	thamizharasan@hclhr3.com	$2b$10$LoQV2eBcGXckMRt1LRLHRupFdkg4wByhA37YkJ2ZAVBWpFCdLpHwK	HR	2026-03-07 11:53:52.143	training2026
+864fdade-0299-4871-a060-3c55442a1355	swarnalakshmisaranraj@iljinelectronicspvtltd.com	$2b$10$2U5i4ftp6vSSwMMF427Vle6UkIPxQ0OZtBDy5oRGQ4LEfPU6WHh66	HR	2026-03-07 11:53:52.268	training2026
+74a0f6ca-e9d4-48ce-80b4-463ce6f06489	marysujatha@indrayanibiotechlimited.com	$2b$10$FUFzUVxXabKv9PJfzJdeRO7HwCgh4iHaic8T0nGtj4YAA3V6y3S3i	HR	2026-03-07 11:53:52.391	training2026
+8439c4db-97c1-424b-bddd-76301e9c2f70	manikandan@infosyshr2.com	$2b$10$cZDHTOn66LW8QcNbzcUS2OZ6VTxg3V.9Gpmr5/bUntw/cM3cCo5TC	HR	2026-03-07 11:53:52.724	training2026
+f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	vinolar@kashtech.com	$2b$10$TLs7H7AewJKaTvT9i2gEue17q8bqh47XLR18.KIYYmdrqtSjTFvAe	HR	2026-03-07 11:53:52.92	training2026
+e6dc9aba-338f-40f4-bf50-27ee5504b737	alexjohn@kgisl.com	$2b$10$Ka0.HYiYNRc5zMTRbFdFruIPsWsIpEFeNiqTXMgN50edtCFjMNIzO	HR	2026-03-07 11:53:53.03	training2026
+39892be7-d57a-4cf5-819c-818c3dcd0d38	sribalaji@lthr2.com	$2b$10$vzeE00I7Q9hOp6t/LOPkOulqOnTQxJ92VDmSvl5..hztEE5PbXSYe	HR	2026-03-07 11:53:53.149	training2026
+d6a31449-5393-444e-89c7-f8ba9d35545a	narayanan@lthr4.com	$2b$10$55rhdeAES20wzMABGe1PF.dyMFAlDV.jKCo19cze4r5Bs9R57oaT.	HR	2026-03-07 11:53:53.271	training2026
+55fbdf9b-b4c7-4844-babc-bba452abf569	bala@lthr5.com	$2b$10$eTxRq.hmNE0kp3BU6ySaNuRtGd/Z6xBcwuQeLQFgQAMtAfuaRljD.	HR	2026-03-07 11:53:53.383	training2026
+6fbfe039-4af5-4d10-bb34-184b1e568b1b	averyldsasaldanha@legrandhr2.com	$2b$10$OgfJoiVwqymCqbxUqtaoEOUpJGkTc10CBXb2QY.SXQx3yRu7AtR6O	HR	2026-03-07 11:53:53.51	training2026
+539ff319-c98a-440f-9541-c0e736fe44b3	kavinpaul@logitech.com	$2b$10$zIAYXUaG4V5L4m0552tK4uo18YDC121GpSPJCdSPAcEgpBaEB4KsS	HR	2026-03-07 11:53:53.64	training2026
+eea52d8e-619c-4985-9891-2b417c468095	karthick@marutisuzuki.com	$2b$10$A8Y1y5vwbTUz5xHumafl9eCXN6OkJcSnHBSrXqR7dE5VZ.C2A4b5i	HR	2026-03-07 11:53:53.767	training2026
+0ac45005-84e5-4b25-ad6c-1e998e94a611	selvam@mcdermott.com	$2b$10$HwjEIPlx36q/V4rE5gW1POjMAt1LBATD7FKY4rozDf0dZyKhzGayO	HR	2026-03-07 11:53:53.884	training2026
+5772f06a-bf47-407f-b92e-74bf4a85aead	jagdeeshraju@microsofthr2.com	$2b$10$OGjvwoqB4iLBVbxuyB9BPuSdRgunQk0.Ka2wXARwTH4ANIHqRhN9C	HR	2026-03-07 11:53:54.007	training2026
+217ae2de-4843-400b-964c-30302c10965e	rajeshdayalan@mindx.com	$2b$10$uGsiQ4aDYPWKW/ggZg4suerjgWUwom/7hESBni.WrtFBRPRCKN9b.	HR	2026-03-07 11:53:54.132	training2026
+fee36876-2c43-49ca-bf38-cf3a9c65df00	georgemuller@mindxconstructions.com	$2b$10$z/8BH1FJqkVmaUBFNSt..enRZOzhI3pbnpYEnKZVRQgRme4KT51AK	HR	2026-03-07 11:53:54.261	training2026
+9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	monisha@mobicip.com	$2b$10$n4UxJ6JXtPldF7nGXI75vuQh5qOrhYhps/Dz1vFY/P8GlbtJDcuyG	HR	2026-03-07 11:53:54.395	training2026
+ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	akash@mphasishr1.com	$2b$10$l8lwmahenwAHA5aSBfxDReEnPzB3i7RzEwpN6bhHMbKtKw61t1bc6	HR	2026-03-07 11:53:54.595	training2026
+2447e995-8cd8-431b-80fd-2654f0b2298b	jeshran@nabatiindia.com	$2b$10$0EZzoW2YdiFzDSNF5h9hYOjz3Zugf60zYZQEdLRP3eebrTXbdc7dy	HR	2026-03-07 11:53:54.8	training2026
+44f338a5-56b0-4ad1-8258-79826e1445b3	malolan@nibhavhomelifts.com	$2b$10$uJNdfhJvyJWYFMR8M7O3GO260hir3/KVqc2iGA.8YMbDXsjg87W6m	HR	2026-03-07 11:53:54.918	training2026
+ce6d53c7-d3d3-401f-be95-013fa81fd707	shilatiwari@nobelautomotive.com	$2b$10$H3AVwKiPWxna4ZnQxWol0OsV3RC.wQl64QKFyAbjEb2nzk3B6Jqba	HR	2026-03-07 11:53:55.053	training2026
+246e2354-457e-4112-af52-025952cca149	jerin@novactech.com	$2b$10$aTetT/EyfXXANuv5dQnz1.EnX6.7s0eYaNDAVrvY1pgmPkDTXeVAq	HR	2026-03-07 11:53:55.191	training2026
+c34851b2-fce1-4c90-b896-3a1a666a841a	roopasri@novartishr1.com	$2b$10$As6q22Tr.s29S8s4kUPfhuLZ2zSeXpFQhqJcbUAOMeQwocs5xfbOy	HR	2026-03-07 11:53:55.323	training2026
+c9d7022f-7e84-4876-a4fa-beda27a31cd5	vijayalakshmi@nstore.com	$2b$10$/kjgNLBkFDl2hdVLIUA1ku6CjLqPrAWtaX/8fdavy8ucBbXbusvtq	HR	2026-03-07 11:53:55.455	training2026
+89cbe614-d6a2-4418-8571-27e9eea6568d	augustineraymond@ntpclimited.com	$2b$10$glS7FOiDjna/5YGeY2fteOlJhGFcIjgVERw8XIOUB/NdhhxcfVvk2	HR	2026-03-07 11:53:55.76	training2026
+8dc2e306-0b99-47f4-ab15-7e64121bdd0e	aseemkumarsinha@ongc.com	$2b$10$L4qnA/J7sE8R4J6zNy8qy.EorYwqdHLY83lH7PtfJZslqF/HzUnhS	HR	2026-03-07 11:53:55.884	training2026
+50fa6865-037c-451b-8ecc-c4fd9bdb0334	aanchalsrivastava@payoda.com	$2b$10$F1.NIJZ7JUa6.jy1LhFvFOO/9qr29nlDfR1RlF/pR8cTxLGIPI3Ti	HR	2026-03-07 11:53:56	training2026
+51c28633-94a9-4653-bbc8-47eca7fd98c2	mohammedibrahim@petrofac.com	$2b$10$fEuNx0PCnKyIkbjBRhrgTuBESZqi9ntyI/DoCEelLXI7LAftF0WNi	HR	2026-03-07 11:53:56.114	training2026
+23aec277-cce6-4a42-b4c0-c31755cd2f28	kanagamnachiappan@phycosolecotechpvtltd.com	$2b$10$zu6fHoS9smH.fYAzuxJ9/.I.ulZCfrOX5iR72YdRHo/UXNLQB60p.	HR	2026-03-07 11:53:56.227	training2026
+9b408827-9730-414a-a9ae-c8638060695c	aswaththamanjayaprakash@playsimplehr1.com	$2b$10$L0Vv4vNjnroiDTv5MKdz8egsPO90ggtAsO6DmnhjZSJn/plbMKpxK	HR	2026-03-07 11:53:56.328	training2026
+9fe45617-f211-43db-905c-28bd9a045d45	chandan@playsimplehr2.com	$2b$10$j2XXi4Q8KQo1umj6c0l5Xez.RKePReNsx6mp2TBG.5WZTUbpv6Yqm	HR	2026-03-07 11:53:56.443	training2026
+565b69ae-c54e-4f96-9d46-a31e869eccbf	vishnuprasad@powermech.com	$2b$10$s7C/5/9w6rD3a5OV5bOMYelqsO.yfDZ1624oEADHrED9Q39mdum7i	HR	2026-03-07 11:53:56.557	training2026
+4df9bf27-579a-4661-a2ea-703387a2bdaf	yukendran@precisionbiometric.com	$2b$10$aLkKvfY4BgbjV.LeAYBiz.DcbsscmPhcc26/x/wm1loKBYZp9ur4K	HR	2026-03-07 11:53:56.679	training2026
+fc1f8f4c-1e4f-4bf1-b24d-e1fd342f2d36	padmavathyp@prumatech.com	$2b$10$yJTUUK4BYCySIU1PnqK1r.3uE9Gmr6RQH8uilRH7upxH0OiunCREu	HR	2026-03-07 11:53:56.798	training2026
+2920b45c-0ce6-4dec-8766-3892322ff1b0	skannan@qualcomm.com	$2b$10$7BY3zxIxUe7gVbMV2/JXrebki8jHnUOJrq/mS4tdvdcGxOLsXR0D.	HR	2026-03-07 11:53:56.93	training2026
+1cdcde69-9c74-4f47-8da6-335a93fe0cfd	srinivasankumaresan@royalenfieldhr1.com	$2b$10$ISzfLu0qRRSW/kM5L22P4emKcUfj1kx0n0mj62j90lPKVM4fXYMXC	HR	2026-03-07 11:53:57.047	training2026
+551cc011-24d8-4fd4-bdd6-8b0cb84239ee	muralikrishnau@royalenfieldhr2.com	$2b$10$bkhfMmgW6lP4MwT3htNAzuGtbeOYSI5/DFtrMeqO39uRPJFaW7/YG	HR	2026-03-07 11:53:57.171	training2026
+5f1975ba-b40d-4a05-b28d-5195c0db7348	ramashreesaienath@saintgobain.com	$2b$10$fKCyIh9HUfClK.IGttKcd.sGGKsYs//iBCpvQxCJldwc.8kB5ZNlW	HR	2026-03-07 11:53:57.303	training2026
+91c6de71-9638-4b58-b266-47f3e7c6bfb9	sivashunmugamarumugam@schneiderelectric.com	$2b$10$G3Jd.TTMisPYR7.00SUVd.T9wnDNeOC8L4jng7AGAoozHLjNNs2Fm	HR	2026-03-07 11:53:57.426	training2026
+a55a5c41-087d-4ea5-bdb1-2c7345243b0e	akshayasairam@sdinnovations.com	$2b$10$FRgDzkV8ObCPXoqer19b.eab.Xm1766inmO61vnXas1QVvJzTxiIW	HR	2026-03-07 11:53:57.543	training2026
+d3211624-8dd6-409c-b000-bd7166f0755b	ramgowdham@shell.com	$2b$10$cZ/37c3OuM.rUTDAz6VjrOEpuLgdB3h5NmyZVurP5WKIMH4TkEx6a	HR	2026-03-07 11:53:57.652	training2026
+a694622b-3ba8-4c82-bd05-08d8bfd5af50	karthikkumar@companylsiemens.com	$2b$10$jnFFT3ys9eX9MwnEPW727eqW716XTkGM1tg/8VXFFszy55MpkdGvi	HR	2026-03-07 11:53:57.77	training2026
+bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	mohanababuranganathan@siemenshr2.com	$2b$10$jN0tAmeh3Sg4AZW4i4sok.QdQTfdBkfYhNk1f1M3ejTOzVBz55K/G	HR	2026-03-07 11:53:57.887	training2026
+24421caf-3a14-4681-b9f9-f237f956d8d4	venkateshvc@smartcliff.com	$2b$10$8pD4pQSwUwd8liND29/Q2.Qm7w4TbOSDy4V7zjV95fJ9kKOosXyIG	HR	2026-03-07 11:53:58.013	training2026
+98996c73-8763-4ee8-bb8c-bfeaa7c791b0	trishiraj@solarisse.com	$2b$10$oZy4gUSN8JOjA.QxPeBrvu4j32Fy7jCrIMYwByq886Z25BttXCj7e	HR	2026-03-07 11:53:58.146	training2026
+e4d9b090-495e-4d82-9c3e-d8048154ccd6	vijayaraghavan@staples.com	$2b$10$xkdzCOQi5V0C5mHv3sHiXu7WpWzQsszONVqcZ.tiV6.ZtgbGmQ2Ca	HR	2026-03-07 11:53:58.259	training2026
+0cc1387b-56c9-4ce6-a994-e1cf59c24632	chinnarajduraipandian@straive.com	$2b$10$G6RgfkTL.j0ZE3QSGflYEu3Jlb8KfR9qr7QsBehEKPMqY15kL.0Da	HR	2026-03-07 11:53:58.376	training2026
+674b5de7-296f-4f50-8359-9e337c508dd2	haripraveen@sutherland.com	$2b$10$Ajlc7Iv3aP8slW5N81LETOwRB26JtT514CjgpY70rODMTrAxVadwS	HR	2026-03-07 11:53:58.504	training2026
+efa89ff0-babb-47d8-9694-afcbe18d049e	chandrasekaran@sysvedainformationtech.com	$2b$10$TS2dLZLgZ5mvEDYs5jH8KeRlC.mD./6TtlZhGv50DN.XoM.9O4PAW	HR	2026-03-07 11:53:58.624	training2026
+56996512-1176-493d-869f-c1cb3b9bd7ed	rahuljain@tafe.com	$2b$10$/VZqX.IISJ4jnNCNeT20XOFGFLvmKxBaPfQFsI5PZPurOStWKrOh2	HR	2026-03-07 11:53:58.753	training2026
+b871efe2-531c-4205-ab03-4e548db1e2a1	aravindhanv@tatacommunications.com	$2b$10$dL2.gBH44m.xDXnINtR2XOAlE8dcME07K15lb.mXP0b7NDJ984QW6	HR	2026-03-07 11:53:58.885	training2026
+38236c5f-2faa-4940-aa37-60a206f3be14	anbumozhiparamasivam@tcshr3.com	$2b$10$0nriMEeW.VPfZVRzpACg4eSvRjKm2ByfkfTTtgPWcQH/bL3GAMIUa	HR	2026-03-07 11:53:59.009	training2026
+81f895c5-36b8-4d09-8241-80e64868fe56	udhayakumarravi@techmahindra.com	$2b$10$GtTADtmf6KY66ODjFQ93iOYZ8Nca02GsSh4R/quPngPvltoSVxUiW	HR	2026-03-07 11:53:59.133	training2026
+f1e9a93f-1e04-4540-9d63-4d34570f4cd2	sasikalasreedhar@telusinternationalhr1.com	$2b$10$NW1iQl6AIiaAxjjYQof8DeVUxiARJc4E75cshfg9WSX8uYd29SA6.	HR	2026-03-07 11:53:59.267	training2026
+8c1d8564-6890-42e8-b25f-456e6ee88396	prabhakarramakrishnan@tnqtech.com	$2b$10$yqS4wFGFMSJ9vXtNcSJc5.MqH0yVkE0Mh8JngtV9Mu2gT9TgCTlTu	HR	2026-03-07 11:53:59.45	training2026
+ac74bc6b-de4f-4965-9cdb-3d3851da916a	farhanafathima@tranxit.com	$2b$10$NPzRjE5E5XWAYml8UsYg0eq2pu4udZRbO2ezwLyQGgrMfDa1atVPO	HR	2026-03-07 11:53:59.564	training2026
+aaec9758-627f-40bb-b8b2-e92110d36327	nivedita@virtusa.com	$2b$10$4.ZKgrdWtQKDjt4dZnn02.C.18pRPfCesx/zbA3qtZHXrtzbKLs0a	HR	2026-03-07 11:53:59.683	training2026
+77da9640-33e1-4aba-a5fd-ff98ddfb57c4	subashinikannan@wiprohr1.com	$2b$10$v9ipboaVTUEHz96b9q4lcOEmtzaziYYZCSBLZQej2hwWBS8MRKpc.	HR	2026-03-07 11:53:59.841	training2026
+6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	mukeshkumar@wiprohr4.com	$2b$10$3050WE3kzMZf3Y6r2O44qu2tpPDSc.5oOaACn66RAX4BfyOxaMNqy	HR	2026-03-07 11:53:59.963	training2026
+fcce01c3-007c-4299-a17f-9d5f4402c6ec	harshelvyas@zebronics.com	$2b$10$1i29b9L9nsbzLsrgx4tDBeD9msFvM6t2HZCr9GNrpLCi8MSS3PnkW	HR	2026-03-07 11:54:00.113	training2026
+54736253-a69f-44a5-975a-10998246fe9d	praveenkumarm@zeckhoitservices.com	$2b$10$WH6Eynq/e14isP.76BpBY.9u/J0FybV4PVoAbRhZfPpVIRzlSMZGu	HR	2026-03-07 11:54:00.275	training2026
+5e31574a-8f3c-46c7-8f2e-fbd603c057a0	divyav@zohohr2.com	$2b$10$7WRxtLZ/6zsKdkinME2t7.ZU5E..wyFHlzT5gR7F432WVVbBfWZuu	HR	2026-03-07 11:54:00.447	training2026
+cf6780cd-f597-4792-96f8-5e11206fae5e	aswinsr@clarivate.com	$2b$10$IUjpGf7FTAFlSBX.xcAGZOZagQuesecpdYI/LOzhzfIpF/nJZbB1i	HR	2026-03-07 11:54:00.585	training2026
+7f1fffa7-2ca2-45a1-802d-35c7b7e22215	vishalir@mphasishr2.com	$2b$10$cN9eefKmXeON/z.Yg2mTEOzTxKoAR3HD1yNCJjksIDMIDr2bSsntW	HR	2026-03-07 11:54:00.732	training2026
+5c9635b4-b0e1-40ac-947e-93714df4d582	viknesh@novartishr2.com	$2b$10$1UnkCXc7uyXQbeZHZYes8ebKxXnoV5sjNOJdkdB/YY5RDD4YglDPq	HR	2026-03-07 11:54:00.866	training2026
+3bb7ac61-b27f-4979-b200-79ff470f486f	srinivasant@glosystechnologies.com	$2b$10$e78OL4p5OIAYfdakvaz1Re/JIK5pxBJFqz8Zb6MlWbU8tAOFsXECu	HR	2026-03-07 11:54:01.01	training2026
+68e11996-3b69-413e-a7d6-9b361f1d4b2b	ssudha@glosystechnologies.com	$2b$10$pGRhL.xy6eHf3P21KL6RqeYnnfxcG6Rx5DiFNKBRzA1YL.SQedeba	HR	2026-03-07 11:54:01.171	training2026
+cd263764-71e2-4ead-87a3-0c5e9aff9828	chetankapildevsharma@meritgroup.com	$2b$10$ha461eR2k.IZeitdDXS1iunJGRVxXLElVPz2RFIOEttMvgkej.jOe	HR	2026-03-07 11:54:01.336	training2026
+dc83d654-7865-4342-9437-16bfcb075e6a	nikitharavi@chemfabs.com	$2b$10$44XqFfp2q45BoknB0XGr.O/sSuRHiDqwTQTsRduyWbzAIFYYHcWY6	HR	2026-03-07 11:54:01.622	training2026
+90614df5-31d4-44d3-a5a0-575213f4a074	ananthika@forese.co.in	$2b$10$sKPlPSIdqKONPJ0AM0n/2el/jwaN9P2vP/j3EvDhKkl1IlzsQ.C0S	VOLUNTEER	2026-03-07 11:54:09.638	volunteer2026@pass
+bdf1332d-78bb-4da6-84cf-476d3d9519d7	vishwanathank@forese.co.in	$2b$10$0vZG24VNw24Htu0j0zZOk.yw.ujLs1n9xPPeAYOJHTdouika0PynG	VOLUNTEER	2026-03-07 11:54:09.793	volunteer2026@pass
+f77fe85c-497f-4478-8b53-ca5e5ae3be3d	krishnadattaadibatlav@forese.co.in	$2b$10$6ypI6Dr2C9O.xNpni.Y5K.e9Co/6vjz1iYLZckXk0nctyZJvX0qoi	VOLUNTEER	2026-03-07 11:54:09.906	volunteer2026@pass
+3e103a88-25eb-4e6a-982a-c1601811ba8b	bhushikar2ndyear@forese.co.in	$2b$10$vSx31kuiF8xgBZrucrmW5.G9VFJ0yHh1z.f0KM4eV8nnDXrIAKX42	VOLUNTEER	2026-03-07 11:54:10.029	volunteer2026@pass
+0586f0fe-a1fa-434d-9604-e06c23022d0a	harshithah@forese.co.in	$2b$10$mCBPPUfgZQ0CPa5FP3Q98eqnxMNxgAx8NEb7Q4YOENdwRaZHzJKHO	VOLUNTEER	2026-03-07 11:54:10.152	volunteer2026@pass
+6bb4dd7f-d675-47fb-af11-ae191e5e4067	ikkavinsriniivas@forese.co.in	$2b$10$LM2ZQgNAO.17iBTPjVbuUuyT3bwfdxQbnpbvH3bmEPy240W5NZVOq	VOLUNTEER	2026-03-07 11:54:10.393	volunteer2026@pass
+d77755d4-a87d-4c65-9eb7-1e3cd27f4e1c	mohammedthoufeeqs@forese.co.in	$2b$10$TN6cwl8DFnH9U8bZwVqITOauEvFmP.nYVSAURsNjQLKIIyiM42Ehu	VOLUNTEER	2026-03-07 11:54:10.518	volunteer2026@pass
+186c35f5-1e5a-479b-907d-28c28c96ed93	amahathikavya@forese.co.in	$2b$10$WHl3/wT2TiS9RVK2Tv5ZheuR2qa.wyXup6iHy/irOPsJyNvgg3TOe	VOLUNTEER	2026-03-07 11:54:10.638	volunteer2026@pass
+3bcdb3bd-c0bc-47d8-8ee4-1407db7f3597	skowshikganesh@forese.co.in	$2b$10$3vsABaolsRb40vFsVHRVz.tVVs4vQE/ff1pfrLD3.RkkM2Qasdwje	VOLUNTEER	2026-03-07 11:54:10.769	volunteer2026@pass
+25fb53ef-0b44-44a1-b0a6-08a150d983e1	pyeshwanth@forese.co.in	$2b$10$SpKs6fD9qtqlmj1y549a4.pqX82LUlSu7jqLfhpaNM9FgEE/ymPkm	VOLUNTEER	2026-03-07 11:54:10.911	volunteer2026@pass
+e5c0c776-29c3-4e60-88b8-c706692c3842	ashwantp@forese.co.in	$2b$10$NzsuAzH6CSyU6Qjevz1qT.uPPn.xQW61QsQQ9PNnsqvfDA0scjH2i	VOLUNTEER	2026-03-07 11:54:11.051	volunteer2026@pass
+18afcade-51d2-4f85-bd65-168040cb7925	sampreethis@forese.co.in	$2b$10$NyP5KhRzeBua25fzo/UZtuiHExmthGSh8psO0VuEmc/VyDeH9tfm.	VOLUNTEER	2026-03-07 11:54:11.192	volunteer2026@pass
+323e4d15-6cb8-4ab5-a10d-8942fd75405e	harinisharonri@forese.co.in	$2b$10$WNfD0V0ZshasCXxiOwvAdupoIufml.eKnznfPVaDDd6HWrfs1wQbW	VOLUNTEER	2026-03-07 11:54:11.33	volunteer2026@pass
+dcf4d4cf-7347-43f7-bad5-fe389b3c6743	harshietaasounder@forese.co.in	$2b$10$H4EdLcFQlcVmY3/JlrD4KeyisVc/T5ikJ04JF0UOX/H559WEOXYia	VOLUNTEER	2026-03-07 11:54:11.468	volunteer2026@pass
+4b417996-9bfa-4526-8d33-18175d3804ca	harinees@forese.co.in	$2b$10$.a8AEWMOHOwnG2n7AMueSOe2pAoGswCDgZEHs9LpgnA5IZ9qAAo3e	VOLUNTEER	2026-03-07 11:54:11.6	volunteer2026@pass
+7b04e471-37a0-4d66-a3d9-b38a9b00cbdf	ktharunvel2ndyear@forese.co.in	$2b$10$YZ9T5sQmsp/i9T1KcdgB3OOsdMOXPB0AFY3lAbuZQ.jXT6yCGevAK	VOLUNTEER	2026-03-07 11:54:11.753	volunteer2026@pass
+9288f98b-e298-4592-86a2-8d1f99d6e9ed	krishshah@forese.co.in	$2b$10$1vNaJKwjZQZaitvbi0sb1eviUs4r7lWWa1x5a08zz3lDDTuYh4ECO	VOLUNTEER	2026-03-07 11:54:11.893	volunteer2026@pass
+20bde13a-8141-4d5b-a879-585e79928582	subashkrishnak@forese.co.in	$2b$10$eX1VtycdPZKJDlpHrLDB8.J6EpjBjakyaha6k0xBoydWOMfrsdWP6	VOLUNTEER	2026-03-07 11:54:12.022	volunteer2026@pass
+8482352f-7cb0-4bde-8960-5959a6c1c46d	ananyah@forese.co.in	$2b$10$cw0qc9HxqMHJBKxrW4KDsOVyeaKA1prsStF2sw3fd1O/Bq.EtvrLu	VOLUNTEER	2026-03-07 11:54:12.154	volunteer2026@pass
+da7b05ca-033d-44e0-bbf9-008473a24bf2	ptharunika@forese.co.in	$2b$10$zONN66aFZfiE0b5EBmBMAOZxk5bHRQO457IvhgmREsTkjgZmqIm7.	VOLUNTEER	2026-03-07 11:54:12.278	volunteer2026@pass
+521a9e6f-2f14-442f-a911-f732aed02c3d	aarenkarthik@forese.co.in	$2b$10$iUYqQo85B/nvqqYElWh25.jlhEGGf./PTJDMYAhi6HzJuZHp2czRK	VOLUNTEER	2026-03-07 11:54:12.405	volunteer2026@pass
+e84b2b4c-5688-4ef2-abbf-3bfa59348159	vyashitha@forese.co.in	$2b$10$vheDRFjQFthOmMGM5uTTmOhqbfw7G//zgmxZjfzMEbKtkdLc/6DVy	VOLUNTEER	2026-03-07 11:54:12.533	volunteer2026@pass
+e72778cd-2e01-4f67-a2d4-1146490b0dd4	kaaviya@forese.co.in	$2b$10$6XyV9roYikm.6NHaZQmuNeG2nYIQKoEuAQm20oPYUs3N2crce/6Uy	VOLUNTEER	2026-03-07 11:54:12.664	volunteer2026@pass
+e3d92481-b161-43ba-8eb5-6d47a6b227ff	mtitiksha@forese.co.in	$2b$10$bvnHCb0l5wvj.ixZ/aQ1Lupn1bvaeym8tOE41gRKwVNo/lpB4RGzK	VOLUNTEER	2026-03-07 11:54:12.783	volunteer2026@pass
+24e65744-601a-4f8e-9052-72220a4e364b	saivignesh@forese.co.in	$2b$10$YgKaAqO4/0b4QVnmnJwlt.Z6FetE4vE2.QAob.4cHkhquBYoPrSIW	VOLUNTEER	2026-03-07 11:54:12.91	volunteer2026@pass
+6c4c89a3-4773-44d4-8f98-0eeb2f4f5dfb	hrithikg@forese.co.in	$2b$10$b94PUxHZSc/ANcqmJ9zeEOS9bvPGu8sAx3DOXgF1D8O/VSc2POUgi	VOLUNTEER	2026-03-07 11:54:13.067	volunteer2026@pass
+4bc1c2c5-2b16-49bf-b5fb-eb79ea5c0bc7	rithikeashwarg@forese.co.in	$2b$10$gqm4GrOXx.AAwR0eMK3XnOJzz/s00ER0HlRiu7lHG.iLw.IBmXB3u	VOLUNTEER	2026-03-07 11:54:13.228	volunteer2026@pass
+a1ab9bc5-867b-4b8f-9763-4cfafd396ae0	kailashs2ndyear@forese.co.in	$2b$10$dPvCXl5b4mwt28.YpCjnHe9RQLmvi7quMbWknaIE4EXFHJHOQrNwi	VOLUNTEER	2026-03-07 11:54:13.352	volunteer2026@pass
+4b8e9874-848d-4793-ae37-27db04bec36f	bjashwanthshankar2ndyear@forese.co.in	$2b$10$VW6U21ga1z6hnvgIVTcwI.1KzPKU39As8jCrgrUOT6fWNiWS7C5V2	VOLUNTEER	2026-03-07 11:54:13.468	volunteer2026@pass
+d104e4fe-1397-4ae6-9297-93a04cc8dc58	rsainethra@forese.co.in	$2b$10$7tk2D27PLrVkXBWjpdBiFOFkMfjNF1llmaVkIX61wHcgi9C4/BCxa	VOLUNTEER	2026-03-07 11:54:13.585	volunteer2026@pass
+40603496-bba2-49e2-ae29-7efc054b3c8d	dharshikasampathkumar2ndyear@forese.co.in	$2b$10$nYSIQiwnj7JaGM02s/AzaOjJs17UCz0W3Cw3O/hj7LZo/RjmJxLYC	VOLUNTEER	2026-03-07 11:54:13.711	volunteer2026@pass
+394780f2-01de-4cb8-ad50-d887d38af0f8	sniharika@forese.co.in	$2b$10$j6.iW8umscnG1DSSUdbJk.1rbi1At/T.IA29dTpAPhyy6Ne66Q.Ui	VOLUNTEER	2026-03-07 11:54:13.829	volunteer2026@pass
+dd96c24c-7148-4150-8e27-f2ffe05f31d6	sangavaigk2ndyear@forese.co.in	$2b$10$ODSQ.UI6iZ94KPa0lujiue9h.3G47ceJhwwgjx4Tvz13HVPVxSTgu	VOLUNTEER	2026-03-07 11:54:13.967	volunteer2026@pass
+332e7c46-c26e-4650-a12f-f546a2b7ffd9	jgrislerpaul2ndyear@forese.co.in	$2b$10$E2nO89IG1AsJCcrNTyqOj.6t6Tf8lPFbRB5VMoeo9peYq4FuJ6Iti	VOLUNTEER	2026-03-07 11:54:14.098	volunteer2026@pass
+21044e96-c1bb-46c3-9bb9-61477c883181	shreenidhic2ndyear@forese.co.in	$2b$10$A9Mo/34CaKJ1a4eWtpsbUelCrrFE08FUQiXrGUcJ3xulaPJaYfZy.	VOLUNTEER	2026-03-07 11:54:14.24	volunteer2026@pass
+fbf24d8d-2d38-48dd-b0eb-25ae2d64f9bf	rlekshitapranavi@forese.co.in	$2b$10$X1Gr.pK2XeGzpEe84yuTaeNXqIZ.FVzeWuKeR6HiU6c502dajZgLa	VOLUNTEER	2026-03-07 11:54:14.376	volunteer2026@pass
+7c88b7e2-9240-487a-952d-b9c5b4599020	yadhunandhank2ndyear@forese.co.in	$2b$10$mIg5r2h47eWSdw.VRFDC/e1lkcIVNUpelm7vWLvopA97hsCigDczC	VOLUNTEER	2026-03-07 11:54:14.505	volunteer2026@pass
+41144311-ba6b-4f70-9e75-a6b393fc2bc6	jovialjayburtparavallapil@forese.co.in	$2b$10$J4nGJDpL6foIUbKgzqGsnOendD90o1y4wVBU2fjDe.iZgL0czqxFi	VOLUNTEER	2026-03-07 11:54:14.628	volunteer2026@pass
+2b139ad9-a807-4243-b634-ffc3ee75a08a	msabiya@forese.co.in	$2b$10$sXVjeBZF24mIzGfcqB.KMeE2oubnltjPe00sLAfUVhaDPvdSJ8bjO	VOLUNTEER	2026-03-07 11:54:14.752	volunteer2026@pass
+8797f69c-1805-4db2-a20d-2e3bdafbaeaa	sakthiganeshj@forese.co.in	$2b$10$xuezIBB5spS.svnK4dRa6OU6C9VdckR7gKFOMhz926UGvwF2zIIWy	VOLUNTEER	2026-03-07 11:54:14.878	volunteer2026@pass
+46d9c47d-b487-45bb-ad6d-659f0357cd35	abayambal2ndyear@forese.co.in	$2b$10$NNknZoqowXKPWaBOUKUchu77lecYd9KCbKSYisiCywsfpsSgexvIq	VOLUNTEER	2026-03-07 11:54:15.004	volunteer2026@pass
+4793b3b9-dcc8-423a-ad55-e6f9b08d0730	smruthis@forese.co.in	$2b$10$g7rlFAarOq4HuTxlgqprPuYcuzZgdtIeCKuyR.6fIaN90YgJI50ue	VOLUNTEER	2026-03-07 11:54:15.146	volunteer2026@pass
+87a96f72-d75c-4e28-b96e-1e6bf5fd044a	danirrudh@forese.co.in	$2b$10$sLxzgF5rU7FOgJnL6BYDa.F02G0u/oK3dXpYCdbUWZW6W0ipIQ6nS	VOLUNTEER	2026-03-07 11:54:15.279	volunteer2026@pass
+fcde429c-31be-4955-86e2-4d4084cc335e	aradhanav@forese.co.in	$2b$10$P8ZYvp9q3xABnrFhEbHbU.YpcxUF5qpyHl0XvqWRtRRj9lCkjyucu	VOLUNTEER	2026-03-07 11:54:15.404	volunteer2026@pass
+3e47336d-e053-4c3c-9184-7e0fd6178f53	sharansuresh@forese.co.in	$2b$10$9QK/ombYujIcui1AFK/NIu7nuqAaOCO9JN.RVPM5ljflcqvbFuPrq	VOLUNTEER	2026-03-07 11:54:15.524	volunteer2026@pass
+74743271-f6e5-4f31-8bb4-e5ce36ad77b3	prabhanjanva@forese.co.in	$2b$10$HhauO07TYm.9.crjrw9J8OAtH58z3NRU2tAfERbgB9woJYcGK0APy	VOLUNTEER	2026-03-07 11:54:15.668	volunteer2026@pass
+456567c5-4335-4f36-b6f4-5061bea40154	harinarayanans@forese.co.in	$2b$10$rGRZs7kozAzlIIuTdvSBueON/wFlsQLyoJi1n/kev4dBpdDbOQaZW	VOLUNTEER	2026-03-07 11:54:15.817	volunteer2026@pass
+c617b45b-460c-4938-a5f9-86d0f829f27b	sahanasrinath@forese.co.in	$2b$10$jSoS2gEWQ6AeeP7WAQEDt.tg.V/n8b80c9J.RxlbC1auvgd2xOUU2	VOLUNTEER	2026-03-07 11:54:15.959	volunteer2026@pass
+b299e229-11f6-47ee-a40f-eaa5826dd34d	sharukeshp@forese.co.in	$2b$10$Ewhqm9.ng1VCfcvYeDl5aeaPHVvMHdA72Rj.GlH37DxchRScYdZW.	VOLUNTEER	2026-03-07 11:54:16.1	volunteer2026@pass
+00a476a8-693c-4d0a-9b9f-db86be5a5c76	harshiitha@forese.co.in	$2b$10$BoLPEyo9PtvegQN7p.qpuOoiA9HPrSe4OMN2W9c8TZTgu5XugY4aq	VOLUNTEER	2026-03-07 11:54:16.229	volunteer2026@pass
+18e85172-3031-450c-8ca7-91deeb3a5070	agneshepsibas@forese.co.in	$2b$10$i96In.jU1L8XO.s1N/8MVubr3mbL/MyIFMyjKVHVNFnLf5fuQVpLa	VOLUNTEER	2026-03-07 11:54:16.358	volunteer2026@pass
+16a76a68-ba31-4b40-b50e-26c206242345	sucharitha@forese.co.in	$2b$10$CWMRmCfEMLDk/i0YPAKbyuMjXRGVJkRXA.AH0/zDyXIEXKuBz9SsG	VOLUNTEER	2026-03-07 11:54:16.498	volunteer2026@pass
+859c9174-8f65-481b-bd28-2abd6927f9a8	nethrar@forese.co.in	$2b$10$v4xQ7R6Vtx0fvYRd8n/TROFMOTytQm0xFmRlvFYrMuz0.g35sip0S	VOLUNTEER	2026-03-07 11:54:16.639	volunteer2026@pass
+3c432c61-2faa-44ad-9991-f7fdad9bf669	sarulathag@forese.co.in	$2b$10$S6gXRXIoTSQunb6hJoVDjOWNO7h.digkwAZWltrOfy.bBkE3C/kWu	VOLUNTEER	2026-03-07 11:54:16.779	volunteer2026@pass
+9f3b5c66-f532-45e6-8503-7fc39b0a95bb	sathyashreetr@forese.co.in	$2b$10$BiumMyvHyMzsvYS1vEVLi.yRu9DhWslHo9YUhDo2hC7KQJxhtJzcy	VOLUNTEER	2026-03-07 11:54:16.915	volunteer2026@pass
+a80f13d6-eda5-4052-80e9-299271d5a7ec	yaathrap@forese.co.in	$2b$10$iiMnKcv/c2ISom.ewUDEQex4tVJ9vCrpVzEN5Okf607A28mvATCPa	VOLUNTEER	2026-03-07 11:54:17.042	volunteer2026@pass
+5819ab66-0dfa-4dd7-8f69-30feac167d3b	shruthikaantoinette@forese.co.in	$2b$10$s.ZXEKPjvIlbit11LZZMX.WvGyxyl6lG7y0jzbOmIzDLGdMJ3OL/C	VOLUNTEER	2026-03-07 11:54:17.177	volunteer2026@pass
+54ee550e-1eb8-4df2-9946-53516c6e3e0d	priyankap@forese.co.in	$2b$10$TEkrLKLeB030/EnpbxjaB.FhyXKT5kvzgDcc5ImFnYJ4hm7XrLGsC	VOLUNTEER	2026-03-07 11:54:17.317	volunteer2026@pass
+1fb38f6f-b4f1-4731-ad43-61471c5eb757	aishwaryas@forese.co.in	$2b$10$tM7.iU2vrgtkZzpk1KKTgeT6.FNyswQcPbNrV6QIPSfrq4WJlqGKS	VOLUNTEER	2026-03-07 11:54:17.437	volunteer2026@pass
+becd70b3-fbe1-4dda-ad04-87c5afbdc3a9	akhshayamurugan@forese.co.in	$2b$10$PyVHkfJPCOKxOa5YCrD5run.6/qqNkgkVUAibXmNy9A0xhw4nnFCG	VOLUNTEER	2026-03-07 11:54:17.567	volunteer2026@pass
+4ff57bb4-389b-493c-a497-54088fb2006f	ashwinkumar2ndyear@forese.co.in	$2b$10$rR7gdATA.vzY2YfC5Qdj4O0ea5phaYcpKm3D34Nu14Aq3qcAhE5JG	VOLUNTEER	2026-03-07 11:54:17.687	volunteer2026@pass
+2037c65d-d19b-4967-9636-de75559aa078	rdevesh@forese.co.in	$2b$10$j89RZDUg8eJOb43r7Du8U.DeuuYlHQmy4hkSffYFJlJwg4rxC9hFq	VOLUNTEER	2026-03-07 11:54:17.81	volunteer2026@pass
+8dd5b7f3-01e2-49f2-bf7a-6ac1d75337dd	sreya@forese.co.in	$2b$10$7BIQhngYPWELdvijLUpCoud8oRk/UZ1F5ZsFZv6W0mLJ/Vm92eb7S	VOLUNTEER	2026-03-07 11:54:17.948	volunteer2026@pass
+e44ace30-21d3-4325-b0d4-e1b1f4fb5cef	aksharas@forese.co.in	$2b$10$AzIsq9gT4Yl030RZrPm1vufhgobe3e7/jWNpSxP0tsrNqzGpPsgXm	VOLUNTEER	2026-03-07 11:54:18.067	volunteer2026@pass
+7532fb55-6560-41c9-ae5e-5f6485875cb3	vanishri2ndyear@forese.co.in	$2b$10$iKtx3txQGShqEziiYOE.TuHVYXEG2fGsgXx6R.0zi5FFCF5oHL6Ri	VOLUNTEER	2026-03-07 11:54:18.183	volunteer2026@pass
+f28ac576-bf95-4178-b122-107bfcc51882	edharanivel@forese.co.in	$2b$10$xgv.Yuy7kxDjkZb6i2oF8uXJUxd5jqbu.pwuxeBDdoxa6orA8mG7K	VOLUNTEER	2026-03-07 11:54:18.313	volunteer2026@pass
+01e23243-7be5-4194-a04f-c95bb93fa3a7	balaaravinthang@forese.co.in	$2b$10$6iWSAUVHpDIWxZbG.GQFouREgEsLyQt8h21PPi1uyl39agolIkE.6	VOLUNTEER	2026-03-07 11:54:18.425	volunteer2026@pass
+dcfb4552-5b13-4b67-94c8-26ed9b4eaa11	paoliveashrita@forese.co.in	$2b$10$AQBLAV6FJWOxPZYAf6dvGug6Uj/2QqixsakbYoxwjALpGwZ/mSFQC	VOLUNTEER	2026-03-07 11:54:18.543	volunteer2026@pass
+1df29d94-afc2-4f41-b80b-843f15c2bbed	soorajd@forese.co.in	$2b$10$mCNXJ/IEYv4arCiDgVjNju9oWpufrppynomRsxvWN5qsIz0OPgFtq	VOLUNTEER	2026-03-07 11:54:18.659	volunteer2026@pass
+0896cf8c-100f-4ed0-8e61-05c1ba56fd9e	jagabattulasubhashtapasvi@forese.co.in	$2b$10$5XWY4wGKFOziWVJD4g3FiugxUrKFwEzGl2buOYng7SavJ9xI6LJwG	VOLUNTEER	2026-03-07 11:54:18.779	volunteer2026@pass
+ea7fbd88-eed5-4283-8652-ae43c9312e31	sowmiyar2ndyear@forese.co.in	$2b$10$NqYQuC85APIFBmIlb9/l3OxUASS0Sqb0qqfnPw4jHYUiFQVsKegCK	VOLUNTEER	2026-03-07 11:54:19.005	volunteer2026@pass
+3d956ace-e6b9-435e-a705-d6bb447a2b3e	jaideepl@forese.co.in	$2b$10$M8KEYPSn86l7uU0YQf1yMOdR9v.4AqxbMfma6gsb44pNHNu0yqB4e	VOLUNTEER	2026-03-07 11:54:19.206	volunteer2026@pass
+0fb31418-76f2-43e1-8717-a56d5e982155	amathimalar@forese.co.in	$2b$10$bUubQC/Q5FNAIVl6lpN8mOEQ/v3B/rjku0BWv4Xg0DqiIp5Nt8iGm	VOLUNTEER	2026-03-07 11:54:19.399	volunteer2026@pass
+f66a8910-57a9-4d20-9ba5-793e0c16387d	umaramanathan@forese.co.in	$2b$10$gsiiBmdMSYUVgJfmGHklTu5DqSBhRv4o.M9yAc8M7wn2z1rlxX6p2	VOLUNTEER	2026-03-07 11:54:19.526	volunteer2026@pass
+9b8bd320-31ed-42a9-a558-d2f0495e04c7	jesurupesha@forese.co.in	$2b$10$UcRTaqsrHRbQdtt32HVckOxS0zC84/vIqVzvgvlGmiRjU7PEvR0wO	VOLUNTEER	2026-03-07 11:54:19.647	volunteer2026@pass
+6f203979-641f-455b-a0e2-57777826c203	yuvaneshs@forese.co.in	$2b$10$qo8.DIDkOw4Ku4VFURCdp.SnYqCmLCGf3im3RQc9Ny.KiDlfPrgt2	VOLUNTEER	2026-03-07 11:54:19.776	volunteer2026@pass
+625b5f48-6f6d-42cc-8ce5-6a3b7021fb15	sriharinis@forese.co.in	$2b$10$yUMgumjrURfsWXKGbPzxluAdpTLiD4AbOZuMr5VNawOn9hhGQHPSe	VOLUNTEER	2026-03-07 11:54:19.894	volunteer2026@pass
+360c4b99-3959-4840-b1d2-2278fe4e34a8	vanthanar2ndyear@forese.co.in	$2b$10$z7JIqx6L1WAwghkDOTO6tOSQrZD7mC6Ac9pRpHIH4RwDnyYVjBv46	VOLUNTEER	2026-03-07 11:54:20.023	volunteer2026@pass
+a2431e46-50f1-4002-ba69-b0aaba3f2ade	shivanishrird@forese.co.in	$2b$10$ZoTXl1XuY3TijsfUvBpjPOf2c6Febf5wf9PmfQQ2UTZS90GgJpIPa	VOLUNTEER	2026-03-07 11:54:20.14	volunteer2026@pass
+27b797b3-adb0-478e-a25c-cadcc8ad113d	harshithar@forese.co.in	$2b$10$wEA3voquBwxUob15m/z5wOt8Xp567j0bAsSCJhCgoQWMu/67HtmWG	VOLUNTEER	2026-03-07 11:54:20.254	volunteer2026@pass
+1981e957-d4f1-4b40-a479-5fa3a169a3cb	adinathr@forese.co.in	$2b$10$lu7Cfa0Epw0O5c.Na1692ejf8vd1ID4M8SCejg9HMs/j6dH7HhjOi	VOLUNTEER	2026-03-07 11:54:20.369	volunteer2026@pass
+a4601a54-d245-44b6-9aa6-1458fa2dca9b	tbarshanarani2ndyear@forese.co.in	$2b$10$6s6XNYVW.gM6ZOpPRAQwsO3HVJo4Fk1npcphDS3xHosltplJnLroa	VOLUNTEER	2026-03-07 11:54:20.482	volunteer2026@pass
+2499a43e-0ffe-4f6d-9448-6c7c7c7dec37	anupriyad@forese.co.in	$2b$10$JXUHxSuvbMlYS2zmjqFVuuDvimgFxezte.owAKuToSw3PxgtukgnO	VOLUNTEER	2026-03-07 11:54:20.611	volunteer2026@pass
+2067eb3b-f56b-4a4e-bd45-3f55957f0fc6	thangarajad@forese.co.in	$2b$10$QT8oFB5UQTekqVTF4163pepBG65lIVIWUXcw5y7d3UEug4ctsrYhy	VOLUNTEER	2026-03-07 11:54:20.764	volunteer2026@pass
+218f9b7e-9772-4e39-987f-0e425043f073	vaishnavichitraam2ndyear@forese.co.in	$2b$10$i7tdfhprxwpPINn3lMBGF.ukRbUBsT5BIfLU82I6Q/Mo.5kqDZ.9K	VOLUNTEER	2026-03-07 11:54:20.885	volunteer2026@pass
+0116ac47-5583-4a0a-bfc9-cbd6913b2ebe	madhusreei@forese.co.in	$2b$10$We5HvVL9jp2tJF0Y4GWnCeygNVOfNuGBoSwIKI.y7GHsatTrZN5ze	VOLUNTEER	2026-03-07 11:54:21.007	volunteer2026@pass
+00dee63e-290a-4c2e-af74-40ce86dfa257	madhushalanis@forese.co.in	$2b$10$hF1ZCMjJcTXXcMm2X7BJWO02ADqbS3grx1QDw/I25V84ejkAGPDb6	VOLUNTEER	2026-03-07 11:54:21.129	volunteer2026@pass
+a2d19586-5bbf-44a3-b001-947d3a225926	pparimalakrishna@forese.co.in	$2b$10$8GDxFVUCNESe6N0Q7y2/4uoUwLdCvGFf8LY28Tu0syYUaxpo1AC66	VOLUNTEER	2026-03-07 11:54:21.366	volunteer2026@pass
+7076ccdf-37e0-4e5d-9c01-485938f4dd2a	ssamjoshua2ndyear@forese.co.in	$2b$10$e3tVvkGFLS5xX68.C2LxteEhFML0AFp6UGEZTz2SsgmOfW9kSYgHO	VOLUNTEER	2026-03-07 11:54:21.69	volunteer2026@pass
+3fdba41d-124b-4a51-87b6-5573aa04d6aa	jandhyalaamrutha@forese.co.in	$2b$10$oJHeQWtWK5CMWBXUE0W3OOem/OeVUJJZjfOQar3JdsxqgWHOg8SNK	VOLUNTEER	2026-03-07 11:54:21.809	volunteer2026@pass
+9e1101f1-b164-48e8-9263-a17699835e77	rsakthirasagnya2ndyear@forese.co.in	$2b$10$u65pyzfsjens4I6cjjNtj.x/2CDLxkJkDZJwhjxgoCroJitIrSK7.	VOLUNTEER	2026-03-07 11:54:22.041	volunteer2026@pass
+dea27289-b753-4793-823c-927dce5310f7	gayatriv@forese.co.in	$2b$10$qohGuZl.CbylwjFSdRK8SOD9hYQQSUEf3PgxXFZd3UNoEw2sBMJYu	VOLUNTEER	2026-03-07 12:15:47.378	volunteer2026@pass
+91e4c386-af59-448c-8f00-eb0392b74254	sshruthikaa@forese.co.in	$2b$10$5tjLWYTvObI967C9rOOiX.As08Le9HUQVpxfewQlveucG815UxBKe	VOLUNTEER	2026-03-07 12:20:40.533	volunteer2026@pass
+8ef5450c-442e-440e-b14f-9b98542fd9bf	sudhankumar@gmmco.com	$2b$10$b951ejb9XWBtVukXA0JbeOF8tVFPLpCRXpcjH6kEI8VMEkW/0JP7K	HR	2026-03-07 12:28:17.495	training2026
+c9cfaa26-f93a-426e-af85-1ecc99279d9a	pragatheeshwaran@forese.co.in	$2b$10$.FElUyTK4rRCqsgKsAFf7ewt99Br7ux8gDdIpY86XdBUoYZJguKMu	VOLUNTEER	2026-03-07 12:29:12.177	volunteer2026@pass
+6b65b0e5-ad3f-4756-a04d-f15f072ab740	poojasam@solarisse.com	$2b$10$zYDrXKCCMPWJrugk8k6xZOZzSUI34c4HWGOJbhxA.q/olMW8AVDnu	HR	2026-03-07 13:12:02.639	training2026
+588d3ec5-e21a-440a-8235-3d99c1f66365	meentship@forese.co.in	$2b$10$49fG7VLATtLU.2hRxiS3n.9OEHI0kCZ2TKIDSXsLaad1kqL4AwGla	VOLUNTEER	2026-03-07 13:13:40.078	volunteer2026@pass
+458250d8-e65f-4171-9e11-3a6dff72a848	shivanesan@lt.com	$2b$10$DBxFXkaeOylrsuCI8PIZB.NnRy7TseR67xWVXATRJK3aNFpA.Ze1e	HR	2026-03-07 13:36:37.952	training2026
+ff332412-1b24-41f9-91a7-c8d3a046d3cd	abhimanyusinghbhati@forese.co.in	$2b$10$aSJ6vKdb/3Pyw2INsDysZ.PhE3SWzai7iHg4X3ihpmvgEwJlLbqma	VOLUNTEER	2026-03-07 13:37:49.929	volunteer2026@pass
+54ad8399-936a-47f5-bfc8-db3194c32ea3	rex@marlensoft.com	$2b$10$TsXteYdQPpd6S/2n0H1Aw.wrM4uITLSZmb6Co0B3IU16Wnn2cipSq	HR	2026-03-07 18:20:56.013	training2026
+b9ec752c-ffc5-4df5-b2d1-67542e245d05	ananthika7367	$2b$10$DE/y7gE39cUpb0W41sEWiul2HiQYxbAOVd8imBxdyAKRm.yL5l88u	VOLUNTEER	2026-03-08 02:58:05.359	ananthika@7367
+683327d9-605d-433e-9fe3-964005139e0b	vishwanathank1441	$2b$10$Xl2pHjBnIeN6SsEKd7MFl.wFqPv21Vv7R0TBh3S8Nj0eAIjrrMHqW	VOLUNTEER	2026-03-08 02:58:05.515	vishwanathank@1441
+d9f54959-5bae-4baa-b191-db06f7976a64	krishnadattaadi2779	$2b$10$Yzt0u9qJPeLUuFZSZnluYup81E/zLCbWs6LQq0p5fjsVPaGx1sE9K	VOLUNTEER	2026-03-08 02:58:05.639	krishnadattaadi@2779
+5f95ce85-7bfa-4339-9917-5c5dd316c157	harinees4261	$2b$10$0htlz8CX0ivznAaUGEBGbe4NrrZy4hIlQT8/Q65kTVgZLjtzDE6mq	VOLUNTEER	2026-03-08 02:58:05.766	harinees@4261
+d48db17c-292c-4a69-ae58-ff91be3e8f41	harshithah8722	$2b$10$dyAVpZYhvVUse//.kMjPyOWnRnVy726NtMXIVag9QAvTPBNSVz9BC	VOLUNTEER	2026-03-08 02:58:05.888	harshithah@8722
+f5e9c1b9-6475-4848-babe-06cf999a265b	abhimanyusinghb8084	$2b$10$j3..UX30MmoNASDeO4utH.8kvQQ87pOJdrnnDXxMKwqMerBFaVjPK	VOLUNTEER	2026-03-08 02:58:06.005	abhimanyusinghb@8084
+8c4627b5-95fd-4094-b437-1cf342fcbe00	ikkavinsriniiva3603	$2b$10$uimn3eZdHW1fUe8kpTDb/Op3wHFqHXkANk4C1590CZUsirPdAOy8a	VOLUNTEER	2026-03-08 02:58:06.12	ikkavinsriniiva@3603
+3f094cca-c22b-41c0-898a-bfff266aea85	mohammedthoufee4558	$2b$10$HtMTaBnxh9nz4ybBo49IGuAN1jjfGOzPNajzMgiK6pJ6vscpBNOLe	VOLUNTEER	2026-03-08 02:58:06.236	mohammedthoufee@4558
+4ce26e20-f54e-4b3b-a677-1e0a347c4552	yuvaneshs8612	$2b$10$FVXO.UaWFS65V.EiyOXaXus.jcbjgE7tqfdjiic9oKnB3AOSuZsBi	VOLUNTEER	2026-03-08 02:58:06.351	yuvaneshs@8612
+6a6bd943-77de-49b9-8f9d-0791ee719fa0	skowshikganesh6763	$2b$10$k3I8hbSZCQYY0R7J0vTbluxku28bzwR7LYwfldjXXungWR4n1CIBG	VOLUNTEER	2026-03-08 02:58:06.464	skowshikganesh@6763
+052ea53a-dd98-46a4-b0fe-52d05e15f660	pyeshwanth7180	$2b$10$2Dv87ixpF7p/Exo1qF3QNeZUs4TvwOlrrv000lxxmS3lw.F36T1M.	VOLUNTEER	2026-03-08 02:58:06.579	pyeshwanth@7180
+4627fb6d-38d9-4512-844e-7b13c14be299	ashwantp5041	$2b$10$bBJZZTUThFNamFEeY9pXnOSPiZM8Hg0ErGYl56x0Vd.DOTX9zneRe	VOLUNTEER	2026-03-08 02:58:06.695	ashwantp@5041
+e86d5b0c-0195-4ff4-8546-bb1feaff27fb	sampreethis7605	$2b$10$ykcBsL2eRrcnlQPHZrSxYe6GKn0Ejt4FfT2kbZW9f8.C7mdk6ws0y	VOLUNTEER	2026-03-08 02:58:06.81	sampreethis@7605
+d554e134-b28e-446f-9e47-7d985391764e	harinisharonri9693	$2b$10$5TNzwTjeKNNWSTwL0XYAWemty1OjWd3CjCEKf.MFi1vhW9SzcwU9S	VOLUNTEER	2026-03-08 02:58:06.927	harinisharonri@9693
+fd4bb95b-2c86-4f2b-8c27-7cb80dbef17f	harshietaasound3724	$2b$10$cEfuy6Ba4uuUQyox3vEZSO1wjC5gxKajT2rYkGX2Ot4UabyRL.vRm	VOLUNTEER	2026-03-08 02:58:07.039	harshietaasound@3724
+425ee31f-7e86-4f4f-8581-0a4c0889bfc6	pragatheeshwara4600	$2b$10$L9Fjfu.bUvhZL0.xXLUSL.qfY742Fx63IOiNV4ZrfTC/EK85a/rpS	VOLUNTEER	2026-03-08 02:58:07.156	pragatheeshwara@4600
+4c3d1715-9aa6-4a4c-a994-4aa1218bbdb6	abusathikafridi7999	$2b$10$RrJlFAUXoNuTSY29QN6ykOIeQBzb0yg88s.4Q7L79.FA7vT7t2Lee	VOLUNTEER	2026-03-08 02:58:07.272	abusathikafridi@7999
+22568920-bdef-49ec-b347-2fe87880b5f6	ktharunvel2ndye3861	$2b$10$.QoXsajNoddQuthNRXFhHORyjIGW912/HkFrTtGrDSzmvCrW/isK2	VOLUNTEER	2026-03-08 02:58:07.387	ktharunvel2ndye@3861
+0cbbab04-2092-4fd5-8334-e45fdf6e220b	krishshah3746	$2b$10$0Szq5nYpyzzGpwRl9coDL.DLI6SHE6HtMybwZuENMOSI8pT2jO8nm	VOLUNTEER	2026-03-08 02:58:07.504	krishshah@3746
+fa5cbdd9-10c6-4250-9413-da37efa007ee	suryaprakashs5811	$2b$10$E2YKn6iDUhGkUk3BgAImwOI5vVHyx.Q6RGfvB5yFaqYTZ/GVFxCqa	VOLUNTEER	2026-03-08 02:58:07.626	suryaprakashs@5811
+535a7aaa-46f5-4290-922a-f49376145eb5	ananyah8128	$2b$10$d9rBNMfN5KQ1E8352EvQkOuJzdXn5iwryMIt5HzHGVBXOXeGzlacK	VOLUNTEER	2026-03-08 02:58:07.735	ananyah@8128
+ef38f37b-c3a6-4f84-bad2-8321e970f3c9	ptharunika4839	$2b$10$Z0P4tSG4IFJKUgHbaXFxF.V2Ed8D98c9oDKf5Zxd34AEBQNCO1dsa	VOLUNTEER	2026-03-08 02:58:07.855	ptharunika@4839
+5e83a602-c4f2-455c-8862-0760b8d74682	aarenkarthik1117	$2b$10$/B2lfUg7Ey.vDKd/aRcanedQ6x913LVX701iXykTPsJxADrxWidcG	VOLUNTEER	2026-03-08 02:58:07.971	aarenkarthik@1117
+6c9bb9ac-ce85-482c-9367-3de6a0ee5955	vyashitha9872	$2b$10$wUmKeEyiue76TZWihke3b.OzpbONmvqt283oKLAbq44CP.Q1ABisi	VOLUNTEER	2026-03-08 02:58:08.094	vyashitha@9872
+c12a0434-ef5e-4253-97fc-77aadc69ed5b	kaaviya5634	$2b$10$epgftPu3GtK2L3Ed69jgRuxht4h2TRB2N6MKg1aIPy9Dlok3ADF3K	VOLUNTEER	2026-03-08 02:58:08.203	kaaviya@5634
+f4ab0b5e-cf4e-4cd6-a711-2c3371b6c57a	mtitiksha2975	$2b$10$td3g7xRuJJkkU0OBooiWTe67qyK5ZWGaWdb2Kne8q7q4PY9UnFNm2	VOLUNTEER	2026-03-08 02:58:08.318	mtitiksha@2975
+4a8d50e8-223a-4085-badf-b4fa8f63f47e	saivignesh3357	$2b$10$tkFmDwxeBR0dzx/5styTSeE1grNUfkEoWW.ZY75AZtG1OfU3OFyeq	VOLUNTEER	2026-03-08 02:58:08.436	saivignesh@3357
+9209359d-918d-4573-a910-e4eabf365bbc	hrithikg6392	$2b$10$QVKnpnnaAJZWKN2LiJn2Te.oFKuvmzvLwN5it1GBgtesh9ctyZ/dm	VOLUNTEER	2026-03-08 02:58:08.554	hrithikg@6392
+0530c686-3ef4-45d0-802d-b2b745958698	rithikeashwarg2489	$2b$10$0rxy2MFdf3xOluks2octtew1Rkub.J5i8cqgQaP0dgamLZ3LwG6Je	VOLUNTEER	2026-03-08 02:58:08.69	rithikeashwarg@2489
+952c9087-df52-4737-bcf0-659121486278	kailashs2ndyear4491	$2b$10$1AfYQZwEtEFSiSKVyrnSAOfRNp.n3WFZG5bOsr6.oGPu8JJzXJ7CK	VOLUNTEER	2026-03-08 02:58:08.827	kailashs2ndyear@4491
+8333dc86-60f8-441a-b9a2-4a8b437b6bda	bjashwanthshank7277	$2b$10$Srx/rFafLPXIQ/GD9Q/z.O3010S.6xqejkfnGhq7Mverc6wTMpy5m	VOLUNTEER	2026-03-08 02:58:08.945	bjashwanthshank@7277
+855898b5-356a-414c-a2e2-f4ee47031273	rsainethra9231	$2b$10$kzluscPmPkwOUzGnEqJOn.aQkv2.SN5c6oTItY5sZA75o.ohtyHQy	VOLUNTEER	2026-03-08 02:58:09.056	rsainethra@9231
+e9a6253b-412f-4954-bb2d-5e3c389c0ef4	dharshikasampat8610	$2b$10$q8rbNiANv0F.W7XbufyHV.HbQnYBD5cwleos0WnM4p1beP7YWooCe	VOLUNTEER	2026-03-08 02:58:09.169	dharshikasampat@8610
+f910702d-c82a-4022-bb4b-580e825d5c78	sniharika8703	$2b$10$.Bh/SgS7.n4devCIZmatG.F5JWyUPqN4UW27h6qGi.sTjaF91PXha	VOLUNTEER	2026-03-08 02:58:09.292	sniharika@8703
+feb7a4ec-7cff-4bce-8509-ece6baa0ec11	rishivarma5870	$2b$10$9Hmdd4q2pN7wvVga8Ls4qeUCUu2x37s.OY6Y6G/bVOd241n08khxe	VOLUNTEER	2026-03-08 02:58:09.401	rishivarma@5870
+d9e823e0-cadd-4710-8416-fae252a5704c	jgrislerpaul2nd8926	$2b$10$P9u..TY2RyKYQhKOThcuHOdW17hspV5kkEqW6mg7Ec6yrz1/nYZDC	VOLUNTEER	2026-03-08 02:58:09.519	jgrislerpaul2nd@8926
+b7ecd00a-fb1f-4d4f-941d-eb74c2802bc5	abdulmuhaimanba5654	$2b$10$xEudbIhh9HMZ/n56OsAL1uMRI7tEUKB5wsLok87j8YQiSkL.j29Eu	VOLUNTEER	2026-03-08 02:58:09.635	abdulmuhaimanba@5654
+8f277682-2be0-429f-8a11-30fb8f7f94ba	yadhunandhank2n5030	$2b$10$HyWfZwqreaiuzC71MlHw..CGMLtkOwwearqQCuTZeRYunhFXhVqye	VOLUNTEER	2026-03-08 02:58:09.743	yadhunandhank2n@5030
+e2050730-0a09-47ca-9c71-4d225fbeeda4	jovialjayburtpa7399	$2b$10$A9.DvJBeIXJ07xkhNfmyAOQMFn9pj0F5K2KpsCRDXrlMiJ1SlNhIy	VOLUNTEER	2026-03-08 02:58:09.845	jovialjayburtpa@7399
+adb283a0-ef91-4607-b1db-0f212e85eadd	msabiya8447	$2b$10$GrVAvsAC5Zm5AUREP3CzvOMuDyc1NTPCxI0FR8A2LD.rZAjgWGKfK	VOLUNTEER	2026-03-08 02:58:09.959	msabiya@8447
+983d2143-1b4f-440a-a09d-f56c81d17f50	sakthiganeshj9048	$2b$10$V7uyU06SRwJy2bYTGXsJ1.mGWjoaIPADz0ilKjc4380mJaCzxG4cK	VOLUNTEER	2026-03-08 02:58:10.068	sakthiganeshj@9048
+41421f0c-31a3-4a3b-a089-d9b6d39dee9b	abayambal2ndyea9537	$2b$10$g.zua1uoxz5WAmhHv/zJQeSk4szjG8108NOLzTpewM5fhGSjk433u	VOLUNTEER	2026-03-08 02:58:10.188	abayambal2ndyea@9537
+d5e5945a-45b0-4c23-8373-d459d1a16273	smruthis6982	$2b$10$NXSHfICI37t.xr4sosqi6eQueZX0a8.m.l1xCIYahKdGyIAKpxyUC	VOLUNTEER	2026-03-08 02:58:10.301	smruthis@6982
+85bb0d65-9ecb-4fd7-a45b-eb518c4823c6	danirrudh4010	$2b$10$Id6lBHsOxg0q0Bx4qi6be.L93/ysJk7lHw8m71mjVqxixOOD.5X6a	VOLUNTEER	2026-03-08 02:58:10.417	danirrudh@4010
+adc75e26-d59a-4553-b549-6a9c7b281142	diyasrees6498	$2b$10$Rxs6cLuqOJjj3lmd6FPAcus3E/3Md537qNDUInhY9KGgMOhVUFgvy	VOLUNTEER	2026-03-08 02:58:10.532	diyasrees@6498
+2ab3a0ca-1084-4af7-8447-c73766c44811	sharansuresh4212	$2b$10$iJKxNFZUtd2Tf/0DaKvhXurclWG5bSemAbf41hPvgRy8D92LD/jgi	VOLUNTEER	2026-03-08 02:58:10.644	sharansuresh@4212
+7c693e6b-ad8b-426e-a665-cb7673fca245	prabhanjanva3166	$2b$10$lDytb9WLoEY9JwhjqlbdK.iGvBk4pazlmYg6CF92larshlUOoan.a	VOLUNTEER	2026-03-08 02:58:10.755	prabhanjanva@3166
+60ec4266-b1e3-4bb3-a3f4-b60c7764ad9a	harinarayanans4594	$2b$10$uaX5nVjrY1r5ClCjWdvMm.0SS2chabBBRBuSJdLU5lWaVWsJveS/u	VOLUNTEER	2026-03-08 02:58:10.881	harinarayanans@4594
+7b1d637b-3477-459d-afb7-d96d2b185e5d	sahanasrinath7478	$2b$10$4WU0qZ6MbdFX2oI1s5L8T.MZ1pImXgXLllqSPfAzQjMIuEXPXHK4O	VOLUNTEER	2026-03-08 02:58:10.995	sahanasrinath@7478
+7a1b11d8-8720-49ca-9dc5-476a9a424456	harshiitha3709	$2b$10$mnaZ/d2XnO.Q/OKwyirZ1.xT1Dzo.evx1349l3Yji/iPHDZrvbNVq	VOLUNTEER	2026-03-08 02:58:11.11	harshiitha@3709
+3e7b46a5-278b-446a-9567-3b0e4a49212d	agneshepsibas7093	$2b$10$Y/nhzHr4pdhcZeCrhC/si.mtC9QuJNWoMCwQORMaStcr1QlfzCpMe	VOLUNTEER	2026-03-08 02:58:11.218	agneshepsibas@7093
+fcd809b0-a8c8-472e-8990-8c340761321d	sucharitha6268	$2b$10$kIvl3h2f70Tu5sliMKkfOuS77N4yZ0RAsz5b.26jHe7j/DPYEkPzy	VOLUNTEER	2026-03-08 02:58:11.333	sucharitha@6268
+235d1d72-a678-4e53-8830-f4775e59f49f	nethrar2968	$2b$10$EH/5Xs0j08m1eB.flHBypuTmyJroKb.qZSmQ6E7j266nXyrXGv3ZW	VOLUNTEER	2026-03-08 02:58:11.447	nethrar@2968
+a3d7608a-3e6b-41de-afe1-d83bd9c06ba8	sarulathag7722	$2b$10$2rGXOvOx6HwcSfypzofqjuUikUrI40rff9PrjhOEmNOt2nvUoFa3O	VOLUNTEER	2026-03-08 02:58:11.563	sarulathag@7722
+97c88bbe-de06-43da-b840-59bf09e5736a	sathyashreetr6774	$2b$10$icDlXxlXAmSxy3PUhoBd.O2jXY1sqc1cVZyhkn6VBpn/yGyvec1z6	VOLUNTEER	2026-03-08 02:58:11.692	sathyashreetr@6774
+28f5d1b6-3b66-46db-a03c-91b9d649d6dc	yaathrap5433	$2b$10$jkwMKi5k5RxYNtuzxIdN5.J7Fmxv/hs4FycxpITm1Z.aSANxyPXr2	VOLUNTEER	2026-03-08 02:58:11.811	yaathrap@5433
+92530483-2e55-4633-801b-33068777dece	shruthikaantoin7958	$2b$10$g1VXw5DFCg.AjqIWNcQWOepMv7hU4GsfDQIqZWIpPMC1FIA1OZ30W	VOLUNTEER	2026-03-08 02:58:11.941	shruthikaantoin@7958
+29570303-2e89-4309-a176-89d8fe5e11d9	priyankap9270	$2b$10$Of1LGa8ok6M9VrcDYvIJvuINZlisMajT7PTK2Xr.k34CMvc3NDtOu	VOLUNTEER	2026-03-08 02:58:12.059	priyankap@9270
+5ac951bd-3939-4230-b1a9-2730cd6fb272	aishwaryas5070	$2b$10$QngpGeVnGUyEhMBjiOiBl.ESdmYZppNFmW6S7iaabXGZK.Y9ddJ0q	VOLUNTEER	2026-03-08 02:58:12.17	aishwaryas@5070
+75243657-2d47-4521-83c2-16226cf30f1e	akhshayamurugan7773	$2b$10$uFnYvSbaHs.WqKDDLmeJEuXbk1Y54.PDPLcMDlXimVQDAtC1Cbku2	VOLUNTEER	2026-03-08 02:58:12.282	akhshayamurugan@7773
+27379fa2-37cf-40ea-8d4e-964d771a9a5a	ashwinkumar2ndy1547	$2b$10$1bcbvgAKQcSPLGXBrOxBkOBrve79T2L7cJNX6ZAbFjlDJI81nvUVG	VOLUNTEER	2026-03-08 02:58:12.394	ashwinkumar2ndy@1547
+51c9b398-5978-4fc6-8a51-ca27987eacad	rdevesh5334	$2b$10$uhCFImhpzBdJ7GW5C4du..L0UBaNFItaCL2fVaP/DYNmPiqT08txq	VOLUNTEER	2026-03-08 02:58:12.509	rdevesh@5334
+d9cbf999-7160-46e4-954e-0003c2bbf469	sreya1435	$2b$10$c7eCPVhbEgi35xI1sPZwzeM1uvsN8ROXRYtAMV1GzC5A5smJyyeTW	VOLUNTEER	2026-03-08 02:58:12.618	sreya@1435
+12b69d4d-22d9-457b-83bd-51fd6dd550b7	kalpanapriyadha2871	$2b$10$FJ4qbEDX19u8y3BsLSUcFuhFKYWob7NKXit4ZLnUyUA.QwWx2sDae	VOLUNTEER	2026-03-08 02:58:12.727	kalpanapriyadha@2871
+850d1b00-008a-4414-9061-bc1715337a21	edharanivel8071	$2b$10$2Ckjzix/e/F6.yTsmWQ/o.9hvGLLbI2hZtXr055nkMpj13Vtbv.P6	VOLUNTEER	2026-03-08 02:58:12.84	edharanivel@8071
+0b2baddb-c981-4263-abdf-666c90c80d85	balaaravinthang8430	$2b$10$Iz/3ghC8gwt1kYjq4fJSE.Efl6ES/ycw.6vBqBIEB4MgNC2ig2tFq	VOLUNTEER	2026-03-08 02:58:12.955	balaaravinthang@8430
+bc76a506-2d9d-48f8-bf77-fec273ffc999	paoliveashrita7217	$2b$10$xYs8bQR.4jo8Y6rfT.jONOcEyo/TCQ/Yv1sfxjG7XbYJ2N/97huOy	VOLUNTEER	2026-03-08 02:58:13.08	paoliveashrita@7217
+e4a1e93d-df96-4d06-98cd-2c2ff225bbcc	soorajd6963	$2b$10$s8kRJE8PQPAh66NKZApEfOk2c/DXFxIKEcS9b0hvOXAYpk1Lc/Y7e	VOLUNTEER	2026-03-08 02:58:13.19	soorajd@6963
+7388a8a6-8510-4d41-bff4-32791b8ec647	jagabattulasubh4440	$2b$10$7I7b/oAVnKtfIEWpSetBWuZRri4BRwl5a5rRiQUqQ38fZG2GTMJTW	VOLUNTEER	2026-03-08 02:58:13.301	jagabattulasubh@4440
+f53fff0e-4467-4ecd-8c0f-83d5053150c3	sowmiyar2ndyear5382	$2b$10$3OOt962AYZmYzU4mH./iRu3dQagfjkSLwu9u6x6fZap4I8hjkIwHC	VOLUNTEER	2026-03-08 02:58:13.415	sowmiyar2ndyear@5382
+02481999-8975-4df9-abe1-f9eb6d3b4a34	amathimalar9046	$2b$10$WiYRn5v9KHX9pSC8kp0cGe7n9iUdXigXDyNLST47xTWU/uvAeaDxS	VOLUNTEER	2026-03-08 02:58:13.527	amathimalar@9046
+dcc94a38-bfd8-44a8-bcb1-6fe752136882	umaramanathan1454	$2b$10$17mqhmjwkLu9xKmdUGX11uRkRkEOgbc2F/twuwSE/DAkPRz0V8elO	VOLUNTEER	2026-03-08 02:58:13.648	umaramanathan@1454
+cca7dd88-8f54-40d9-b27e-68ce966b14a3	jesurupesha7160	$2b$10$r924SzSF18mgjMToL4q0Je/r.akkiaRXu3e32U9gClikYlowGLXAu	VOLUNTEER	2026-03-08 02:58:13.778	jesurupesha@7160
+6aaef626-2c8a-4de2-8667-5553d4b8b47f	aradhanav9667	$2b$10$aqeNrVbkc5Xje/YXiyWziuO.61G5ajWz46BrzD42PDInB1jKvbSAe	VOLUNTEER	2026-03-08 02:58:13.908	aradhanav@9667
+e2576d7e-38da-4faa-966e-9b0fbb52f590	vanthanar2ndyea1977	$2b$10$tboQNobt3lsDTWK2UCngEegsJT6lw70Ieh2ohLL2TbM2UJqkE6jZe	VOLUNTEER	2026-03-08 02:58:14.024	vanthanar2ndyea@1977
+ec5d2aa5-3432-4332-87a2-e5df041e101b	aadithyar4836	$2b$10$pW/viDoE.sn4ErAFM8iu2uuhYVJkVT5IrJZHX8CqXR1xm1bvkkDsG	VOLUNTEER	2026-03-08 02:58:14.148	aadithyar@4836
+b91a398f-64d4-4afb-a4e4-d8eb4811bc5c	harshithar2242	$2b$10$M1Z9FFFCGG4Hd0mJXbuvc./646i56oHXCQSBbB4NmqiV4Zs.Lfkmi	VOLUNTEER	2026-03-08 02:58:14.271	harshithar@2242
+aacc975e-bcab-425b-b665-9e20c628af95	adinathr8667	$2b$10$p5DSW.IRW/IuLCPr89JUUuc7pUwr9XfcPKhJRT.qyAc/p2wYllwDq	VOLUNTEER	2026-03-08 02:58:14.403	adinathr@8667
+82b347cd-200d-4a2b-9f5d-53e59d13866f	tbarshanarani2n5203	$2b$10$Drlfyw4jimtmMLvfjVI6V.o5eIrMkvlntK3r6YPv8mPl9wXMlwlqK	VOLUNTEER	2026-03-08 02:58:14.526	tbarshanarani2n@5203
+6ff368e9-7c6e-4c68-ae53-aee0925beb65	anupriyad1090	$2b$10$Sck/9SJZbVZS1Ojj3NRVLOn2Shh9spv3k.E1xSnzv/VcQW29i57ra	VOLUNTEER	2026-03-08 02:58:14.65	anupriyad@1090
+3cc7da2b-0993-45d8-b897-0150221476b3	thangarajad6068	$2b$10$I7rjzeeaHd7CL8T3YJW3WudgYJeuyfa4B60wUhdL299JTmFApky52	VOLUNTEER	2026-03-08 02:58:14.776	thangarajad@6068
+099bf757-0cb3-4e4c-838b-8585feaca9bc	vaishnavichitra7729	$2b$10$iuZ7VxxY.ieOMfarR8EygeD.N.Vh1yc7SnvHR1sgafXQYaRxzauu.	VOLUNTEER	2026-03-08 02:58:14.896	vaishnavichitra@7729
+d7498189-5bd4-4a94-a177-fc1d9d4d95e6	madhusreei1565	$2b$10$l0mVlwmWxOQN0pL18FNMhOx/1WRlm2Rxt8/pWQ/hjn7NdhDsXxma2	VOLUNTEER	2026-03-08 02:58:15.017	madhusreei@1565
+89e9f262-9267-440c-b139-4807fdd1936c	madhushalanis2259	$2b$10$ovZEKhxS1/S/DyRWPAq0.eWMpY33OltM9OgVDiO80UclZZAtxPH76	VOLUNTEER	2026-03-08 02:58:15.135	madhushalanis@2259
+1ad5d812-2541-4510-a69d-9f6fbd7b770a	pparimalakrishn7642	$2b$10$ALJ1yKlYqeFQud1JHYsxKuFIGCVkUaNxP1Rk0pVg0reXbSNtbPyla	VOLUNTEER	2026-03-08 02:58:15.254	pparimalakrishn@7642
+e9ca7e0f-37da-4eff-9491-19351afbe2b5	surendar1485	$2b$10$P25dBvKUaKyW2v9G5PgoXOiyDW.D5Gd9bNHHTnO.hb7jQ8HLLZX.W	VOLUNTEER	2026-03-08 02:58:15.686	surendar@1485
+6006a985-8e1e-49f5-accb-957f9af35428	meenatship9057	$2b$10$M5jhDgikIAiZbmLs6XMJR.TJw8Kd5..44eoDcOYpdUZhOlWRoM6Hy	VOLUNTEER	2026-03-08 02:58:15.844	meenatship@9057
+25a42377-2253-4634-9457-33f397c24e26	gayatriv7704	$2b$10$E1BawloHD32WSt8VRhmLJuMuWvBNVfL5h5lSupC25kcMpKSKQvmSS	VOLUNTEER	2026-03-08 02:58:15.967	gayatriv@7704
+f48650e2-4091-4021-a596-4987b8c7cd2c	subashkrishnak1207	$2b$10$NSnBieDZ/8ucpdPuWcr1DOHBxP09YfWSMlnsPIAySK9ZLueyv/qNq	VOLUNTEER	2026-03-08 02:58:16.088	subashkrishnak@1207
+cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Ananya	$2b$10$I5VdykMfiU6QQW6D8KUXnuh8QaqfRTuCXf1etsU4nhzwkg.HhNddy	PIPELINE	2026-03-08 03:01:12.924	admin123
+1c23ba53-30f5-4913-aedb-4007ac32ea1e	Pranaya	$2b$10$rYL0CG/H5zNtB6MszinicucQjAxmsqsrKyNFb/Yu9RFvYYPtrnZoq	PIPELINE	2026-03-08 03:01:20.885	admin123
+5011fcd3-30a7-4e6c-b515-126a0bfc3b50	Srinidhi	$2b$10$c90daTNF3sxZNafitXsh1Oo1k22rz.Re0h4kOvHMb4LSKtqXQz4SS	PIPELINE	2026-03-08 03:01:31.883	admin123
+81c6f0bb-2675-46d8-897e-bab7d796d256	shreenidhi21	$2b$10$1FDGhD5hNq/kHYKBH9h2h.DDpuGm4s0MxgBDscLpFglfZthRfNYLS	VOLUNTEER	2026-03-08 03:03:43.361	shreenidhi@21
+d187c76f-382c-4fee-84aa-69eaae09e124	sarukesh08	$2b$10$MJ7wmxOol7GYajV9vgz8wO6HRiWfzV4txKdyWMRfqb2knu68yEjt2	VOLUNTEER	2026-03-08 03:05:22.882	sarukesh@08
+f7e111d5-d366-4220-add8-83c41fe7dd99	vanishri3434	$2b$10$PJrLQzNXO63F1OM/5v155OTpbW5V1cyblko8DXwKGm/l.BbKNzKdm	VOLUNTEER	2026-03-08 03:06:49.072	vanishri@3434
+e206b17c-50f8-4b46-a94c-5e48b1d82190	jaideep55	$2b$10$E41S4QjU9quIlCSIxPGqw.NjKXVubZbJ7RubKIbFy4Sile5NuynfC	VOLUNTEER	2026-03-08 03:07:43.851	jaideep@55
+d355909d-d3d5-49f0-a00a-88ed836c401b	sriharini865	$2b$10$WPnbd19PLC6pKbvhJ/ulUOCOn5vQiYMK2wGwlAMtVAKrOHqYqKuHu	VOLUNTEER	2026-03-08 03:08:46.807	sriharini@865
+323065de-d86d-47ee-838b-69e9dc6ef1c4	 shruthika444	$2b$10$QPQ1ZoKBtxFr6o62ybxY3ujgZEHxRzsHXv954ppvLoJiJmZho14em	VOLUNTEER	2026-03-08 03:09:40.15	shruthika@444
+1de88450-10ee-48d2-b1fb-8673d1304e86	jandhyalaamrutha	$2b$10$KS1nYxwV0BMogXzH2EzkXOEfqo4zsfLY0QIupf14lNemsb5gNUuJm	VOLUNTEER	2026-03-08 03:10:44.673	jandhyalaamrutha@0303
+649453fd-ef30-42d1-8d2a-94c26237e814	brinda1@forese.com	$2b$10$VvLHuD/O8hFX7nyu4y5x3Ofo8g528md1jQ5zC5ec2QLohb7pnc8Mu	HR	2026-03-08 03:52:11.743	training2026
+6fac4c06-6ec4-43db-ba50-7d0e7e19fcf8	sanjitha0505	$2b$10$dO0paqeZ95jRWH8mEBXJQui1TJ49t3K..WZvsHygXuYTIiqDi.wGG	VOLUNTEER	2026-03-08 03:56:18.09	sanjitha@0505
+33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	saravana_123	$2b$10$.o7XdVsAAoOd2xfI/uVR.O74JpPVS.owYJskMvm7/QPSI2YQeBcjq	HR	2026-03-08 04:38:39.812	saravana123
+4f9c5ebf-c0dc-4fa9-a288-2b53bc490d6e	shruthikaafinal@forese.co.in	$2b$10$aw5zUhqT9gXV3.UxUvdLeug7p0eelkkjkNF9CVJv4omTelxKiaYSe	VOLUNTEER	2026-03-08 06:23:41.663	volunteer2026@pass
+5cd29d5a-169e-41db-87a2-997e5fd5301f	shobita3030	$2b$10$ZYgm/3DX1qdHlzYyU4WdxubzPOChjqDU.JROfBfkhkQpyTu0XSyqK	HR	2026-03-08 07:58:18.66	shobita@3030
+\.
+
+
+--
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
+6c88ee05-f508-43fa-aa85-ff553454e7df	7000143b6cd8b29898dc58cf6531274a928aa4c04f65cd91c6277238d96b06f4	2026-03-07 11:52:19.038801+00	20260301084007_init	\N	\N	2026-03-07 11:52:16.550157+00	1
+162802f4-39f1-4b25-9202-47b217c9bc73	946d887047b82aa0e5df4d26788496294f7ce6c2306519317faa68951c9c0df6	2026-03-07 11:52:19.42917+00	20260301084855_schema	\N	\N	2026-03-07 11:52:19.081883+00	1
+a449438f-cde6-4fb1-9713-68207012fcfa	e8271e98a23696d693483a7f67f614807047c429315472d7b5329828cea52c2e	2026-03-07 11:52:19.567064+00	20260301090311_enum	\N	\N	2026-03-07 11:52:19.452362+00	1
+bc8f0b14-e653-4c5a-9232-c3453455d73c	eaedb10180a3fc7a68237cce43d115cf5534b70e582d6c27ea18128b42ba2381	2026-03-07 11:52:19.687059+00	20260302034127_added	\N	\N	2026-03-07 11:52:19.594924+00	1
+9b7e646b-e11b-4845-96af-d85c65b152a8	fb293555fbfa2f012842d6df12ed69db70eea3995fcd2725f9efe8fd0ca984e3	2026-03-07 11:52:19.748499+00	20260307033156_feedback_volunteer	\N	\N	2026-03-07 11:52:19.689316+00	1
+\.
+
+
+--
+-- Data for Name: evaluations; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.evaluations (id, "studentId", "hrId", appearance_attitude, managerial_aptitude, general_awareness, technical_knowledge, communication_skills, ambition, self_confidence, strengths, improvements, comments, overall_score, evaluation_date, created_at) FROM stdin;
+1	dff2d6a6-33d2-4ae2-a3ee-ea583602ae67	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	8	6	8	8	7	9	8	Candidate is technically strong, understands the real world applications of his solutions. Willing to ask for feedback & implement the same. \n	Candidate needs to be more confident in his answers, especially when making bold comments like achieving 0 hallucination ( something even huge MNCs are struggling with ). On paper he is an extremely good candidate, he needs to translate that into speech. 	Brilliant work but, resume needs to reflect the same, so does his oral answers. He has the calibre, when given proper confidence & guidance in communication, he will definitely shine. 	8.00	2026-03-08	2026-03-08 04:21:21.587
+2	7f0b3f4f-7937-4a47-9a1d-075480009d60	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7	6	7	7	7	6	7	Communication & Confidence	Overall structure & clarity of thoughts	Overall good	7.00	2026-03-08	2026-03-08 04:24:17.766
+3	70d286a0-d95b-4897-9fa0-7de70176b5b4	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	9	8	10	10	He's very confident.	He needs to improve his resume, communications skills and technical knowledge.	Good Candidate	7.00	2026-03-08	2026-03-08 04:25:50.652
+4	0d2f82df-0533-4491-b413-f13a1782188c	5772f06a-bf47-407f-b92e-74bf4a85aead	8	6	7	7	7	8	8	Prajan has the intent to learn and upgrade himself for a better future. He has good technical knowledge however would need more in depth knowledge in System design	Technical depth, system design\nRealistic projects with customer impact	Overall he is good	7.00	2026-03-08	2026-03-08 04:29:38.093
+5	3463f821-dbc5-4ed8-9d89-4a404ad4f005	39201be0-22a9-4afc-8bbf-9a7dd43637e6	9	7	9	9	9	9	8	Arshad is very clear on his future path & his incline towards AI	Feedback given to the student. however, he has to set up a virtual bg during interview calls & should avoid disclosing entrepreneur aspiration during interview. 	Smart Student. High chance of getting placed. 	8.00	2026-03-08	2026-03-08 04:30:08.7
+6	e2c9e952-7b86-4b7d-84b3-a1769e4fdee8	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	8	7	7	6	8	7	Team person and hands on experience	Communication and further depth knowledge on projects	Good, needs to improve on his communication 	7.00	2026-03-08	2026-03-08 04:31:00.589
+7	3aa63746-5d60-4f3b-89b0-fc564e1f4c5e	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	1	7	3	8	5	4	4	Able to explain concepts	better articulation, Confidence and clarity of thought.	Unable to assess attitude and posture since the camera was not turned on. Need to improve confidence.	6.00	2026-03-08	2026-03-08 04:31:52.997
+8	37e25cf8-0358-4150-9210-a003a7d4644f	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	9	10	9	10	6	8	Communication. Time management	Need to focus more on the career roadmap. 	Have a good attitude of adaptability. But in career, if she focuses on a single goal with a backup plan, she will be able to reach great heights.	9.00	2026-03-08	2026-03-08 04:32:45.644
+9	acbeb8b7-d83e-4e39-9e93-40f3ff1e4652	a0df520f-d839-4acf-b594-7cad857eeaa7	6	6	4	2	7	6	7	Maintained a positive attitude while responding to questions and feedback. 	Should definitely improve more in Technical Part. 	Better Clarity Required. Should learn and explore about core concepts and in Technical Programming Skills.	5.00	2026-03-08	2026-03-08 04:36:28.713
+10	265e16cb-d2b6-4cb4-9644-e6d82b6a2a49	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	7	5	7	6	7	7	8	Vishwa was confident while answering the questions. His professional appearance, attitude, and overall demeanor were good.	Vishwa would benefit from strengthening their understanding of both ECE and CS fundamentals.	The candidate should focus on improving technical knowledge and demonstrate greater ownership in the tasks they undertake.	7.00	2026-03-08	2026-03-08 04:38:23.489
+11	8806c887-f3c6-46f5-803e-70cd48dd4295	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	10	7	8	8	9	8	9	Well groomed, good understanding in project, certification and tech knowledge	code without built in function, Need to learn tricky questions and tech questions. Focus on the self intro more and the conclusion.	Good and more understanding, refer the strength and areas for improvement.	8.00	2026-03-08	2026-03-08 04:39:42.802
+12	78837ca5-3bcd-4ea3-9b05-6ccd4a11330b	efa89ff0-babb-47d8-9694-afcbe18d049e	7	5	5	5	7	6	5	Communication is good.  He is having basic IT knowledge and high level idea.	Needs to concentrate in specific skillset and improve.   	Should answer by own. if don't have idea no issues.	5.00	2026-03-08	2026-03-08 04:41:16.289
+14	ab5fd830-6ffc-4bfe-8e43-d23c63f71293	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	10	10	10	9	He's technically strong and has really good set of projects.	He can improve his presentation skills.	Good Candidate, Focus on problem solving.	9.00	2026-03-08	2026-03-08 04:45:18.117
+15	bd0c9f6d-199e-4238-8fdd-8b16c9c04ed3	ce6d53c7-d3d3-401f-be95-013fa81fd707	8	5	6	7	6	6	8	Confident, good appearanc and attitude	need work on detaling like he was not aware about full form of 5S	in general good candidate out of 10 overall 7.	7.00	2026-03-08	2026-03-08 04:46:19.306
+16	633ef711-c7c7-4cee-9863-c9480c4bedf8	81f895c5-36b8-4d09-8241-80e64868fe56	7	6	6	7	8	7	8	Good activity and attitude 	Need to Learn more areas in Technical sides, Com skill need to learn. 	Good	7.50	2026-03-08	2026-03-08 04:47:21.603
+20	217e64cb-6bb5-4924-a119-1b725699b1e9	5772f06a-bf47-407f-b92e-74bf4a85aead	9	8	9	10	9	9	10	Good technical depth, great communication, realistic project and very good articulator.	Business perspectives and customer perspective	Very good and bright candidate. Has great potential to become a founder.	9.00	2026-03-08	2026-03-08 04:52:14.402
+21	5e321aa7-1f29-4f58-a3b7-f05fd32e7a5e	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	7	9	7	5	8	10	The main strength is his confidence whether he is telling correct question or not he doesn't show that fear in his face atleast in front of camera. And also i think he is more strong in designing since he worked as executive in design team on some project	He really needs to improve his communication for now its okay but if he wants to get placed in MNC's means language matters. and also he needs to be prepared in most of the programming languages and SQL nowadays sql has been used in many companies even for simple projects	he is very confident but he needs to improve his english skills and technical skills.	6.00	2026-03-08	2026-03-08 04:52:21.742
+17	267f072b-2f8c-4d34-acca-b5e2e86b7192	52535048-47f2-42cb-91ec-65a4824c9908	6	7	7	7	7	6	7	Confidence and knowledge is his main strength which made him perform in the interview	Communication, explain more details that adds more value to his self introduction	Good	7.00	2026-03-08	2026-03-08 04:48:07.231
+18	16d530be-85f3-4c32-8a7d-b3db2a40724a	104e34a6-fd53-4012-a0f0-41df6842c833	6	5	8	9	8	8	8	Passionate about the field. Possess sound technical knowledge and understands work in depth on the technical front. Able to also communicate clearly on the work being done.	To share the explanation in a structured manner would help people listening to follow easily.	Works on a range of domains. Able to give back to community. 	8.00	2026-03-08	2026-03-08 04:49:09.096
+19	96e81ee0-b055-41f5-88ff-36c74bd1b24f	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	7	7	7	9	8	8	Has a fair bit of knowledge in the projects	Can be more specific 	Can be molded better.	7.50	2026-03-08	2026-03-08 04:51:15.679
+24	fd6e47be-3fe3-4522-8a3e-aaad21e92c4f	d6400b5f-5117-4826-8aa2-20e215edfb2b	8	7	8	5	9	9	10	Strong practical experience; Good knowledge about the technologies involved; Goal-driven mindset. Communication skills are good. 	Should work more on the foundations; Applied AI needs to be backed by fundamentals. 	Great efforts from the candidate. Attention to details when it comes to technical expertise is needed. 	7.00	2026-03-08	2026-03-08 04:53:26.775
+25	876b3fb9-8977-4540-981a-790099ed05d2	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	9	8	8	9	9	7	Has good attitude of learning and presenting herself elegantly. Understands the current learning gaps and works towards it. Currently has an idea of where she wants to land when completing the Engineering.	She can present herself more confidently and be slightly more bold in her response. 	Have interest in Automation testing, which is a good field. But can focus more on using AI in testing.	8.50	2026-03-08	2026-03-08 04:54:05.532
+26	0136fc99-d67d-4972-8d7e-aede2b1577e6	2920b45c-0ce6-4dec-8766-3892322ff1b0	8	8	8	7	8	9	9	He demonstrates a positive attitude and possesses strong knowledge of the work he has carried out in his projects. He has a clear understanding of his goals and the steps required to achieve them, which reflects good clarity and focus. His internship experience and project work have significantly contributed to his ability to understand real‑world applications of the technologies he has used.	As an area for improvement, he can continue to strengthen his grasp of core academic fundamentals and further deepen his understanding of these basics to enhance his overall technical proficiency.	He demonstrates a positive attitude and a good understanding of his project work, with clear clarity on his goals. His internship and project experience have helped him gain exposure to real‑world applications of technology. Further strengthening of core academic fundamentals would support deeper technical growth.	8.00	2026-03-08	2026-03-08 04:54:05.757
+27	2cf23dd3-fb4e-4c9b-a2a1-6ee081a4a129	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	9	5	6	6	7	6	9	Confident, Able to speak with volume.	Better listening.	The candidate is confident and able to explain questions well, need to improve on listening	8.00	2026-03-08	2026-03-08 04:54:17.401
+28	14940b5d-bcbc-42a6-9a47-6bbf2246066a	bf71f55b-86ba-46b8-afa1-1aea09f829e1	9	6	7	8	6	8	8	Quick learner , Positive and Achiever 	Need to work on English grammar and confidence 	Overall very appealing and positive candidate . Good at her subject .	6.50	2026-03-08	2026-03-08 04:56:53.325
+29	0d72ef1c-6a1f-4e91-9a63-7bbc4226a111	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	7	6	7	6	7	6	6	Polite and humble	Need to improve communication and core concepts	Ok and can do better	6.00	2026-03-08	2026-03-08 04:57:20.457
+30	7ad64e8a-6e2d-40cc-bf89-a06ce828dbe1	39201be0-22a9-4afc-8bbf-9a7dd43637e6	5	5	5	5	5	5	5	Seems hard worker but has long way to go for surviving in corporate.	communication & domain	Resume not available. He need clear understanding of his future path. Needs more training on Communication & domain. Says interested to work as wed developer but doesnt have much knowledge into it. 	5.00	2026-03-08	2026-03-08 04:57:49.203
+31	14c7be43-3524-47b4-8b2c-0e62ecd15e1f	fcce01c3-007c-4299-a17f-9d5f4402c6ec	9	7	4	5	7	8	5	Good communication and has a good ambition. His focus is clear and well presented. 	General knowledge about the current scenarios has to  be developed. Need to build his self confidence and reduce nervousness on his face	Can work on his area of improvement and he is good to go	6.50	2026-03-08	2026-03-08 04:58:40.184
+33	d3fabd71-b624-4b3a-a47e-ce92fc1ee906	cd263764-71e2-4ead-87a3-0c5e9aff9828	8	6	5	6	7	6	8	Passionate towards becoming a software programmer/engineer. Good academics. Has well educated and informed family.	He needs to be able to explain the technical part. He should know everything that he has mentioned on the resume. Need more awareness and does not have to be casual about the interview and give detailed answers.	Over all a good candidate but needs to work on his technical skills and also not underestimate on the salary that he can get. The student needs to be more passionate towards the field he wants to get into and also know or have a company in mind and not be blank on what he wants. the student needs more boosting and exposure to what he could do.	6.50	2026-03-08	2026-03-08 05:00:45.922
+34	eb7a00a6-7516-44c4-a46e-462343ffce81	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	10	10	10	10	He's very much strong in the concepts he works.	I do not find any.	I have looped him to work with me in one of my project.	9.00	2026-03-08	2026-03-08 05:02:39.06
+35	38640d7c-eacc-45fa-b2e0-c0f9c8b6939e	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7	7	7	7	6	7	8	Confidence & clarity of thoughts, way of articulating	Communication needs to be focussed	Overall good	7.00	2026-03-08	2026-03-08 05:03:35.686
+36	43ef9456-f40b-4054-8bb7-3115b9a5dcb4	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	5	5	4	6	5	5	Academics	Can work a bit on her communication skills	Can do much better in her aptitude and GD in the upcoming assessments. 	5.40	2026-03-08	2026-03-08 05:03:50.075
+37	ce8cbb79-0502-4c72-81ae-250d95f4b55b	efa89ff0-babb-47d8-9694-afcbe18d049e	10	8	8	9	10	9	9	Communication is good. Having good technical skill and overall knowledge in full-stack development.	Keep continue the good work and improve your technical skills (Front end, back end) and utilization of AI tools.	Keep continue the good work and improve your technical skills in particular area and utilization of AI tools.	8.00	2026-03-08	2026-03-08 05:03:53.055
+38	7d8f7668-6048-4383-b08f-b2c885dc2002	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	6	7	7	8	6	6	The candidate demonstrates strong communication skills and good attitude. He has a good handle of his shortcomings. 	The candidate needs more confidence. Candidate should think and frame the answers in his mind before giving the answers. 	The candidate needs more confidence and be prepared with answers for the basic questions that are asked during the interview. 	6.50	2026-03-08	2026-03-08 05:04:36.846
+39	75312d77-2d8b-441d-85b5-538b3262bec4	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	7	8	8	8	9	9	Student has good hands on knowledge and interest on Design	suggestion or scope for improvement - can try to utilize his interest on design to integrate with AI which is the need of the hour	Has a very good attitude, communication skills, steady learner, passion for learning\ncan concentrate more into research in design	7.00	2026-03-08	2026-03-08 05:04:56.82
+57	f4f860d2-324b-4103-85d4-3d7dd7d7a34b	50fa6865-037c-451b-8ecc-c4fd9bdb0334	6	7	8	8	9	9	9	I found Srinidhi very much confident and great with what she is working and studying. I liked how she is passionate towards her MBA Learning. She as a personality will be doing great in future.	little focused on current but is more enthusiastic about whats for future.	she is good to go for any kind of company with all kind of technical and nontechnical roles, i would suggest her for more of non technical and managerial roles. 	9.00	2026-03-08	2026-03-08 05:16:54.117
+59	937aa4e9-09cf-4578-8714-a978476edda0	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5	6	7	7	4	7	8	His strength is his confidence and positive attitude 	Oral communication has to be improved	He can evaluate his own score of aptitude and see where he lacks, that will help him imrpove.	6.50	2026-03-08	2026-03-08 05:18:21.447
+40	64134fd3-ba3f-4a1a-a242-c05028eebd58	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	7	7	6	6	5	5	5	Candidate is humble, willing to explore. He admits his faults and are willing to correct them. He has potential, good ideas. 	Resume updation - Linkedin, Github, Project sections to be revamped. \nConfident communication needed\nHe mentioned that he is choosing a field because his brother is in it too - this is a dangerous answer. I'd rather he replies with his own strengths ( I'm choosing data anlaytics as I Believe data formulates the basis of decision making, Python is my strength, etc etc )\nHe has done a complete project from scratch, but talks very little about it & has not mentioned it in his resume. This needs to be changed. \nHis resume should reflect the role he's applying for - which is missing right now. \n	Good candidate, needs help in confidence & communication. 	6.00	2026-03-08	2026-03-08 05:06:16.599
+41	4eb50c5c-8472-4d14-af27-714a38e5e788	6a9107b1-6b87-42c5-8994-967a28c2b0d1	8	8	6	9	6	7	7	Really good subject knowledge and has a command over his skills	command over language, has a good vocabulary (can do better with fluency), can avoid nervousness.	ambitious and good technical and general skills.	7.00	2026-03-08	2026-03-08 05:07:15.167
+42	ce9fdd10-4d23-401c-9af8-64f10db56b21	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	7	7	8	7	7	7	Technically good	Need to improve the communication 	Can be molded easily	7.50	2026-03-08	2026-03-08 05:07:36.961
+43	3075d0f7-557e-4826-936d-efe20ab39229	a694622b-3ba8-4c82-bd05-08d8bfd5af50	8	5	9	8	10	9	10	His English is good, and his programming skills are also strong. He was able to convince me even after noticing that his Java programming was not compiled. He chose to start with the C language instead. He shared his screen and used an online compiler to demonstrate. His self‑confidence was good.	Managerial skill needs to be analyzed. Need to learn basics of operating systems like IP, Comp name change, adding systems into server, log analysis etc.	Overall good.	7.00	2026-03-08	2026-03-08 05:09:27.934
+44	16b425e3-d5f2-4d4c-b6e1-74e177ca4a6a	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	7	8	8	10	10	10	Very clear in her goal. Has a good support system personally to learn things.	Could focus on career roadmap and develop a broader idea about AI & ML	Can continue to progress in the same manner as now.	9.00	2026-03-08	2026-03-08 05:09:40.864
+45	1b079f3b-04fc-43ee-85d3-e638f41f613b	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	9	9	9	8	9	9	9	Excellent grasp of the English language, clear crisp communication\nUpdated resume, open to opportunities & has not boxed himself into a role yet. \nExcellent method of explaining his projects, understands the technical know hows & how to capture attention. \n	Evaluation metrics - Student needs to focus on idenitifying potential risks in his projects & evaluating the same. \nLinkedIn needs to be updated\nGithub repos needs to be made public with better readability. 	Strong candidate with good team & technical skills, hard to find this combination in general. Would be a wonderful addition to any team, just needs to be guided on learning to question his methods well	8.50	2026-03-08	2026-03-08 05:09:53.978
+46	53f9c3e7-af26-4cc7-832f-9e91ffe2addd	39201be0-22a9-4afc-8bbf-9a7dd43637e6	6	4	4	4	5	4	4	NIL. Had background during the meeting & had dressed formal	everything. No future goals. no knowledge on the college project that he has mentioned in the resume.	Needs to improve. Says he is fine with Non-IT job as well being a b.tech student	4.00	2026-03-08	2026-03-08 05:10:25.748
+47	580fed09-f65c-4cf7-9e42-89a0ce25da0b	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	5	3	3	6	4	2	4	The candidate seems to have good learning ability and actively seeks feedback.	Needs to work on communication and articulation.	Good learning ability, needs motivation and support.	6.00	2026-03-08	2026-03-08 05:10:47.892
+48	af6dbb9b-cfdf-4b50-b017-c50d19c7186f	44f338a5-56b0-4ad1-8258-79826e1445b3	5	5	5	5	5	5	5	sdfghj	sdfghjuk	swdefrgthyjukilo;p	10.00	2026-03-08	2026-03-08 05:11:10.953
+49	4d01b614-4498-4332-ad23-eb89e9dc607d	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	9	9	8	9	9	8	10	Good communication skills and confidence. Pranay was able to clearly explain the projects they have worked on.	Although Pranay comes from a core ECE background, they should prepare more on software-related technical concepts and Data Structures and Algorithms (DSA).	Very good communication skills and good core technical knowledge.	9.00	2026-03-08	2026-03-08 05:12:05.929
+50	3a6c1a62-6127-4991-9031-41043be4f5f5	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	4	5	5	4	4	5	6	He has confidence, which should be channeled in a more productive way. 	There is a significant scope for improvement, particularly in communication skills and comprehension. Additionally, a few revisions should be made to the resume.	Since the internet was down, there was not a proper communication. 	6.00	2026-03-08	2026-03-08 05:12:18.237
+51	7f88abb9-7940-4cdc-b99e-21715e682c52	104e34a6-fd53-4012-a0f0-41df6842c833	7	4	5	6	5	4	7	Able to share the reason clearly for choosing the degree. Understands the need to spend time to figure out solution to problem. Knows the big picture and explain the role performed.	Too many fillers like um.. aaa... Need to be aware that short introduction needs to be brief and no need to explain details. Must communicate clearly and not go in circles trying to explain.	Worked on technical problem. Need to be clear when explaining the problem. 	5.00	2026-03-08	2026-03-08 05:12:39.722
+52	5e5015a3-bb85-4fa7-a5ea-3e7abc85b474	52535048-47f2-42cb-91ec-65a4824c9908	8	8	8	8	8	8	8	Skills - Python, Java, C++\nInterested in Zoology. \nVery Hyperactive which he himself accepted and said that as his strength \nUsed Python, Fast API, etc in project and good to know that he had convinced his intern managers to do the project in python instead of Java which shows his communication skill	Can improvise more on the intro's, comms	Good candidate	8.00	2026-03-08	2026-03-08 05:13:28.305
+54	06cc7ee7-933e-4b71-a952-fe4c5a2021ec	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	8	7	6	7	7	8	7	* Dinesh is very strong in UI development\n* Communication is good\n* He has the ability to identify the solution when given a problem	* Need more focus on backend development\n* Need to be up to date on current affairs in IT	Dinesh has been the team lead for the hackathon. Need more focus on basics of OOP programming, backend, DB concepts and current affairs in IT. 	7.50	2026-03-08	2026-03-08 05:14:05.033
+55	f0205c3a-25bc-409c-9bdf-06265ebe9cad	81f895c5-36b8-4d09-8241-80e64868fe56	7	7	8	8	6	6	8	Good Activity, Good Capability, 	Need to speak more. 	Ok for technical side. 	7.00	2026-03-08	2026-03-08 05:14:22.635
+56	77ec1ce4-5bbf-4b88-a90a-6f0f6fea5826	2920b45c-0ce6-4dec-8766-3892322ff1b0	9	8	7	7	9	8	9	He demonstrates strong confidence and has a clear understanding of the path he needs to pursue. He possesses a solid technical foundation to achieve his goals and shows a good understanding of the projects he has worked on. Additionally, he maintains a positive attitude and approaches his work with clarity and focus.	He would benefit from placing greater focus on strengthening his fundamental concepts to build a stronger technical foundation. Additionally, engaging with experienced professionals in the field could provide him with more focused guidance and help align his learning more effectively.	He is confident and goal‑oriented, with a solid technical foundation and a good understanding of the projects he has worked on. His internship and project experience have given him exposure to real‑world applications, and he consistently demonstrates a positive attitude. To further strengthen his profile, greater focus on core fundamentals and seeking guidance from experienced professionals would help build a stronger foundation.	8.00	2026-03-08	2026-03-08 05:14:26.366
+58	8bf9da40-3967-475a-997b-8f011f4765c0	d631f416-b5af-4ca2-956f-da772aff5f6f	10	7	8	5	9	9	9	Being Very Honest. Taking the feedbacks. Listening and understanding.	Need to practice more to develop programming skills.	He has to practice and improve in Programming and Logical Skills.	6.00	2026-03-08	2026-03-08 05:17:49.468
+503	2a468916-7c57-4b2d-a887-ad33003290ee	458250d8-e65f-4171-9e11-3a6dff72a848	8	9	8	9	8	8	9	Technical 	Out side the subject 	Good	9.00	2026-03-08	2026-03-08 09:50:25.405
+60	ef918fbb-58e9-4568-8a53-4ed3c0d4de5b	a0df520f-d839-4acf-b594-7cad857eeaa7	7	6	6	6	6	5	6	Communication and Confidence	More Technical Knowledge need to develop. 	Technical Knowledge and mainly resume needs to be updated. 	5.00	2026-03-08	2026-03-08 05:18:39.394
+61	f6b6db61-4577-4ffa-aed6-27cb51fb242a	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	8	10	10	10	9	10	Confident, clear in communication, focuses on both technical and managerial aspects	Try more virtual calls facing the camera. 	Good candidate and is ready for actual interviews. 	9.00	2026-03-08	2026-03-08 05:18:39.807
+62	4ea704d8-1bfc-491f-a34c-231449103736	cf6780cd-f597-4792-96f8-5e11206fae5e	9	9	9	8	9	9	9	Technically strong 	Don't need to be anxious while answering \n	She's a good candidate	8.50	2026-03-08	2026-03-08 05:19:00.227
+63	9a6473c7-d593-484b-9f0b-b663cb236edd	50fa6865-037c-451b-8ecc-c4fd9bdb0334	2	2	2	5	5	5	4	candidate key strength is her technical domain and her current stream	needs lot of improvement in terms of confidence, appearance, attitude, communication, adaptability	overall , she was low in confidence, she was not at all focused,  needs lot of improvements to sit for different interviews.	5.00	2026-03-08	2026-03-08 05:21:03.9
+64	2fb7cafe-3473-4028-952a-f81d3d22e09c	44f338a5-56b0-4ad1-8258-79826e1445b3	8	8	9	6	7	7	7	Candidate is very good he in concept, he has a passion to go ahead with what he is doing. Basically from Dindugal. he wanted to do a project whatever he has faced. 	He needs to talk little bit technically.	Really a good candidate in Mech. Small grooming session is required to actually place him.	7.00	2026-03-08	2026-03-08 05:21:42.124
+65	b965f962-07d0-476f-8f45-bc8dd781059f	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	9	9	9	10	10	10	He understands what he's doing and had really good projects.	He could improve his resume.	Good candidate	9.00	2026-03-08	2026-03-08 05:22:19.517
+67	5a3ec3ec-8ee5-485f-8c2f-252dce79b5c9	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	5	4	5	4	4	4	5	Needs a lot of focus on communication, project knowledge and clarity of thoughts	Communication, inter personal skills, technical knowledge , project knowledge	Overall performance was very average	4.00	2026-03-08	2026-03-08 05:22:35.214
+68	80fe8e49-55fd-4bbc-9dea-5565805573cc	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	7	7	7	7	7	7	Good communication skills, quick learner,	to gain more confidence in technical areas Embedded systems and Networking	Has to deep dive and learn more about the candidates own areas of interest like embedded systems, image processing etc	6.00	2026-03-08	2026-03-08 05:23:21.018
+69	b85a97f2-802d-4961-9068-19614c0567db	50fa6865-037c-451b-8ecc-c4fd9bdb0334	7	6	7	8	8	8	8	her strength was her technical knowledge and dedication towards her current studies.	needs little more practice for interview participation in future.	she is good to go for all type of technical roles based on her studies.	8.00	2026-03-08	2026-03-08 05:23:31.185
+70	f77bd3b1-928f-42b6-9fc1-1eed498f831a	38236c5f-2faa-4940-aa37-60a206f3be14	6	4	4	6	3	4	3	Good technical knowledge 	communication, grammatically sentence flow is not correct .No clarity in his personal life.	Need interpersonal soft skills 	5.00	2026-03-08	2026-03-08 05:23:47.747
+71	7ccc8ee0-b315-4142-ae09-df136038cf15	d6a31449-5393-444e-89c7-f8ba9d35545a	9	6	7	7	8	8	7	1. Self-Confidence\n2. Clear Vision\n3. Good Communication	1. Have to more focus on the Core Subjects\n2. More deep drive in Robotics	Good attitude, self-driven, good in communication	7.50	2026-03-08	2026-03-08 05:24:03.716
+72	5f410aa1-9d41-4f84-a300-12a76df36bbb	39201be0-22a9-4afc-8bbf-9a7dd43637e6	8	7	7	7	7	6	6	Her communication meets fresher expectation - Good. Has expertise in machine learning. Open for any location. Seems quick learner.	easily accepted change in job role change from Machine learning to developer. 	Avg candidate with decent communication. 	6.00	2026-03-08	2026-03-08 05:25:09.818
+73	555d8c6d-2139-450e-a402-5a5393c0571e	0d77a15a-eaec-418e-93ba-7317ea498599	10	8	9	9	8	9	9	Neha seemed full of energy and brought a strong sense of purpose to the discussion. Her academic rigor is commendable. Her clarity of thought and goal-orientation are refreshing.	1. Slow down pace of speech little bit  \n2. Adapt details to target audience - how much to say, what to say based on whom\n3. Appropriately timing your key messages (wait for question or opportunity or create the space during conversation)\n	It was nice talking to Neha. Wish her all success!	8.00	2026-03-08	2026-03-08 05:25:33.286
+74	15dd7f45-75f4-44b8-aae8-8500d95fd3eb	44f338a5-56b0-4ad1-8258-79826e1445b3	5	2	5	3	3	4	4	i Couldnt identify as he is very reserved.	Confidence & self	Not prepared for a interview, he needs time to take over.	2.00	2026-03-08	2026-03-08 05:25:40.769
+66	f5f09364-d077-4fce-b924-2af4aadf0036	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	9	8	8	7	8	9	8	Confident, tackling question, coding skills, self intro	reduce self intro for 5 mins. Instead of explaining everything, highlight the main things. Need to know more project related questions. technical questions need to practice more. Try to practice in front of mirror	Good, practice Aptitude test.	7.00	2026-03-08	2026-03-08 05:22:22.679
+76	be586f64-f568-4089-89c0-819919a254be	ce6d53c7-d3d3-401f-be95-013fa81fd707	3	5	5	6	6	7	7	Confident, very clear about his carrear choice	need to aware about the concepts to be ery precise he was not aware what is ISO 9001 and IATF. suggested to be prepare himself accordignly	he was confident, ambisious can be supported with technical evaluation	6.00	2026-03-08	2026-03-08 05:26:19.069
+77	5b439ef4-d685-4e7d-b797-221f281ab248	50fa6865-037c-451b-8ecc-c4fd9bdb0334	7	9	7	8	9	9	9	Ashika's confidence, attitude, appearance, communication, all was very great	no improvements required.  she was very well answering the questions .	overall, she is great in what she is doing and what she is expecting, amazing answers, well managed person.	9.00	2026-03-08	2026-03-08 05:26:45.043
+78	748a77c1-445b-4764-92ec-0cc01c06ca22	d6400b5f-5117-4826-8aa2-20e215edfb2b	6	6	5	5	7	7	7	Candidate has explored multiple modalities and tools. He is able to think under pressure and evaluate options impromptu.	Should get stronger in foundations. Needs to explore more novel technologies. Need for better self-confidence and awareness; Communication skills needs work too. 	Good efforts but attention to information is required. 	6.50	2026-03-08	2026-03-08 05:27:42.727
+32	c9c3a787-a156-4c85-b702-2f3b2299ed24	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	9	10	9	9	10	9	10	Confident, knowledgeable in tech and project. Good management skill to tackle the questions.	Already your good and always ends about your projects in a good way.	Excellent, Try to practice in front of mirror with a energetic face, especially in your self intro	10.00	2026-03-08	2026-03-08 04:59:10.207
+80	f8aa2e65-f30b-4130-97be-d7061471137a	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	6	3	2	5	4	3	7	Good confidence.	projects and technical skills are lacking in the resume.	No real career plan. lathargic apporach.	4.00	2026-03-08	2026-03-08 05:29:44.349
+81	d11da8ac-540e-4349-98cc-1153d77d15ed	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	8	8	9	7	9	7	The student is technically sound. He has great interest in VR and also in AI. The student is confident in contributing not just to the company but to the society as a whole. Was clear of what he deserve in salary after graduation that shows a clear goal. 	Needs to work a bit on communication and also get his work published that could add up to his resume.	A good student and technically sound. 	7.80	2026-03-08	2026-03-08 05:30:12.958
+82	2449271b-9f19-4464-b2eb-f6acbd045dfa	db338578-8876-4dec-a6d5-2d0094828b16	8	6	6	6	7	6	7	Good in Attitude, Listening. Good in Communication as a fresher. 	Need to improve his narration skills. 	Above average	6.50	2026-03-08	2026-03-08 05:30:16.204
+83	607261e5-0d4b-40df-af2f-09422a2f49af	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	8	8	9	9	9	9	8	Good knowledge and understanding 	All good	Good Knowledge and understanding of core concepts	9.00	2026-03-08	2026-03-08 05:30:34.121
+84	430eb6f9-98e6-4e5f-a1a8-a355b8f20d55	efa89ff0-babb-47d8-9694-afcbe18d049e	8	7	8	6	8	9	7	Communication good, having self confidence and lesson learned from her challenges and improved. Thats good sign and strength.	Just concentrate academic and prepare the latest technical skills based on industry needs.	Please continue and keep update latest technical skills based on industry needs.	7.50	2026-03-08	2026-03-08 05:31:29.516
+85	7eebb759-a5d5-47f9-9c5a-03daa2411935	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	10	9	9	9	10	10	10	Good in communication skills, confident and presenting well.\ngood in technical skills - Phython, SQL, ML concepts\n	Can improve in Probability concepts.. Eg: Bernoulli distribution, Central Limit Theorem,Bernoulli distribution etc...\nlearn any one cloud platform - Azure/AWS/GCP.\nWork with Databricks - understand Distributed Data processing using Spark.\nimplement ML solutions in Databricks - get understanding of Databricks Mosaic/Genie etc..	Jai is very good in coding and concepts. presented himself well. overall he exceeded the expectations.	9.00	2026-03-08	2026-03-08 05:32:49.215
+86	a3d403e2-a31a-4bd6-9fad-da95b4b325ed	5f1975ba-b40d-4a05-b28d-5195c0db7348	9	8	8	9	7	9	8	Understands the industry and is curious in learning about the industry trends for applying his knowledge.	Madhavan has a Practical mindset which could be added with some more efforts on communication. Although he is able to put things clearly, he should have a bird's eye view while explaining projects. 	Highly recommend him for Plant Design in any Chemical Engg industry. 	9.50	2026-03-08	2026-03-08 05:33:57.083
+87	c6d445a8-7dc3-4999-a3f3-28c1496bdc0c	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	9	8	8	9	7	10	Very bold, energetic & confident. Knows thoroughly about whatever she has done.	Can be more organized in the goals and tasks to do.	Should focus on doing things which will have  a greater impact in the society	9.00	2026-03-08	2026-03-08 05:34:01.37
+88	d9a71c3f-dc83-4078-a11e-eee13b95f44b	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	8	8	9	2	5	7	8	confident. descent in communication 	technical knowledge to be improved. need to be a better listener. 	have given feedback on call. 	7.00	2026-03-08	2026-03-08 05:34:11.167
+89	3b5c35b3-bb05-4422-bfc5-e794ae7e008d	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	5	4	4	5	4	5	4	Transaparent answers	Communication, learning initiatives and project initiatives	Overall performance was very average	5.00	2026-03-08	2026-03-08 05:35:53.73
+13	85510a17-e022-4557-9dc1-a3b26646af08	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	8	8	7	5	6	7	7	Candidate understands problem statements & target audience well. Has a strong potential for AI augmented UX roles. Good resume as well. Good communication while talking about his internship tenure. 	Github - Needs to be updated\nTechnical knowledge - He needs to understand the system design of his projects, understand the tech stack, pointing to his friend who did the technical heavy lifting is a dangerous statement & should be avoided. \nCandidate seems to have vibe coded his project, he has basic understanding of the problem statement but has not factored in scalability, security, etc. \n	Good candidate, needs to improve on his technical knowledge. 	7.60	2026-03-08	2026-03-08 04:44:24.816
+91	9932284c-8a74-40e9-b879-cd61a9f6405f	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	9	7	7	8	8	6	6	Confidence, technical	Use of Body language effectively	will score better with little more guidance	7.00	2026-03-08	2026-03-08 05:36:31.04
+92	8c731ef1-5c02-4db4-8478-37e657c02822	dc83d654-7865-4342-9437-16bfcb075e6a	6	5	7	9	8	7	5	he is technical Strong 	He can attend the interview  with Self Confidence 	he is technically good but his should improve in his behavioral  aspects to crack the interviews	7.00	2026-03-08	2026-03-08 05:36:40.678
+93	06cec8df-84ca-4400-bc03-1171c063cd62	217ae2de-4843-400b-964c-30302c10965e	8	8	7	7	9	9	9	Good in communication, Interested in AI project, leadership and confidence. 	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project. 	Overall, Sadhana demonstrates strong communication skills, confidence, and leadership qualities with a clear interest in AI and technology. She shows good potential for growth and has a positive learning attitude. However, she needs to strengthen her OOPs fundamentals to build a stronger technical foundation for future projects.	8.00	2026-03-08	2026-03-08 05:36:45.262
+94	d78e1f6b-b04d-4894-9a57-7e58727d8433	5772f06a-bf47-407f-b92e-74bf4a85aead	8	7	5	6	5	6	6	Needs more confidence and should improve communication skills. Has technical know how but needs in depth knowledge	Articulation and communication skills, resume needs a fix.	Good, however needs improvement in technical depth and communication area.	6.00	2026-03-08	2026-03-08 05:37:33.713
+95	5f49a1a9-39f5-413f-848e-995b9d09551c	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	7	7	5	8	7	8	8	Demonstrates good clarity while explaining technical concepts, especially related to AGV and robotics.\nShows curiosity and analytical thinking by asking questions and seeking clarification when required.\nHas hands-on exposure to robotics, including building a 2-wheel BOT using IRAC sensor and PID control.\nParticipated in Hackathon activities, showing interest in innovation and practical learning.\nPossesses strong interest in high-speed and performance-based systems such as Industry AGV vehicles.\n	Communication skills need further improvement to express ideas more confidently and in a more structured way.\nCan work on presenting technical concepts more concisely during discussions.\nNeeds to develop more confidence while presenting ideas in group settings.\n\n	The candidate shows good technical interest in robotics and AGV systems with practical exposure through projects and hackathons. He demonstrates clarity of thought and patience while working on technical challenges. With improvement in communication skills and structured articulation of ideas, he has the potential to perform well in technical roles.	7.00	2026-03-08	2026-03-08 05:37:49.011
+96	916f0a23-5484-493e-849b-0b6eaf408918	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	8	8	7	6	8	8	9	Good communication skills, confidence, and ambition.	Although the candidate comes from a core EEE background, they should prepare more on software-related basics technical concepts (especially if Java or C is mentioned in the resume). The candidate should also strengthen their fundamental concepts and core technical knowledge.	Good communication skills, confident, and demonstrates a good managerial attitude.	7.00	2026-03-08	2026-03-08 05:37:52.497
+97	b7006233-a0f2-4535-9cf6-0ba18ac98b0e	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	8	7	5	5	4	7	7	He is attentive while listening, but needs to articulate his thoughts more clearly.	Comminication skills has to be improved. 	He is good overall, but should focus on presenting his points more clearly.	7.00	2026-03-08	2026-03-08 05:39:07.699
+98	03cd4019-0c9f-417e-a635-439f9dd1ae15	52535048-47f2-42cb-91ec-65a4824c9908	10	10	9	10	10	10	10	Prg - Java, Python, MySQL, PHP, CSS, HTML\nProjects - Figma, Bitcoin\nExcel in tools and technologies \n\n	Can improvise more on all the existing excellent talents within her. 	Excellent 	10.00	2026-03-08	2026-03-08 05:39:18.705
+99	0beb221f-c93d-4913-ac9f-ca176692aa79	6a9107b1-6b87-42c5-8994-967a28c2b0d1	9	9	8	9	9	10	9	Great managerial knowledge, self-confidence, and technical knowledge.	Elaborate resume, don't get nervous; libraries mentioned in skills can be removed.	Vishal has strong skills and a good command of his knowledge and communication. 	9.00	2026-03-08	2026-03-08 05:39:39.034
+100	2e6fd048-8246-4f9f-b9aa-b89f1306789f	3bdac905-7cfa-4a31-85de-39ec2f854afd	7	10	9	9	9	9	9	He's clear and consistent on problem solving	He needs to be more presentable.	Good Student	7.00	2026-03-08	2026-03-08 05:41:04.567
+101	d9fe8497-24d7-4b60-93c5-35a498c21c03	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	8	6	6	6	9	6	9	Good confidence.	Need to improve on goal setting	Good communication and confidence. can work on better explaining his work in a structured way.	8.20	2026-03-08	2026-03-08 05:42:08.191
+102	bda9954d-c4f0-4098-9540-1be6afbea1c2	39201be0-22a9-4afc-8bbf-9a7dd43637e6	7	6	6	6	6	7	6	Has a clear vision to pursue his masters in Germany & with a university chosen. Is also improving his German language parallelly.    	Needs to improve talk more technical in the domain he is willing to undergo.	Avg candidate with focused path for next 2yrs but has a lot to groom himself. Not willing to join a job now, hence, placement opportunity is not advised. 	6.00	2026-03-08	2026-03-08 05:42:17.553
+120	d0d86feb-4639-4f63-9705-e3bf400959b5	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	7	7	7	6	6	6	7	Good knowledge on what projects has been done, able to explain what he knows clearly. Able to work as a team. Understands where he went wrong and  how to fix it. 	Spelling mistakes in resume need to be fixed\nNeed to analyze different methods before coming up with one in projects\nNeed to think about potential attacks on systems. \nNeed to be more confident & improve on communication when faced with questions he does not know.\n	Good candidate , need to work on areas of improvement. 	7.00	2026-03-08	2026-03-08 05:52:33.896
+179	19e4e252-39ed-4f68-8c28-e561ca54c784	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	10	10	10	10	He's aware of the projects.	He can be more presentable	Good candidate	10.00	2026-03-08	2026-03-08 06:19:20.824
+103	5f546c43-7153-478a-a597-25009f21b178	2920b45c-0ce6-4dec-8766-3892322ff1b0	6	6	5	6	7	6	6	He demonstrates strong willingness to learn new concepts and shows a clear sense of ambition regarding his future goals. He is highly motivated and draws inspiration from his objectives, which drives him to continuously improve and work toward achieving them.	He would benefit from gaining greater clarity on the job market and role expectations aligned with his career interests. Additionally, further development of his communication skills would help him articulate his strengths more effectively and present himself with increased confidence.	He is confident, motivated, and demonstrates a strong willingness to learn, supported by a solid technical foundation and a positive attitude. He has a good understanding of the projects he has worked on and shows clear ambition toward his career goals. To further strengthen his profile, gaining better clarity on the job market and role expectations, along with improving communication skills, would help him present himself with greater confidence.	6.50	2026-03-08	2026-03-08 05:43:14.671
+104	55f4d696-54a4-4f50-b656-5d83b98d463f	104e34a6-fd53-4012-a0f0-41df6842c833	4	3	4	3	4	6	5	Able to share the reason for choosing the stream. Has the ability to understand there is a problem and tries to solve it. Thinks and researches about future prospects.	Need to be in adequate lighting for the interviewer to see. Pick up technical domain knowledge. Should be able to communicate clearly on the technical front.	Aware about the constraints and does work to mitigate it. Needs to spend time on technical skills and enhance communication.	4.00	2026-03-08	2026-03-08 05:43:17.353
+105	cf4a8285-f6c2-4860-8f8d-3529a1374be5	eee239d8-0363-488a-80c3-0c415c7b2217	10	9	8	9	9	7	7	Obedient 	Confidence 	Good	9.00	2026-03-08	2026-03-08 05:43:50.712
+106	866f1f13-6339-4371-bb05-3d8479783721	d6a31449-5393-444e-89c7-f8ba9d35545a	8	6	7	9	8	7	7	1. Communication\n2. Technical Knowledge\n3. Clear Vision	1. To develop on managerial capacity\n2. Should be more aggressive	Good in communication and clarity in thought	7.00	2026-03-08	2026-03-08 05:44:00.62
+107	65790262-91ac-460f-8f04-fa6025015552	bf71f55b-86ba-46b8-afa1-1aea09f829e1	7	7	7	7	5	8	8	Very upfront and honest 	Need to concentrate on the communication and articulation and also need to focus on the listening skill 	Comes across as a very honest person and ambitious too . Very impressive CV . Need to to be trained on a bit of communication . 	7.00	2026-03-08	2026-03-08 05:44:05.115
+108	bf76c172-e627-4be9-8201-797c59986a97	cd263764-71e2-4ead-87a3-0c5e9aff9828	9	7	9	9	9	9	9	Exceptional academic performer with outstanding 94% aggregate score demonstrating exceptional commitment to studies and mastery of core concepts. Demonstrates excellent technical knowledge across AI/DS domain with strong conceptual clarity. Possesses outstanding communication and presentation abilities with confidence and articulation. Shows high levels of ambition, self-motivation and leadership potential.	While overall performance is excellent, candidate can benefit from gaining more industry exposure and practical project experience in real-world AI/DS applications. May explore internship opportunities to enhance hands-on technical skills and project portfolio for better placement competitiveness.	Raghavendhar demonstrates exceptional all-round capability with 8.71/10 overall assessment score. The combination of 94% academic excellence, Aptitude score of 36/40, and GD score of 39/50 indicates a top-tier candidate ready for placement. Highly recommended for premier organizations seeking exceptional technical talent. Strong potential for senior roles and career growth. Candidate is placement-ready and will be an asset to any organization.	8.70	2026-03-08	2026-03-08 05:44:17.13
+109	81bbc788-2417-4dab-ae90-481c93e668bd	38236c5f-2faa-4940-aa37-60a206f3be14	7	4	6	8	7	7	6	Good technical knowledge 	ideation clarity, application end user 	Good in attitude and can be explored and if trained properly he will fly with colors	8.00	2026-03-08	2026-03-08 05:44:48.908
+110	9da5810c-7e15-4ac3-9c44-92ced255d7d2	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	9	9	10	9	10	9	9	Good technical knowledge and a  team person	Seems to be good in all aspects	Very good candidate. 	9.00	2026-03-08	2026-03-08 05:44:55.607
+111	1f971b7c-3cdb-477b-a69e-3e5218e7ea0a	50fa6865-037c-451b-8ecc-c4fd9bdb0334	7	6	7	7	4	7	7	confidence and technical knowledge is good	needs more better communication skills 	 overall , he is ok for current jobs or internship, will do good in technical terms but culture wise ok it seems.	7.00	2026-03-08	2026-03-08 05:47:31.294
+112	066842fa-7768-450b-beeb-d89c4e3e9b14	cf6780cd-f597-4792-96f8-5e11206fae5e	8	7	6	7	6	8	8	Quick understanding	Need to focus more on technical side, clearing problem gathering skill	he's a good candidate 	7.00	2026-03-08	2026-03-08 05:48:31.707
+113	91c696c6-919a-4a5a-8088-1ec2269501a5	a694622b-3ba8-4c82-bd05-08d8bfd5af50	8	6	8	8	6	6	8	Self confident.	His English needs improvement. His resume is not good and requires significant updates. He needs to learn Python and also improve his basic computer knowledge, especially in operating systems.	His English needs improvement. His resume is not good and requires significant updates. He needs to learn Python and also improve his basic computer knowledge, especially in operating systems.	6.00	2026-03-08	2026-03-08 05:48:32.141
+114	8db5374a-2189-4b0a-9fb1-ae91b6393f46	7d959ecb-3999-47cd-ae17-5aab0405cb97	7	5	5	6	7	6	6	Candidate has good communication skills. Is proactive and aware of his shortcomings and is working on overcoming it. 	Has not prepared well for the interviews. Needs more confidence. 	Overall the candidate is proactive and shows interest in upskilling. But lacks pre-interview preparations. 	5.50	2026-03-08	2026-03-08 05:48:45.158
+115	827958e8-0aa2-4a7a-a039-2eda28985b40	fcce01c3-007c-4299-a17f-9d5f4402c6ec	9	8	7	7	8	8	8	He has a clear vision and goal for his future, and has a good communication skills. He knows his focus companies and has done a detailed study on that. 	Communication grammatically can be improved.	Overall his presentation was good, his attitude was good	7.00	2026-03-08	2026-03-08 05:48:56.707
+116	aa92afbe-cda2-4591-b885-b5b2906a2dd5	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	9	9	9	8	10	10	Good in communication, confident and clear in setting an ambition in EHS roles. Bhala has undergone internships that helped her choose her career goals. 	Certifications on EHS and further studies for getting into the industry. 	Bhala is a great candidate who can contribute to EHS upon completion of her certifications. 	8.50	2026-03-08	2026-03-08 05:49:06.183
+117	313964e9-99d8-4fc3-aa84-bc43c2dbd11c	81f895c5-36b8-4d09-8241-80e64868fe56	8	9	9	9	8	9	9	Good strength, Good Capability,  Good leadership, 	Learn More in AI part	Good attitude and learning person. 	8.70	2026-03-08	2026-03-08 05:50:39.758
+118	15bfa627-6e88-4cc1-ae8c-ea47301ade75	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	6	6	6	7	6	7	Good communication skills, best fit always only for a team player role	Has to be gain more technical knowledge\n	Has started studying EEE just because of a family decision. \nNeed to be confident to explain whatever the student has learnt	6.00	2026-03-08	2026-03-08 05:51:08.791
+119	3871102a-3f7a-42e2-94d3-37c2188f72d9	649453fd-ef30-42d1-8d2a-94c26237e814	9	6	7	8	8	8	9	Candidate has good communication skills and able to explain concepts clearly. All the concepts were explained, not only with the theoretical knowledge, but also with examples, which showcases the depth of technical knowledge on the concepts learnt and worked in the projects.  \nHe is also honest about mentioning that he is not aware about certain topics. 	Though candidate was able to answer most questions, there were slight confusions in similar sounding concepts and deeper explanations like typecasting, abstraction Vs Encapsulation in OOPS, Mean Vs median, SQL join types, overriding explanation, Errors Vs exceptions. He can refresh these basic concepts.\nAlso, can be prepared with more impactful technical challenges faced during projects. 	Candidate has good technical knowledge and communication skills and can be considered as a good fit for market. 	8.00	2026-03-08	2026-03-08 05:52:15.219
+121	46e5d681-a70c-4d81-baa5-c4a367686176	964b9c92-19e6-4140-8be6-a64973f93bfa	9	8	7	8	7	8	7	Gopinath has gained good exposure to technical skills by actively participating in hackathons and working on several projects. He has a very clear understanding and demonstrated well about on the  Project subject.	Gopinath has good technical exposure; however, he can further improve by presenting himself with more confidence and enthusiasm. 	Gopinath has demonstrated good exposure to technical concepts through his participation in hackathons and the completion of several technical projects. He shows a sound understanding of the subject matter and is able to explain technical aspects with clarity. To further strengthen his overall presentation, he would benefit from exhibiting greater confidence and enthusiasm while discussing his work. Presenting his project experiences in a more engaging and structured manner will help him create a stronger impact and effectively showcase his capabilities.	7.50	2026-03-08	2026-03-08 05:53:38.358
+122	e90afeab-ad47-4551-8bf6-aee10385090c	38236c5f-2faa-4940-aa37-60a206f3be14	7	5	4	4	7	5	5	Good presenter 	no clarity on what project he done 	Need to align his subject and project technical wise 	6.00	2026-03-08	2026-03-08 05:55:39.466
+123	4e9357e0-bbc7-48f4-b629-17125f1053ff	39201be0-22a9-4afc-8bbf-9a7dd43637e6	8	7	8	8	8	8	8	Has done 3 internship & is clear that she wanted to undergo a career in IOT. She is also doing a project with Ashok Leyland in IOT. 	Though technically good, she needs to adapt to a corporate environment. 	Good Candidate with IOT focused. Easy train & hire.	7.00	2026-03-08	2026-03-08 05:55:48.713
+124	a7f59ba7-19bd-4647-a6ef-91dc1b5a126c	44f338a5-56b0-4ad1-8258-79826e1445b3	4	4	4	5	4	4	6	Candidate is good in core.	Communication has to be improved.	Good to be placed.	5.00	2026-03-08	2026-03-08 05:56:03.296
+125	9a01df9e-af43-4071-82bc-9a336003a8a4	aaec9758-627f-40bb-b8b2-e92110d36327	7	8	7	4	8	7	6	Able to approach problems logically,but needs deeper exploration of solutions	Have to improve technical skills.	Good at communication,but gets anxious	6.00	2026-03-08	2026-03-08 05:56:19.441
+126	48865e86-b110-4bc0-9166-657d8bcc2bf5	efa89ff0-babb-47d8-9694-afcbe18d049e	8	6	8	6	8	8	8	Good communication, having self-confidence and identified his weakness and improving, that is good part. Keep continue. 	Good communication, having self-confidence and identified his weakness and improving, that is good part. Keep continue. 	Good communication, having self-confidence and identified his weakness and improving, that is good part. Keep continue. 	7.50	2026-03-08	2026-03-08 05:56:25.843
+127	b4e04de8-d5d5-467c-b212-40c427412e6e	d6400b5f-5117-4826-8aa2-20e215edfb2b	5	4	4	4	6	6	5	Good project ideas. Diverse experience across many domains. 	Needs focus on foundations and technological advancements. Detailed literature survey should be done. Limitations and scope of the projects should be defined. Needs better understanding of the tech stack involved. 	The candidate appeared to rely on scripted responses rather than engaging in a natural, conversational discussion during the interview. Also, resume needs to be updated. \n	4.80	2026-03-08	2026-03-08 05:56:28.683
+128	ee18151e-d43c-453b-8a7a-2a3c31be9f5c	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	5	5	3	9	5	5	3	good presence of mind. decent technical knowledge	needs to gain confidence. need to fix communication, 	need to conduct more mock interviews him.	5.00	2026-03-08	2026-03-08 05:57:18.541
+129	fc520f0e-74df-4416-ad21-64e639ea7663	8ef5450c-442e-440e-b14f-9b98542fd9bf	7	7	7	8	8	8	9	Ambitious	Need to get updated about external environment	Self grooming is required	7.50	2026-03-08	2026-03-08 05:58:09.943
+130	43456f5a-82c8-42d7-a00f-ef97682ee8cf	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	7	8	8	7	8	7	Has strong basics 	Need to improve the communication	Good in basics and can be mentored and developed as a potential candidate	8.00	2026-03-08	2026-03-08 05:58:30.529
+131	32d30682-0493-4c13-8736-8859cdf18ac9	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	9	8	7	8	8	8	8	* Dhinesh is aware of both front end and backend concepts\n* He is very confident and good in communication\n* Have good problem-solving skills	* Need to know current affairs in IT\n* More hands on in basics programming conceptsLe	Dhinesh has good communication and problem-solving skills. His attitude is good. He needs to focus more on programming basic concepts.	8.00	2026-03-08	2026-03-08 05:58:33.912
+132	cb736e31-1f1f-4ff1-8a5d-4e1764056372	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	10	10	10	10	He's very confident, and clear in his domain.	He needs to work on his resume	I have given him a problem, based on his response I may loop him in the research.	9.00	2026-03-08	2026-03-08 05:58:52.218
+133	31fc7a75-e7f1-48cc-916e-f8d9e05c9d58	990d6c56-fa9b-4848-8696-21e832fbcfd3	8	7	7	9	8	8	9	Very strong in the technical aspects, could connect well to the project. 	The impact part was missing, what was the outcome demonstrated through the project/learnings	Good and sound knowledge. Need to work on structuring the introduction part. Add metrics /measures to each project.	8.00	2026-03-08	2026-03-08 05:59:40.18
+134	e6d680f8-d4fd-409b-8bef-edc6a6814471	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	8	7	8	8	6	7	8	Good Technical understanding 	Need to work on Communication and presentation skills	Good,need improvement in presentation 	7.00	2026-03-08	2026-03-08 06:00:00.373
+135	0eac51f3-e454-4cba-9bba-15372ba4f166	eee239d8-0363-488a-80c3-0c415c7b2217	10	8	8	10	8	10	9	Quick learner	Communication	Good	8.00	2026-03-08	2026-03-08 06:00:20.599
+136	48be4361-9456-4745-9206-2b52f9362149	2a227454-03a0-441c-9b10-480f36a9d715	7	5	5	7	6	6	6	Very polite and professional demeanor throughout the interview. Showed genuine respect and a positive learning attitude by proactively asking for feedback at the end.\nDemonstrated solid understanding of data structures — explained AVL trees vs BSTs, Bloom filters for pre-screening, and the fraud detection pipeline with good technical depth.\nCovered two projects (fraud detection and network intrusion) and was able to explain the "why" behind technology choices, not just the "what."	Self-introduction was a bit long and read like a resume list. Practice a 60-second structured intro: name, branch, one key strength, one standout project, and what you're looking for — then stop.\nWhen explaining projects, try to be more concise. Use the format: "The problem was X → I built Y → The result was Z" and let the interviewer ask follow-ups for more detail.\nStart building something outside of college assignments — a personal side project, an open-source contribution, or even a small tool you use yourself. This shows self-driven curiosity which interviewers value highly.\nFor conflict resolution and teamwork questions, prepare 1-2 real stories where you contributed meaningfully to a team outcome. Even small examples count — organizing a study group, coordinating a college event, or debugging a teammate's code under deadline.\n\n	Bishma has a good technical foundation and a respectful, professional attitude — both of which are strong starting points. The main areas to work on before placement season are communication conciseness and building real stories around teamwork and initiative. With some focused preparation on structuring answers and doing one or two self-driven projects, Bishma can improve significantly in a short time.	6.00	2026-03-08	2026-03-08 06:00:31.939
+137	36e7e3f2-2f0c-4f5a-acf8-ea35a514656a	db338578-8876-4dec-a6d5-2d0094828b16	8	7	7	8	8	8	8	Good in communication and narration skills	Need to improve the recent trends	Good	8.00	2026-03-08	2026-03-08 06:00:44.396
+138	6a128d4d-95d0-458e-8f12-aff8d84c513c	50fa6865-037c-451b-8ecc-c4fd9bdb0334	8	7	7	9	9	9	8	Overall the technical knowledge and dedication was good	too fast speaker to understand, need improvement in communication pace or speed.	overall, he was good to get a good web developing roles.	8.00	2026-03-08	2026-03-08 06:01:24.24
+139	0f11268b-0b4f-4e75-ab9e-4c4adb0a5986	2a227454-03a0-441c-9b10-480f36a9d715	8	6	8	7	7	8	8	Showed genuine curiosity and passion for understanding how real-world systems work — referenced Netflix's content distribution, caching strategies, and high availability with clear enthusiasm. This kind of intrinsic interest stands out in interviews.\nHas a very realistic and well-thought-out career path: start with backend/networking roles, gain experience, then transition into cloud engineering and eventually solutions architecture. That level of clarity is rare for a student.\nStrong conceptual understanding of distributed systems, TCP/UDP, CDNs, and scalability — connected technical concepts to real business systems rather than just textbook definitions.\nAsked a very mature closing question about how AI is affecting the solutions architect role, showing he treats interviews as a two-way conversation, not just an evaluation.	Prepare a detailed project walkthrough story with specific challenges and tradeoffs. The conceptual knowledge is strong, but interviewers will want to hear about something you built end-to-end — the problem, your approach, what went wrong, and what you learned.\nConsider pursuing an AWS or Azure foundational certification before placements. It validates your cloud interest on paper and gives you a concrete talking point that sets you apart from other freshers.\nWhen discussing team contributions, try to quantify your impact — instead of "I guided team members," say something like "I coordinated a 4-person team and we delivered the project in 3 weeks." Numbers make stories more memorable.\nSome of your longer answers repeated the same idea in slightly different words. Practice trimming — make the point once, clearly, and then stop. Let the interviewer pull more details if they want.	Madhav is one of the stronger candidates in this batch. His combination of genuine technical curiosity, realistic career planning, and confident communication makes him well-positioned for placements. The main focus areas should be building a strong project story with measurable outcomes and getting a cloud certification to back up his stated interest. With those additions, he'll interview very competitively at product companies.	8.00	2026-03-08	2026-03-08 06:01:33.176
+140	abe3babc-d4b0-438e-8bef-e392e210e482	24421caf-3a14-4681-b9f9-f237f956d8d4	7	5	5	8	6	6	5	Based on his achievements, I could say he is technically well knowledgeable. He has taken efforts to learn more above and beyond his college curriculum, which is appreciated.	Need to articulate well about the projects he has executed. Need to be more confident in his communication. Be specific in describing the ambition.	Technically sound. Further improvement in his soft skills will help him to achieve better.	6.00	2026-03-08	2026-03-08 06:03:03.665
+141	594f3a35-7849-4af8-bea5-22682bea7578	d6a31449-5393-444e-89c7-f8ba9d35545a	7	6	6	6	7	7	6	1. Good knowledge on the NDT\n2. Clarity on his vision/aim	1. Has to improve subject knowledge in Mechanical Stream\n2. Can be little more clarity on communication	Has the vision on NDT (the interested area of his peruse). 	6.50	2026-03-08	2026-03-08 06:03:24.145
+142	572ad245-64d4-450e-bae0-458367ea28c7	5f1975ba-b40d-4a05-b28d-5195c0db7348	7	7	8	7	7	6	8	Tharun is highly committed towards getting placed and has the thirst for developing new skills. 	He should be clear on setting his goals (Chem Engg Vs IT) and not mistake current trends for future patterns in the industry. 	Tharun needs to get more exposure through internships in Chem Engg field to learn the real-life application of heat transfer. 	7.00	2026-03-08	2026-03-08 06:03:51.006
+143	8acb85d7-1da3-4d1e-8e2a-614924fdc441	a0df520f-d839-4acf-b594-7cad857eeaa7	7	8	8	6	8	9	10	Very Confident and have strong interest in Core Field . 	Technical Part should improve. 	Personality Improvement and Technical Part should improve . 	7.00	2026-03-08	2026-03-08 06:05:50.448
+144	cfac5947-64e2-434e-b2e0-daab571c4391	217ae2de-4843-400b-964c-30302c10965e	9	9	9	8	9	9	8	Good in vision - AI Engineer, good in communication, doing real time AI projects.	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project. 	Shri Vignesh shows strong interest in AI and real-time technology projects with good communication and problem-solving ability. He has practical experience in full-stack development and demonstrates a clear vision toward becoming an AI engineer. With deeper understanding of OOPs fundamentals and core concepts, he can further strengthen his technical foundation.	8.00	2026-03-08	2026-03-08 06:06:32.057
+145	d7fffa7f-3970-4301-b3c9-8e6aa9432b68	964b9c92-19e6-4140-8be6-a64973f93bfa	7	6	6	4	4	6	5	Kishore has shown a strong interest in pursuing a career in the IT industry. To achieve his goals, he would benefit from further preparation and practice to build greater confidence in presenting his knowledge and skills. Strengthening his technical understanding and communication during interviews will help him effectively showcase his potential and improve his overall performance.	Kishore should focus on improving his communication skills by being more clear and specific while expressing his ideas. Participating in more hackathons and working on additional projects will help him strengthen his technical exposure and confidence.	Kishore has shown a strong interest in pursuing a career in the IT industry. To further strengthen his profile, he should focus on improving his communication skills by expressing his ideas in a clearer and more structured manner. Participating in more hackathons and working on additional technical projects will help him gain better exposure to the technical aspects of the field and provide valuable hands-on experience. Additionally, he could improve the way he presents his ongoing project work by explaining the project details more clearly and confidently. With consistent effort in these areas, Kishore will be better prepared to showcase his skills and perform effectively in interviews.	6.00	2026-03-08	2026-03-08 06:06:47.829
+146	0c9d2979-1569-4502-9e48-0008e7739608	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	8	7	7	8	8	8	8	Hema demonstrates a very clear understanding of her project, particularly in Electric Energy Conversion.\nShows strong interest in IoT and charger development, indicating curiosity toward practical applications.\nGood at solving circuit-related problems and has strong technical fundamentals in electronics.\nCapable of completing tasks within defined timelines with deep understanding.\nDisplays hardworking nature and commitment to responsibilities.\n\nAble to communicate her ideas clearly during technical discussions.	Needs to improve coding skills, especially for implementation in IoT-based projects.\nShould work on managing anxiety during challenging or stressful situations.\nCan further strengthen structured communication and presentation skills.\n\nHandling Challenges:\nFaced stress and difficulty during initial project challenges, but managed to work through the situation.\nWhile working as Lead for Sponsorship, handling fund allocation and budget management was a challenging responsibility.\nCareer Aspiration\nInterested in becoming an entrepreneur, showing initiative and ambition.\n	\nHema shows strong conceptual clarity in electronics and energy-related projects with good problem-solving ability in circuits. She is hardworking and technically inclined, with interest in innovation areas like IoT. With improvement in coding skills, confidence under pressure, and structured communication, she has good potential to grow in technical roles.	8.00	2026-03-08	2026-03-08 06:07:09.863
+147	48b1ad11-aadf-4b62-a9df-8ac7a81a438c	d631f416-b5af-4ca2-956f-da772aff5f6f	9	8	9	9	9	9	10	Excellent programming skill, with very good logical and analytical skill.	Can learn DSA and start practicing the Leet code questions and still improve on coding skills and become highly competitive	Over All, Excellent Technical Skills, communication and confidence levels are high.	9.00	2026-03-08	2026-03-08 06:07:20.29
+148	9bb476c4-a066-4f92-89af-343f8a18f133	4df9bf27-579a-4661-a2ea-703387a2bdaf	5	9	7	3	10	6	8	She is really good in communication. 	she needs to improve with her technical skills and sincve she also told that she will be intrested in mareketting she can also try for digital marketting roles.	she can be a good fit for marketting as well as sales kind of jobs but not for technical jobs like development.	4.50	2026-03-08	2026-03-08 06:08:02.418
+149	8459b99f-a6d2-4738-a0f8-db738281fe36	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5	6	5	5	5	6	5	Presented himself good	He has a average communication which he has to work on, CV could have been presented well and needs to be stable during the interviews. He has to work on his body language while speaking during the interview. 	He has a good scope to get into good companies if all the above points are improved. Attending few self mock rounds will help him understand that. 	5.50	2026-03-08	2026-03-08 06:08:06.827
+151	ca28ffb7-6bbc-4c94-8054-3e3d76127750	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	6	8	8	7	9	9	9	Impressive resume, very clear communication on things she is familiar with. Ambitious, with a clear goal. Able to multitask well. 	Did not switch on the camera , might throw some people off.\nHas AI powered projects, but needs to be able to confidently explain how it is 'AI powered' \nNeeds to think about alternate solutions & think about when her ideas will fail. 	Brilliant candidate, strong potential. Needs to work on confidence in the unknown & she is good to go. 	8.60	2026-03-08	2026-03-08 06:08:53.876
+152	c6efedd9-06b7-41b0-bbde-2d677d99ea6b	0d77a15a-eaec-418e-93ba-7317ea498599	10	8	8	9	8	8	8	1. Clarity of thought\n2. Succinct and brief answer for complex/technical questions\n3. Academic rigor along with co-scholastics	Sense of purpose/direction - needs to be clear on pursuing higher education Vs. employment	Srinidhi was calm and composed but energetic. Enjoyed interacting with her. She came very thoroughly prepared and asked lot of questions. Wish her all the best!	8.00	2026-03-08	2026-03-08 06:08:54.441
+153	9131ada4-b023-4dd4-92ed-903160c44a20	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	9	9	9	9	7	9	8	He appears to be studious, obedient, and demonstrates good listening skills.	He expresses his ideas clearly. However, his grammatical knowledge needs to be strengthened. 	He is a good candidate with only a few areas to improve and seems adaptable to different situations.	8.50	2026-03-08	2026-03-08 06:08:59.886
+154	d4422035-cfac-4864-8aae-18462ccf4db1	104e34a6-fd53-4012-a0f0-41df6842c833	2	1	3	1	1	2	4	Understands there are trends and tries to follow them.	Needs to pick up technical skills. Unable to explain about the work done. Must ask if they don't understand and then answer the question.	Need to pick up technical skills, communication and be able to share it.	1.00	2026-03-08	2026-03-08 06:09:08.556
+156	5b224001-de80-4367-853f-ef52854c195c	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	9	8	6	6	8	8	6	Good in SQL, Python. Able to understand the problem statement and provide solution.\na good listner. good in verbal communication.	Be more confident and present well, practice on story telling (explain the project well - why - what & how)\nBresh-up concepts : Probability & Statistics \nGet exposure to one of the web technology : Azure/AWS/GCP.	Over all, Rakshana performed fairly well. Can improve on presentation skills and learn & present concepts indepth.\n	7.00	2026-03-08	2026-03-08 06:11:13.461
+157	c706bd83-0ff7-4a76-84c6-47fb06f969b0	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	8	7	8	9	7	8	7	Good technical knowledge. The candidate has clear clarity on what they want to pursue and shows ambition.	The candidate should prepare more on software-related technical concepts, strengthen fundamental concepts, and practice Data Structures and Algorithms (DSA). They should also work on being more confident while answering questions.	Technically sound with a good attitude.	8.00	2026-03-08	2026-03-08 06:11:15.605
+158	dc9fbe75-ada6-402e-a511-309b9138417e	2920b45c-0ce6-4dec-8766-3892322ff1b0	7	6	6	6	7	7	7	He demonstrates strong willingness to learn new skills and shows clear ambition regarding his career goals. He is highly motivated and driven by a strong sense of purpose to achieve what he aspires to.	Greater clarity on the target job market and further improvement in communication skills would help him present his profile with more confidence.	He demonstrates strong willingness to learn and clear ambition toward his career goals, driven by a high level of motivation and inspiration. To further enhance his profile, gaining greater clarity on the target job market and improving communication skills would help him present himself with increased confidence.	6.50	2026-03-08	2026-03-08 06:11:25.688
+159	2f758b98-8e1c-4cca-a7bd-44e24eeab4ee	eee239d8-0363-488a-80c3-0c415c7b2217	10	10	9	10	10	10	10	Confidence 	Time Management and dependency	Good	9.00	2026-03-08	2026-03-08 06:11:26.184
+160	5823a7ba-d544-4c36-a97f-6e75ba5eea57	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	9	9	9	9	9	8	8	Strong in basics, has a sound technical knowledge	Seems to be good in all aspects	Capable candidate	9.00	2026-03-08	2026-03-08 06:11:48.201
+161	ea739780-6712-4a90-b489-8221729f109a	2a227454-03a0-441c-9b10-480f36a9d715	7	7	6	8	6	6	7	Technically the most hands-on candidate — the SH 2026 hackathon project was genuinely impressive. Working with NetCDF scientific data, building an ETL pipeline, choosing PostgreSQL specifically for spatial queries, creating a Streamlit 3D frontend, and adding a natural language to SQL chatbot shows real engineering thinking, not just coursework.\nHas real industry exposure through internships at two companies (Infinite Computer Solutions and Ashok Leyland), which gives him practical context that many students lack.\nShowed a healthy and honest perspective on AI usage in programming — acknowledged using AI tools but emphasized writing logic independently and debugging on his own. That balance is exactly what employers want to hear.\n\n	Self-introduction needs restructuring. Currently it reads like a checklist (school → coding → hackathons → internships → strengths → goals → hobbies). Practice a 60-second version that leads with your strongest differentiator — your hackathon projects and internship experience — and cut the generic "strength and weakness" template.\nWhen explaining projects, set up the context before diving into technical details. Start with: "The problem was that ocean research data was in a format only scientists could read — we made it accessible to everyone through a simple visual interface and chatbot." That one sentence makes the interviewer care about the rest of the explanation.\nLong-term career vision needs more specificity. Instead of "senior position, tech lead, managing teams," try tying it back to your interests — for example, "I want to lead teams building data platforms that make complex information accessible," which connects directly to work you've already done.	Shagul builds real things, picks technologies for the right reasons, and has genuine leadership and internship experience — that's a strong foundation. The main gap is packaging. His technical work is impressive but his delivery doesn't do it justice yet. With focused practice on structuring answers concisely and leading with the impact of his projects rather than just the technical steps, Shagul can present himself very competitively in placement interviews.	7.00	2026-03-08	2026-03-08 06:11:55.314
+163	89fb7844-ef4d-4d7c-b5d3-8d99eac3ce71	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	8	8	7	8	8	7	The student is confident and sure of what she wants to do in future (getting into Cloud Computing). Student is already working on a project and will add it up to her resume. has good communication skills.	Needs to take mock more seriously as needs to be dressed up professionally.	She is a also a very confident and a good candidate. 	7.40	2026-03-08	2026-03-08 06:13:02.924
+178	eaedba7e-7c02-4b0a-b05a-21dac78c3dbe	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	7	6	6	6	7	7	6	* Jayaguru has good communication skills. \n* He 	* He is from ECE and have little knowledge on IT concepts.\n* He needs to improve his confidence 	Jayaguru might have good knowledge on ECE. But needs improvement in IT concepts if he is seeking a job in IT industry.	6.00	2026-03-08	2026-03-08 06:19:01.708
+180	3b3398cb-c423-42de-bcb7-dab17eb40bbf	dc83d654-7865-4342-9437-16bfcb075e6a	8	7	8	8	7	6	7	he is technically strong and came in proper attire 	Should check his network , Modify his resume and Explain projects in structure manner  	good attitude , technically strong 	7.50	2026-03-08	2026-03-08 06:19:29.207
+182	380856e2-e85b-45d5-9ee3-67a005e6436f	5f1975ba-b40d-4a05-b28d-5195c0db7348	9	8	9	10	9	10	9	Sakthi is an energetic candidate who is keenly focused on getting into Core Chemical industries and apply his knowledge on Process Engineering. 	Sakthi needs to be open to avenues/ applications that might demand him to learn non-Chem Engg aspects like Mechanical/ Civil. This will take him further ahead in the Chemical Industry. 	Sakthi is a potential candidate for Chemical Manufacturing industries and will be an asset to the team that he joins with an open mindset. 	9.50	2026-03-08	2026-03-08 06:19:49.816
+185	8c924911-9a4f-4b17-8574-a10b3e3c358a	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	7	7	7	7	7	6	7	Has basic knowledge in the projects	Need to be more clear in his communication	Needs lot of improvements in the basics 	7.00	2026-03-08	2026-03-08 06:20:34.479
+200	72dc8022-2093-4088-8522-71bfcab6b6c5	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	7	6	7	5	6	7	7	Good confidence in her skills, has participated in symmposiums & won the same. Has good personal sense of self worth. 	Knowledge on new technologies in the market is lacking, needs to stay up to date. \nSeems like most of her projects, extra currciulars happened only till last year, don't see much current scope, need to work on that. \nSeems hesitant to look into advancements in AI - needs to work on this. 	Decent candidate, needs to work on communication & recent technologies in the market.  	7.00	2026-03-08	2026-03-08 06:30:19.285
+164	6fac89a8-6b12-4ad4-a843-25787a65191c	2a227454-03a0-441c-9b10-480f36a9d715	6	5	5	5	5	5	5	Honest and genuine throughout the interview. When he didn't know something, he said so directly without trying to bluff — that kind of honesty is a strong character trait that employers value, especially in junior developers where willingness to learn matters more than pretending to know everything.\nShowed a positive and grateful attitude — his closing comment about appreciating the calm interview environment was sincere and showed emotional awareness. He also acknowledged this was his first interview, which takes courage to admit.\nHas foundational knowledge of Python and SQL and is familiar with AI tools like ChatGPT, Gemini, and Perplexity for learning and data analysis. Using AI tools actively for self-learning shows he's resourceful and open to modern approaches.	Start building projects immediately. Even small ones count — a data visualization dashboard using a public dataset, a simple sentiment analysis tool, or a CSV data cleaner using pandas. Having even one project to talk about transforms interview conversations and gives you real stories to share.\nStrengthen core AI & Data Science fundamentals. As someone studying this field, being able to clearly explain concepts like how machine learning models are trained (supervised learning, neural networks, backpropagation) will be expected in interviews. Consider going through one structured course like Andrew Ng's Machine Learning on Coursera — it will build a strong foundation quickly.\nPractice giving longer, more structured answers. Right now responses tend to be very brief, which can make it hard for the interviewer to assess your thinking. For every question, try the format: make your main point, give one example or reason, then wrap up. This small structure makes a big difference.	Sanjay is still early in his preparation journey, and that's completely okay — he's in third year with time to grow before placement season. His honesty, respectful demeanor, and willingness to learn are genuine strengths that form a solid foundation. The key focus for the next few months should be building 1-2 hands-on projects, strengthening core technical concepts in his own branch, and practicing structured answers to common interview questions. Participating in a hackathon — even a small college-level one — would help build confidence, teamwork experience, and project stories all at once. With dedicated effort over the next 6 months, there's a lot of room for improvement.\n	6.00	2026-03-08	2026-03-08 06:13:09.484
+22	34dba1d8-2998-4a89-9495-24140cbdacaf	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	10	7	7	6	8	8	7	Attitude towards learning and a good listner.\n	Learn Python, NLP,  practice SQL\nUnderstand various ML concepts and models\nGet exposure to one of the web technology : Azure/AWS/GCP.	Overall Varsha did well, have theritical understanding. Can improve coding skills in SQL and learn Python.\nShe is confident and putting effort to solve problems.\nget exposure to current trends / technologies like NLP / RAG etc.\n	7.00	2026-03-08	2026-03-08 04:52:56.709
+166	aec7a705-57cc-4d41-b5ca-4ecf8c3ceaca	cf6780cd-f597-4792-96f8-5e11206fae5e	10	9	9	9	9	10	10	She's good at solving the problems 	No need of anxiety when you don't know the complete answer	She's a really good candidate with good technical skills 	9.00	2026-03-08	2026-03-08 06:13:18.244
+167	e11e1f9f-81b6-4410-bb12-48fc58cefd1b	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	5	2	5	1	3	3	4	not much	lacks basic technical knowledge, should do enough homework of organization, should not give up easily	need to do complete turn around	2.50	2026-03-08	2026-03-08 06:13:22.852
+168	44d45376-b401-444f-9a4b-2553cc2ad3b3	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	4	5	3	6	3	3	4	Nothing in particular	Not working towards any clear objective. 	Needs to set his priorities and a clear gol to work up to.	4.00	2026-03-08	2026-03-08 06:13:30.996
+169	62de75f6-d302-443f-a7d7-2fbdb6afd7db	8ef5450c-442e-440e-b14f-9b98542fd9bf	8	7	7	8	9	9	8	Ambitious person	Deep knowledge required in the latest trends.	Ambitious and career orientation is good	8.00	2026-03-08	2026-03-08 06:14:03.076
+170	31ed9ade-f540-4519-aa84-0b552bee05a3	2a227454-03a0-441c-9b10-480f36a9d715	7	6	6	8	6	7	7	Technically the most current candidate in the batch. He's actively building a RAG chatbot that handles multiple file formats (PDF, CSV, zip) using Python, Flask, FAISS for vector storage, and Gemini API for generation. Knowing and working with these modern AI technologies as a third-year student is a genuine differentiator.\nShowed a solid conceptual understanding of how LLMs and ChatGPT work — explained the flow from prompt to vectorization to similarity search to chunk retrieval to answer generation. The explanation wasn't perfect, but the mental model is directionally strong and shows real self-learning beyond the syllabus.\nAsked a smart closing question about which trends to focus on for full-stack development, showing he's proactively planning his skill development rather than waiting to be told what to learn.	Finish and deploy the RAG chatbot before placement season. A live working demo that interviewers can actually try is 10x more powerful than saying "I'm currently working on it." Consider hosting it on Streamlit Cloud or Hugging Face Spaces so you can share a link during interviews.\nPractice explaining technical concepts more concisely. The ChatGPT explanation had the right ideas but jumped around a bit. Try this clean version: "User sends a prompt → it gets vectorized → similarity search finds relevant chunks → those chunks go to the LLM → LLM generates the answer." Practice delivering it in under 30 seconds until it feels natural.\nBuild general awareness with better retention. You clearly read tech news (the Dubai data center story was a good example), but being able to recall specific names, companies, and details makes a much stronger impression. Try keeping a simple weekly notes file — 3 bullet points on what you read — so you always have crisp examples ready for interviews.	Sudharsan is building with the exact AI stack that companies are actively hiring for right now — RAG pipelines, vector databases, LLM APIs, and full-stack development. That's a real competitive advantage over most freshers. The foundation is strong and the self-learning drive is clearly there. The main areas to focus on are polishing how he communicates his technical knowledge (making explanations crisp and structured) and completing the RAG project into a deployable demo. With those two improvements, Sudharsan will present himself very well in placement interviews.	7.00	2026-03-08	2026-03-08 06:14:51.31
+171	4572a87c-c994-44a9-aa44-8ef2685124a0	aaec9758-627f-40bb-b8b2-e92110d36327	7	4	5	4	4	4	3	Shows interest in learning backend and cloud technologies but lacks depth in core concepts.	Needs significant improvement in fundamental programming, backend concepts, and problem-solving abilities.	Candidate currently lacks the required technical understanding and practical exposure expected for the role.	4.00	2026-03-08	2026-03-08 06:15:05.919
+172	728aa099-3b5f-406f-aee9-c9429fef7e6a	217ae2de-4843-400b-964c-30302c10965e	8	7	6	6	7	9	8	Have confidence. good in communication. want to become Data Engineer. \n	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project.	Jeyasurya shows good confidence and communication skills with a clear interest in becoming a Data Engineer. He has a positive attitude and ambition to grow in the AI and data domain. Strengthening OOPs fundamentals and core programming concepts will help improve his technical capability for future projects.	7.00	2026-03-08	2026-03-08 06:16:42.151
+173	805410d8-c733-49b3-ac5b-a284ab0050cb	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7	4	5	8	8	8	8	Good subject knowledge, and ambitious, sound in technical	communication is good but can be better and improve general awareness	overall Haarini appears to be really good in her technical skills, with some changes mentioned above she will flourish.	7.00	2026-03-08	2026-03-08 06:17:16.833
+174	c3dd69c0-218a-41b7-9653-811aeeea470d	38236c5f-2faa-4940-aa37-60a206f3be14	7	5	3	5	6	7	7	Good communication 	technical improvement needs to be done	can be better resume so many flaws in the resume 	5.00	2026-03-08	2026-03-08 06:18:00.039
+175	5acbd521-d3c7-4ca5-85eb-1d3623d9e3a1	964b9c92-19e6-4140-8be6-a64973f93bfa	8	8	8	7	8	6	7	Manoj’s self-introduction and overall interaction during the discussion were good. He communicated his thoughts clearly and demonstrated good communication skills. He actively participated in the discussion and maintained a positive and engaging interaction throughout the session.	Manoj demonstrated good communication skills and interacted well during the discussion. However, he would benefit from gaining more clarity about his future career goals, as this will help him focus and nurture his learning during his academic journey. Also he needs to have more learning interest while doing his Internship and Projects.	Overall, Manoj demonstrated good communication skills and interacted confidently during the discussion. However, he would benefit from gaining greater clarity about his future career goals, which will help him focus better during his academic journey. While he has the ability to communicate well, he should work on explaining his internship and project work in a more structured and detailed manner. Developing a deeper understanding of his project scope and spending more time working on it will help him strengthen his knowledge and present his work more effectively.	7.30	2026-03-08	2026-03-08 06:18:01.771
+176	a3f7387d-fd40-42ac-9cd1-670a21ea547c	990d6c56-fa9b-4848-8696-21e832fbcfd3	8	6	7	8	6	8	8	Good articulation with respect to the project work. Can connect well to various applications	Need to focus on structuring the topics, little more clarity on introduction is needed	Good but need to improve on the overall delivery	7.00	2026-03-08	2026-03-08 06:18:05.205
+177	3bb6e4bd-7b9d-4613-a3fc-84f888f9cd42	db338578-8876-4dec-a6d5-2d0094828b16	8	7	7	7	8	7	7	Good communication 	Needs to focus on Javascript Frameworks and AI Tools 	Above average	7.50	2026-03-08	2026-03-08 06:18:12.814
+181	81161e9f-b1ea-43cc-b3f3-40089e9c5f89	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	5	5	5	4	5	3	Demonstrates acceptable foundational understanding of electrical engineering concepts. Shows reasonable technical knowledge with adequate grasp of core subjects. Maintains moderate appearance and professional presentation standards. Possesses adequate motivation towards career development.	CRITICAL: Requires urgent and intensive improvement in communication skills (scored 4/10) and self-confidence (scored 3/10). Must work on verbal articulation, clarity of expression, and confidence during presentations and discussions. Needs to enhance listening skills and engage more assertively in group interactions. Should also strengthen quantitative aptitude (scored 21/40) through consistent practice. Requires significant effort in personality development and soft skills training before placement readiness.	Dinesh T scored 4.71/10 overall, indicating below-average performance across multiple dimensions. While basic technical understanding is present, critical deficiencies in communication skills (4/10) and self-confidence (3/10) significantly impact placement readiness. Aptitude score of 21/40 and GD score of 36/50 further highlight gaps. Recommendation: Candidate requires extensive soft skills training, personality development workshops, and communication coaching before considering for placement. Suggest intensive mock interviews, public speaking practice, and confidence-building programs for minimum 8-12 weeks. Current status: NOT READY for placement. Requires substantial improvement in verbal communication and interpersonal effectiveness.	4.70	2026-03-08	2026-03-08 06:19:44.827
+183	8c78cabb-901a-428d-9da8-20ad69f016d7	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	7	6	8	8	7	4	8	Fast learning, 	NA	Good ! \nNeed to prepare more !!	6.00	2026-03-08	2026-03-08 06:19:56.222
+184	89f793e4-1797-4da7-a6a0-17759d1bf313	7d959ecb-3999-47cd-ae17-5aab0405cb97	7	4	5	6	5	6	5	Candidate has good confidence and is self aware of his shortcomings. 	Candidate has to improve his communicaton skills and is not able to explain his answers in detail.	The candidate needs to work on his communication which is a major shortcoming and has affected his confidence. n	5.00	2026-03-08	2026-03-08 06:20:23.081
+186	c3a4772e-435d-4d4f-bbbc-f6a0544412db	44f338a5-56b0-4ad1-8258-79826e1445b3	8	8	7	7	8	7	8	Really a good candidate. Have interest and passion towards the role.	Need to do the project on core only.\n	Good candidate with nice attitude.	7.00	2026-03-08	2026-03-08 06:21:40.477
+187	9b4d7555-7433-422c-ac19-799a95467f1b	24421caf-3a14-4681-b9f9-f237f956d8d4	5	5	5	5	5	5	5	Showing lot of interest to learn Data Science.	Need to learn / practice to solve specific problems useful to the industry. He doesnt know about Kaggle. Need take more effort to research, learn and hands on practice.	Shows lots of enthusiasm but lacks practical exposure. With sufficient guidance and support he will do well.	5.00	2026-03-08	2026-03-08 06:22:36.395
+188	b1dd9bc2-c844-41d3-a5b5-ebfd335dca8b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	5	5	6	7	6	6	Polite and soft spoken, will be a best suit as a sincere team player	Should be able to communicate with more self confidence\nhas to gain knowledge on industry visits, able to explain projects done and the students contribution to the project	lack of self confidence	6.00	2026-03-08	2026-03-08 06:22:39.601
+189	d722a94d-417e-4b9b-bc02-67cc6059bc17	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	9	8	8	8	9	9	9	TEAMWorker, Strong support, Attitude, motivator.	Technical knowledge in various Tools	Good discipline, Good attitude, Good Communication	9.00	2026-03-08	2026-03-08 06:23:34.917
+190	da40cfe4-560c-47de-acf1-475126110b2d	44f338a5-56b0-4ad1-8258-79826e1445b3	6	4	4	6	5	5	5	Good in Oops concept. Have a clear vision	Need to improve his tech skills	communication & tech skills needs to improved. He has a clear vision but need to streamline. 	5.00	2026-03-08	2026-03-08 06:23:48.967
+191	7a866359-ddd5-4d92-a9c9-3e811aa732fb	eee239d8-0363-488a-80c3-0c415c7b2217	10	9	9	9	8	9	9	Time management 	Communication	Good	9.00	2026-03-08	2026-03-08 06:23:51.552
+192	931ec1eb-a2ca-4741-9a47-90516a0018b7	a694622b-3ba8-4c82-bd05-08d8bfd5af50	9	7	9	8	9	9	9	His programming skills are good.	His understanding of operating systems needs improvement, and he should learn the basics of operating systems. His programming skills are good.	good	8.00	2026-03-08	2026-03-08 06:24:10.443
+193	4b8698d4-a70b-46b0-9e52-b217eb0ba82c	52535048-47f2-42cb-91ec-65a4824c9908	7	7	8	7	7	8	8	SQL, powerBi, \nneed to know more  - Cloud (AWS, Azure) \n\n	Need to learn more tools and technologies related to IT and his own domain 	Good 	7.50	2026-03-08	2026-03-08 06:24:31.186
+194	bb876cd1-5922-437c-b6bc-4b1b4f9d51de	d6a31449-5393-444e-89c7-f8ba9d35545a	7	7	6	6	7	6	7	1. Communication Skills\n2. Positive Attitude	1. More Deep driving into the subjects\n2. Should have more clarity on the vision/ambition	Having the self-starter mechanism to run the business	6.50	2026-03-08	2026-03-08 06:24:49.434
+195	b88c2921-5150-4b37-9d20-e0c86e95ef05	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	9	9	6	9	10	8	Candidate has explore several methodologies and techniques. Focused approach towards problem-solving. Good communication skills. 	Need to focus on the foundations. Should be more open to try out novel and challenging techniques. 	The candidate demonstrates good self-awareness of his strengths and limitations, has a clear understanding of the scope and constraints of his projects, and shows curiosity along with a willingness to learn and adapt. \n	7.50	2026-03-08	2026-03-08 06:26:23.479
+196	4ecb2c09-1b00-49f8-b239-9d32f0f49c9e	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	6	8	9	10	10	9	Good communication. Have clear idea about future plans.	Can be to the point when answering specific questions.	Need more industrial exposure to focus on skills to be learned.	8.00	2026-03-08	2026-03-08 06:28:03.008
+197	404aab0b-dd4e-4768-9b6c-a9551c16aaf6	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	7	5	6	8	10	8	8	Good communication and confidence.	Leadership skills and relevant certifications.	The candidate has covered her basics. need to develop relevant skillsets.	9.00	2026-03-08	2026-03-08 06:28:21.92
+198	5f5ecb94-ee4d-42e9-8059-06d67aed7a93	efa89ff0-babb-47d8-9694-afcbe18d049e	9	9	9	10	9	9	9	Having good communication and technical skills . Also having knowledge advanced technologies Python cloud computing.  Keep continue, it will help him to get a better career opportunity.	Having good communication and technical skills . Also having knowledge advanced technologies Python cloud computing.  Keep continue the same.	Having good communication and technical skills as well . Also having idea in advanced technologies Python cloud computing.  Keep continue and update .	9.00	2026-03-08	2026-03-08 06:28:36.527
+199	17c6e987-b4a0-4726-bb15-c85550251455	104e34a6-fd53-4012-a0f0-41df6842c833	2	2	3	2	2	4	3	Able to share about the project. Also about the work done and the work done by team at a high level.	Needs to pick up technical skills. Should be able to communicate clearly on the technical front.	Interesting in trying to solve a problem. Should be able to pick up skills on the technical front and communication.	3.00	2026-03-08	2026-03-08 06:28:50.894
+202	5608f4ea-371d-40d2-b459-907909f2921c	50fa6865-037c-451b-8ecc-c4fd9bdb0334	5	5	6	8	7	7	6	technical knowledge	communication and confidence, managerial skills	overall the candidate was enthusiastic but little overwhelmed with the situation, clarity was missing.	7.00	2026-03-08	2026-03-08 06:30:32.079
+226	e0c83265-5a59-4cfd-99c9-dc5212bf9525	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	7	7	8	7	8	6	The student knows what he wants and is good with his technical skills.	He needs to be more confident and improvise in communication skills as he was struggling to articulate ideas he has.	Overall he is a great mechanical student but needs to find the right vocabulary to communicate their thoughts.	7.00	2026-03-08	2026-03-08 06:44:10.687
+249	89d544af-e10a-4c06-a18f-a2dc42f21c48	50fa6865-037c-451b-8ecc-c4fd9bdb0334	5	4	4	5	5	4	5	nothing really, couldn't get the clarity	communication, appearance, attitude, ambition lacking.	overall candidate needs lot of work in his area, in terms of technical knowledge. communication, amd presentation skills.	5.00	2026-03-08	2026-03-08 06:54:53.582
+203	9e86d3f7-fad5-4b4f-82ab-356f2b78f337	6b65b0e5-ad3f-4756-a04d-f15f072ab740	9	8	8	8	9	9	9	Good In communication , His confidence level is good and the way his answered the questions are clear , Strong knowledge Technical knowledge.  	He has good experience and knowledge for his current level. However, he still needs to improve his technical knowledge to become a developer. He should learn some programming concepts in more depth so that he can be better prepared for full-time opportunities.	I was impressed by his communication skills and the way he explained his internship experience. His positive attitude and confidence level are very good.	8.00	2026-03-08	2026-03-08 06:30:37.964
+204	eacc8fd0-e4d2-48e5-9f75-71fe82b5c2f9	4df9bf27-579a-4661-a2ea-703387a2bdaf	10	10	9	10	10	10	10	Everything. No negatives i can find with this guy 	NA	Pakka corporate material 	9.00	2026-03-08	2026-03-08 06:30:51.576
+205	52365878-f846-4c66-8ef2-205a7eab82f0	990d6c56-fa9b-4848-8696-21e832fbcfd3	6	6	5	5	5	5	6	Good examples related to project work	Need to improve on Communication skills, Articulation of projects, Not aware of the Lathe processes 	Need to work on the technical aspects and be confident while answering.	5.00	2026-03-08	2026-03-08 06:31:40.743
+206	0114fe5b-ec06-4567-848c-11e28fdb8824	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	7	8	8	6	8	8	Has good knowledge in the projects done by him	Should be more clear in explaining about his skills and projects	Communication should be improved in the skills part and his internship	7.00	2026-03-08	2026-03-08 06:33:15.913
+207	bdc7ac62-11ad-4140-abe7-78412063d466	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	6	5	6	4	4	5	4	Nothing	Needs to be interested towards something 	Do something,  find your passion	4.00	2026-03-08	2026-03-08 06:33:46.585
+208	68e6b815-d0ed-419d-91ca-f5f2daad27eb	8ef5450c-442e-440e-b14f-9b98542fd9bf	8	8	8	7	8	8	8	Communication calrity	External awareness, basic concepts	Has certain awareness. needs goomig.	8.00	2026-03-08	2026-03-08 06:33:57.259
+209	8a7f3595-0f78-461e-9d60-5e9b9a11d3de	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	10	10	10	10	10	10	Vibrant introduction, highly confident, strong communication skills and good in business planning and generation of ideas.	Room for improving financial planning and team building skills	Rithika has a holistic view of carrying forward an idea at a scalable level and influencing national leaders. She is a potential future leader. 	10.00	2026-03-08	2026-03-08 06:35:09.828
+210	e8275e02-6e21-459a-881e-cc70d37299c7	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	8	8	8	9	8	8	Has involved in lot of projects and she is very true during the interview	Need to select a technical project in the final semester	She has a fair bit of knowledge and can be molded as a potential candidate	8.00	2026-03-08	2026-03-08 06:35:21.063
+211	b89542cf-0da2-4900-9a1e-54bf311d5505	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	8	7	7	7	9	8	9	* Angeline has good knowledge on AI concepts.\n* She is confident and have good communication skills	* She is form AI and data science and so she needs to get trained on basic programming concepts\n* Need to improve problem solving skills	Angeline has good communication and she is confident. She needs to focus more on programming concepts if looking for opportunity in IT industry	7.00	2026-03-08	2026-03-08 06:36:32.229
+212	4a45f5b3-531b-4d4d-8f8c-22dafad93229	db338578-8876-4dec-a6d5-2d0094828b16	7	7	8	8	8	7	7	Looks Confident and communication	If she focus on some tech stack, it will be good 	Above average	7.00	2026-03-08	2026-03-08 06:36:44.372
+213	03dca943-4e3d-4ae4-9958-ce5b56d854d1	cf6780cd-f597-4792-96f8-5e11206fae5e	10	9	10	10	10	10	10	strong in technical part, communication and problem solving	she's already doing great	She's a really talented candidate and got a good future	10.00	2026-03-08	2026-03-08 06:37:04.182
+214	42d92e7a-a1dc-4c04-8fe2-0fd94bdb1443	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	10	9	10	10	10	He is employable	I do no find any, just improve his resume.	Good Candidate	10.00	2026-03-08	2026-03-08 06:37:20.228
+216	4d7f9320-8a13-4f93-92e6-794cdabfd1ce	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	5	8	9	10	8	9	8	very good in technical and communication skills	can be more positive and confident	just work on the feedback given. has high potential	9.00	2026-03-08	2026-03-08 06:37:42.922
+217	f1ff5238-fdb2-4659-8cce-2db550bb3db8	44f338a5-56b0-4ad1-8258-79826e1445b3	7	1	5	5	4	4	4	Candidate is a groomable material, he has done good project. Needs support.	He needs to code not to take codes AI platforms.	Good to proceed. Manual coding will make him reach heights rather than taking it from library. 	5.00	2026-03-08	2026-03-08 06:38:06.912
+218	574a486c-cc53-4f41-9f4f-ab13dd5fdac3	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	8	8	8	8	7	9	8	He demonstrates good questioning skills, which support his learning and understanding.	His grammatical accuracy in communication needs improvement. He is more technically inclined and should work on improving his social interaction skills.	He is a good candidate who can be nurtured and shows potential for long-term growth within the company.	8.00	2026-03-08	2026-03-08 06:38:31.621
+219	61aa0167-efdf-4ee9-b35a-fff5560a5313	38236c5f-2faa-4940-aa37-60a206f3be14	7	7	6	6	7	5	5	Communication 	Need to develop technical strong 	can be polished in a better way 	6.00	2026-03-08	2026-03-08 06:39:14.47
+220	5eb93ad0-aca0-4f2e-bb8c-e578ae152f01	24421caf-3a14-4681-b9f9-f237f956d8d4	6	6	6	4	6	8	6	He has explored multiple technologies and finally chosen to specialize in Cloud. Also he has planned to do Master in Cloud in an university in Australia.	Identify an area of interest and do more deeper research and learning.	Yet to make deeper learning in any technical area. But his ambition levels are high. Aspiring to specialize in Cloud technology.	6.00	2026-03-08	2026-03-08 06:40:07.735
+221	64ac3963-be12-4b37-8760-66d94a6576d1	50fa6865-037c-451b-8ecc-c4fd9bdb0334	5	5	5	7	6	8	8	confidence	communication and presentation skills	overall the candidate did well, need little training in communication.	7.00	2026-03-08	2026-03-08 06:41:04.865
+222	2417e2e3-5f09-4195-87ec-24557ba3cde3	0d77a15a-eaec-418e-93ba-7317ea498599	8	8	10	8	7	8	7	Rushika came across as pleasant and amiable. She has good awareness about different industries and opportunities available for fresh grads. She asked curious questions and was open to feedback and learning.	 She can be louder and speak with more energy which reflects higher confidence in conversation settings. 	Strong internships which relate to specific industry sectors.	8.00	2026-03-08	2026-03-08 06:41:40.684
+223	92fff2a5-b37f-4501-a8f4-be87c3e0ceb7	217ae2de-4843-400b-964c-30302c10965e	8	9	9	8	9	9	8	Good in communication, confidence, ambition to become ml engineer then want to become in stock market  after 40's. clear in vision.  	Knows oops, but still need to study deeper in OOPS ( Object oriented programming langauage) Foundation for any IT project. 	Sreeman demonstrates strong communication skills, confidence, and clear ambition toward becoming an ML engineer. He shows good exposure to programming and real-world projects with a positive learning mindset. With deeper understanding of OOPs and core programming concepts, he can further strengthen his technical foundation for future IT projects.	9.00	2026-03-08	2026-03-08 06:42:28.422
+224	aa6d3136-87d4-49bb-901a-0f758fda5bfa	d6a31449-5393-444e-89c7-f8ba9d35545a	8	7	7	8	9	8	8	1. Good Technical Knowledge\n2. Good Communication\n3. Self starter	1. Should aware more about latest technology updates	Good in communication. Very clear in thought and go getter.	8.20	2026-03-08	2026-03-08 06:42:35.186
+225	546eb85c-485b-4b8c-a4aa-71351fe8ecc8	a0df520f-d839-4acf-b594-7cad857eeaa7	10	10	10	10	10	10	10	Excellent Technical knowledge and mainly the clarity of the projects is great. 	Technical Part many more to explore and learn related to cloud and Backend applications.	Excellent , Impressed. 	10.00	2026-03-08	2026-03-08 06:43:09.724
+598	679c898d-9455-46d6-8893-6bdfc5dfc618	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	8	9	8	8	good projects	do project monthly	get a more indept tech interview done	8.00	2026-03-08	2026-03-08 10:53:11.94
+285	2f9df7aa-6b11-4dc7-af3e-52ed6809a759	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	8	8	8	6	8	8	8	Clear in what he wants to do	Communication and real world concepts 	Good	6.00	2026-03-08	2026-03-08 07:11:57.563
+600	a22b33fa-0901-4f81-ab1c-3c8c67b437ef	539ff319-c98a-440f-9541-c0e736fe44b3	7	8	8	7	8	8	7	has many projects	do a project every month	do a indept tech interview	7.00	2026-03-08	2026-03-08 10:53:56.827
+227	4c8ee3ec-6087-4e18-a3e7-b20bbb68cdb9	fcce01c3-007c-4299-a17f-9d5f4402c6ec	8	7	5	7	6	9	7	Communication is good, He presented himself well. His CV was well presented and was confidence. 	He can learn AI related things for him to get into IT sectors. He needs to work on his English grammatical errors. Can also work on Company knowledge he is tending to focus on.	Improving on his aptitude test can also help in improving his technical knowledge which will help him crack technical rounds	6.50	2026-03-08	2026-03-08 06:44:26.496
+228	b3ad4528-a604-472f-a231-76d65f043297	bf71f55b-86ba-46b8-afa1-1aea09f829e1	7	4	4	5	3	4	4	Good observer 	Communication\n1. Need to improve on Articulation and listening \n2.Subject area : General knowledge on the subject 	Average performance . May be he has fear in facing interviews 	4.00	2026-03-08	2026-03-08 06:44:27.547
+229	6093556d-ab37-4888-860a-39581a91817b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	8	8	7	7	9	9	will be a hard and dedicated worker\nalways willing to deep dive and learn new technology\nhas visioned future plans	English speaking fluency, should be able to converse much more fluently	Will shine in his Mechanical field after couple of years since student is passioned by his career and field of study	8.00	2026-03-08	2026-03-08 06:44:35.43
+231	edfee3c4-06d4-4ecc-bb4f-567642da43a9	2920b45c-0ce6-4dec-8766-3892322ff1b0	9	8	8	8	9	9	9	She demonstrates a strong understanding of her work and consistently delivers high‑quality outcomes across her projects. She has clear and structured thinking, presents herself confidently, and communicates effectively. She also maintains a positive outlook and attitude in everything she undertakes.	For her career progression, she would benefit from strengthening her fundamentals in C, C++, data structures, algorithms, and operating system concepts. Additionally, refining her presentation style would help her convey topics more effectively and deliver a more cohesive overall narrative.	She demonstrates a strong understanding of her work and consistently delivers high‑quality results across her projects. She has clear and structured thinking, communicates effectively, and presents herself confidently with a positive and professional attitude. To further strengthen her career prospects, focusing on core technical fundamentals such as C, C++, data structures, algorithms, and operating system concepts, along with fine‑tuning her presentation style to better convey end‑to‑end topics, would enhance her overall impact.	9.00	2026-03-08	2026-03-08 06:45:37.963
+232	aaaa1c88-0aa7-434c-990e-a366d21a9d10	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	9	7	4	6	9	9	8	Good communincation, actively seeks feedback, Great attitude.	Need to focus on industry trends.	Good with basics and communication, needs to catch up on the needs of the industry.	8.50	2026-03-08	2026-03-08 06:46:15.287
+233	522f00f6-aeb3-483f-91ac-b6647fc8dd8f	8ef5450c-442e-440e-b14f-9b98542fd9bf	7	7	7	7	6	7	7	Speaks the truth	Focus on academics fully	Complete the course successfully, Focus on one subject and develop	7.00	2026-03-08	2026-03-08 06:47:19.967
+234	690af39c-84f1-41fa-bbe4-33dd46f3b055	52535048-47f2-42cb-91ec-65a4824c9908	7	7	7	7	7	8	8	Git's \nNot on technology based but theoretical in projects due to ECE \nPython, CSS, HTML, frontend\n AI - helps to reduce the manpower \nISRO - e scientist exam 	Can be more confident and fluent in presenting himself 	Good	7.50	2026-03-08	2026-03-08 06:47:27.205
+235	374d310c-614b-4a24-ba96-9a802b39f08b	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	7	7	7	8	8	8	Good in communication, clear about his future goals	Not done any projects	Planning to pursue higher studies 	7.00	2026-03-08	2026-03-08 06:48:31.577
+236	f8ba3ae1-753b-4648-99d3-7d645ee5069f	eee239d8-0363-488a-80c3-0c415c7b2217	10	9	9	9	10	8	8	Keep herself occupied and work hard for commitments.	Confidence 	Good	9.00	2026-03-08	2026-03-08 06:48:31.811
+237	baf4752f-7cc5-4399-9e3d-284d794abb4c	6a9107b1-6b87-42c5-8994-967a28c2b0d1	8	8	9	8	9	9	8	Jai has good knowledge of his projects and whatever is mentioned in his resume and has good communication skills and general awareness	Apart from resume-based knowledge, he is also sound in core but can improve a bit and amend his resume as per mentioned on the meeting	Jai is a really good candidate and sound in all the aspects; with a few amendments, he will go places	9.00	2026-03-08	2026-03-08 06:48:37.268
+238	b5578fe4-9b9c-4a97-a4d1-da1da30038e1	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	5	6	7	8	7	8	Communication is good and has good technical knowledge. Is proactive and is willing to learn	Does not have good managerial aptitude and does not have a plan on how to improve on it. 	Candidate is very knowledgeable and has good communication skills. Should improve general awareness and is oblivious about the major happenings in the world.\n	7.00	2026-03-08	2026-03-08 06:49:32.659
+150	468a32d7-b06b-4c7a-a7c5-6b28b3bbd21f	52535048-47f2-42cb-91ec-65a4824c9908	8	7	7	7	7	7	8	Good in comms, skills, \nTools - \nTL in project - frontend, PDF \nChess, karnatic music, newspapers \nCollaborating with anyone, quickly learn from my mistakes \nweakness - perfection Vs time - time management 	need to improve more on the structure of articulating things. 	Good	7.50	2026-03-08	2026-03-08 06:08:19.56
+240	10f00b58-28ea-491b-bc12-2cf5a3365514	81f895c5-36b8-4d09-8241-80e64868fe56	7	8	8	8	6	7	8	Good Learner, Good Attituded 	More in Communication and Technical	Good	7.50	2026-03-08	2026-03-08 06:50:31.517
+241	b2889d4c-2f58-4c09-a37a-9eb6ff98bb81	db338578-8876-4dec-a6d5-2d0094828b16	7	7	6	7	7	7	7	Wants to explore more	looks little nervous and need to speak with confident. 	Above average	6.50	2026-03-08	2026-03-08 06:51:24.125
+242	d023aeed-015e-4df6-a9b2-e56ffdaed415	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	8	6	4	5	7	8	7	Has ambition and curiosity, though greater effort is required in mastering core basics.	Requires stronger grounding in the basics of core engineering subjects.	Needs improvement in practical knowledge, technological evolution, and awareness of emerging trends.	5.00	2026-03-08	2026-03-08 06:51:37.151
+243	ba84fd9d-d2a7-47f0-af0a-6ee538d891bf	990d6c56-fa9b-4848-8696-21e832fbcfd3	9	8	5	6	6	6	6	Good Introduction 	Need to know more about the company's business, & what type of industry it belongs to. Need to add one or the projects as part of the resume	More confidence needed , good knowledge but need to improve on delivery	6.50	2026-03-08	2026-03-08 06:52:16.873
+244	25b290c5-7b15-4eaa-98f3-54646b29ea64	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	7	7	6	5	6	6	7	She has good leadership skills but don't know how to make that has a point in an interview. 	Her answers are not very clear, and her nervousness affects her responses; staying calm would help her communicate better.	She needs to improve her communication skills and the way she responds to questions, as she often stops midway while answering. 	7.00	2026-03-08	2026-03-08 06:52:49.657
+245	f4a8afda-b740-4297-be95-2ff01b02a2ea	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	8	5	4	2	3	3	5	Gowtham has a good attitude towards work, tried to present well. 	Need to improve presentation skills & English\nNeed to improve Technical skills. Get good understandng on the projects involved.\nIf IT is the target, then learn SQL, Python, \nGet exposure to one of the web technology : Azure/AWS/GCP.\n	Gowtham tried to present well. he need to improve in comunicatin skills and technical skills.	3.00	2026-03-08	2026-03-08 06:52:53.033
+246	411ff2c0-85b0-4dbd-972a-988fa9353e03	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	8	7	5	5	5	7	7	Displays interest and motivation but must build a stronger foundation in core subjects	Should focus on grasping the essentials of core engineering disciplines.	Lack of Knowledge in Upcoming tech .. Needs improvement in practical knowledge, technological evolution, and awareness of emerging trends.	5.00	2026-03-08	2026-03-08 06:53:36.224
+247	3c6f2501-7404-40be-b2d2-15696486aaaa	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	9	8	8	9	9	8	Good in communication	Should improve more on learning new skills and adapting to it	Good	8.50	2026-03-08	2026-03-08 06:53:49.795
+248	4bd872f3-f2f7-45d9-87a3-883483694a70	44f338a5-56b0-4ad1-8258-79826e1445b3	8	8	8	5	8	7	7	talks really good	Technically needs to be improved	Good communication skills. Not good at technical. Needs to be improved.	4.00	2026-03-08	2026-03-08 06:54:25.111
+250	017979e2-4e7e-46c7-8c27-e1831083e0c0	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	10	8	6	8	10	10	10	Confident. Has clear vision of where to land after academics. Has a backup plan as well. Able to present herself very effectively.	Should work on getting real world update about the field she wants to pursue her career	Good candidate. Should have more industrial exposure to learn about opportunities.	9.00	2026-03-08	2026-03-08 06:55:03.851
+251	416f9261-2e84-4666-a861-184add985c54	aaec9758-627f-40bb-b8b2-e92110d36327	8	8	7	8	8	8	8	Demonstrates good understanding of core concepts and explains ideas clearly with relevant examples	Can further strengthen depth in advanced concepts and gain more hands-on project experience	Candidate performed well overall, showing solid conceptual understanding and good problem-solving ability	7.00	2026-03-08	2026-03-08 06:55:18.956
+252	9f1571c0-8b72-4fba-bfa8-c4ce64a3ebef	dc83d654-7865-4342-9437-16bfcb075e6a	7	8	8	9	7	8	8	she is good in her communication skills and technical skills   	she should check her network connectivity because I couldn't able to view her \nOften "I" should be reduced in her communication 	good 	8.30	2026-03-08	2026-03-08 06:56:11.1
+253	a140d7d3-b5c8-4955-81f9-685d51d8a8c1	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	8	8	7	6	6	8	7	Demonstrates enthusiasm and drive, yet should focus more on core fundamentals.	Encouraged to build a solid foundation in basic engineering subjects.	Shows potential and is encouraged to strengthen practical knowledge, adapt to technological evolution, and stay engaged with emerging trends.	5.50	2026-03-08	2026-03-08 06:56:19.116
+254	21f94e64-3391-466d-994c-c2f32e3a2822	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	9	8	8	9	9	8	9	Good communication skills, confidence, and ambition. The candidate was very good at explaining their project.	Although the candidate comes from a core EEE background, they should prepare more on software-related technical concepts and strengthen their fundamental concepts.	Good communication skills and confident. Demonstrates a good managerial attitude and was very eager to learn about the work we do.	8.50	2026-03-08	2026-03-08 06:56:32.658
+255	99427901-273e-4a96-a8f4-8337f1003d02	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	8	8	7	9	4	7	7	confident, good technical knowledge	need to work on english language communication as he is transitioning from tamil medium. 	very good potential. to work on language	7.50	2026-03-08	2026-03-08 06:57:50.564
+256	a9eba93b-ca4c-46d0-9909-7973a9b02955	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	8	7	7	7	8	8	8	* Yamini has good communication skills.\n* She is confident and aware of AI concepts\n	* She needs focus on programming concepts if pursuing a job in IT industry	Yamini is confident and have good communication. Need more focus on basic programming concepts. 	7.00	2026-03-08	2026-03-08 06:58:16.207
+257	ca328ed9-29c1-4a6e-b784-11b375cd2d54	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	9	5	7	6	9	6	6	Candidate is good with communication,	Needs to improve on phrasing and work more on leadership qualities.	The candidate can improve on leadership skills.	8.50	2026-03-08	2026-03-08 06:58:59.576
+258	1d8dfce9-e556-40ff-81a9-62fb99ffdd75	a694622b-3ba8-4c82-bd05-08d8bfd5af50	10	10	10	10	10	10	10	She is confident. Good communication skills	Need to learn about basic computer skills.	Very good.	10.00	2026-03-08	2026-03-08 06:59:18.33
+259	582a2700-7ed4-4c5b-adc2-00805984ba09	3bdac905-7cfa-4a31-85de-39ec2f854afd	9	9	9	9	9	9	9	She's very confident	She can improve the resume and have clear idea about the path she's choosing to pursue.	Good Confident 	9.00	2026-03-08	2026-03-08 06:59:36.924
+260	8f86c362-ed56-4a1c-bd86-a8f3548baeb0	cd263764-71e2-4ead-87a3-0c5e9aff9828	8	7	8	8	8	9	9	Demonstrates outstanding soft skills with excellent communication ability (8/10) and strong self-confidence (9/10). Shows exceptional group discussion performance with a GD score of 48/50 - among the best achieved. Possesses solid technical knowledge in mechanical engineering (8/10) with good practical understanding. Displays strong ambition and motivation (9/10) with clear career aspirations. Maintains professional appearance and positive attitude (8/10). Good general awareness with awareness of industry trends (8/10). Shows strong managerial aptitude and leadership potential (7/10).	Primary area for improvement is quantitative aptitude - scored 22/40 in assessment, indicating a need for strengthening in numerical reasoning and data interpretation. Should focus on speed and accuracy in problem-solving under timed conditions. Consider practising more quantitative sections and case studies. Overall, minimal improvement in soft skills is needed, given strong communication and interpersonal abilities.	Akash G S demonstrates a strong overall performance with 8.14/10 assessment score. An exceptional GD score of 48/50 showcases outstanding communication and collaborative abilities. Strong soft skills across all dimensions - communication (8/10), self-confidence (9/10), ambition (9/10). The only notable weakness is the aptitude score of 22/40, which can be addressed through focused practice. Recommendation: READY for placement. Highly suitable for client-facing roles and positions requiring strong communication skills. Excellent fit for organisations seeking candidates with soft skills excellence and leadership potential. Consider for junior managerial or team leadership roles in future.	8.10	2026-03-08	2026-03-08 06:59:52.905
+261	719adc50-7d3f-46b3-969c-dc9b9cbb67fa	24421caf-3a14-4681-b9f9-f237f956d8d4	6	7	5	7	5	5	5	He has taken good efforts to learn and implement ML projects, though he is not sure how it will connect to his ambitions.	His ambition is to become a business owner in the long term. But he has not chosen a focus area for the short term. He says he is good at Front end. Doing couple of ML projects but not sure what next. Articulation of project details need improvement - given feedback to him directly.	Very enthusiastic, willing to put effort and learn. With proper guidance he will be able to succeed.	6.00	2026-03-08	2026-03-08 07:00:13.967
+262	9a19beee-f9cc-471b-b95d-04d8b1c22296	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	8	8	8	8	7	8	8	Good understanding of Technical concepts	All good	Good	8.00	2026-03-08	2026-03-08 07:00:31.56
+263	d9678115-2e09-4bd2-bb1c-5c4c465b4c16	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	6	5	6	5	5	5	5	Thought process and transparent	Need to work on learning initiatives to ace up for the competition.	Overall average	6.00	2026-03-08	2026-03-08 07:01:23.536
+264	e108daab-28fb-4b18-ae50-10ca49533c8c	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	9	8	9	9	9	8	8	Has a good technical knowledge, committed and positive attitude	Has to take a project	Very committed and good team person	8.50	2026-03-08	2026-03-08 07:01:50.701
+265	5536dfff-479e-4d4c-be39-84dc465c4014	6b65b0e5-ad3f-4756-a04d-f15f072ab740	6	7	7	8	7	7	7	Good technical knowledge in AI, Cloud, Data Analysis, Java, and Python.\nExplained his internship experience well, particularly his work with AI & Cloud at Edunet Foundation (IBM SkillsBuild).	Needs to improve communication skills.\nShould present ideas more clearly and professionally.\nScreen presentation and explanation style can be more structured and polished.	The Student has a good foundation in technical knowledge and relevant internship experience, especially in AI and Cloud technologies. He explained his experience clearly and showed confidence during the discussion. However, he needs to improve his communication and presentation skills to appear more professional and better prepared for full-time opportunities.	6.00	2026-03-08	2026-03-08 07:02:05.971
+266	d4553524-4039-41d3-b339-e7cd47a556ff	104e34a6-fd53-4012-a0f0-41df6842c833	5	5	6	3	6	6	6	Able to communicate on why the field was chosen. Understand what needs to be solved when working on a project. Self aware in terms of picking up relevant skills.	Should pick up technical skills by working hands on in a project. 	Able to communicate clearly on the work done. Need to up-skill on the technical front.	5.00	2026-03-08	2026-03-08 07:02:06.139
+345	9a20421b-0f1b-4692-b5fa-8e9936aa635b	990d6c56-fa9b-4848-8696-21e832fbcfd3	8	7	6	6	7	6	7	Strong ideas, Interested in R&D space	Need to focus more on delivery, project areas , technical details	Good but not able to deliver the complete picture of the project, Resume needs drastic improvement	6.50	2026-03-08	2026-03-08 07:58:11.663
+267	df15ffb9-8141-4700-ac67-c9768d6128b6	d6400b5f-5117-4826-8aa2-20e215edfb2b	8	9	6	9	8	7	8	Has strong managerial skills and mindset. Good communication skills. 	Need to build the right mindset towards planning the development approaches. Candidate has to refine his skills in converting the requirements into deliverables. 	Candidate has good managerial perspectives. Should be more techno-functional. 	7.00	2026-03-08	2026-03-08 07:02:29.88
+268	371b7559-58a1-4cef-99a8-549134d5b2d2	54ad8399-936a-47f5-bfc8-db3194c32ea3	7	7	9	9	9	9	9	Has the ability to understand the Questions and Answer in detail. 	Wholistic or Global View or Final Outcome to learn and initiate the tasks or projects 	An excellent candidate with ambitions. 	8.00	2026-03-08	2026-03-08 07:02:50.828
+269	0aeb7b42-3ff8-4e01-b77d-55658a2eb123	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	8	7	8	8	8	8	9	He has done some research before attending the interview, which is very important for performing well in an interview.	He should maintain continuity while delivering his answers during the interview.	He performs well, but additional practice and exposure to interviews will help him improve.	8.00	2026-03-08	2026-03-08 07:03:07.718
+270	c463841b-3ae8-46bb-b80c-1a10adb24bc6	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	10	7	2	10	10	10	really good in communication and her self confidence gives a little boost to her aswell. and she is very clear about the roles that she like to join in an organization.	need to improve little bit in technical cause of the background	she is really fit for semi technical and non technical roles but not for coding related roles, like development and testing .	8.00	2026-03-08	2026-03-08 07:03:16.929
+271	61799af7-e5bb-4976-8f7c-7066f06eda9f	217ae2de-4843-400b-964c-30302c10965e	10	10	9	10	9	10	9	Confident, Good in foundation, moving from eee to computer science  domain, good in oops. 	still need to study oops deeper to work in any real time IT project 	Thamizhinban demonstrates strong confidence, communication skills, and a clear transition from EEE to the computer science domain. He has a good foundation in programming and shows strong ambition to grow in software development. With deeper practical experience and strengthening of OOP concepts, he can perform effectively in real-time IT projects.	9.50	2026-03-08	2026-03-08 07:03:34.082
+272	6ef44bbc-1f86-4358-8887-913e6370ddf3	5f1975ba-b40d-4a05-b28d-5195c0db7348	8	9	10	9	10	10	10	Good communication, clear goals for Quality dept and straight forward in approach.	Attitude could be more open conversation and improving on understanding managerial aspects. 	Srinidhi is a calm person and is capable of handling multiple tasks. She is a good candidate for Quality roles in Chemical/ Biotech industry. 	9.00	2026-03-08	2026-03-08 07:04:33.53
+273	74d96280-2a0f-41f1-8a40-c09872f47623	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	6	6	6	6	1. His attitude	1. Communication\n2. Technical Knowledge\n3. More deep driving is required	Have to be more focussed and get along	6.10	2026-03-08	2026-03-08 07:05:04.388
+274	e85ef903-86b8-4955-b873-d69a1686ba99	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	9	9	9	9	9	9	very positive and fast learner, good communication skills	Nil	Has ability to explain clearly his though process\nhas an ambition to become an entrepreneur in future	8.00	2026-03-08	2026-03-08 07:05:06.168
+275	fa007fc3-3760-4eef-8198-c7cf668ac63a	efa89ff0-babb-47d8-9694-afcbe18d049e	5	5	5	4	8	8	6	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	6.00	2026-03-08	2026-03-08 07:05:08.037
+276	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	a0df520f-d839-4acf-b594-7cad857eeaa7	5	4	5	5	5	4	4	Willing to learn the things.	Technical knowledge should definitely improve .	Want to improve a lot in Technical expertise. 	6.00	2026-03-08	2026-03-08 07:05:31.509
+277	2b48be84-3b07-4621-bd3e-7ecaa4be953d	964b9c92-19e6-4140-8be6-a64973f93bfa	9	9	9	8	9	10	9	Priyadarshini demonstrated very good communication skills, with her responses being well-structured, clear, and articulate. She displayed strong narration skills and maintained a confident and engaging interaction throughout the interview. She appeared enthusiastic and showed a strong willingness to learn and develop her skills. Additionally, she seems to have clarity about her expectations and demonstrates a positive mindset by exploring alternative approaches to overcome challenges when things do not go as planned. Overall, she performed very well during the interaction and showed promising potential.	Priyadarshini demonstrated strong communication skills and explained her experiences in a clear and well-structured manner. She appears to be progressing in the right direction and has shown good involvement in her learning journey. She has completed a couple of internships in the same organization and has also worked on several projects, which she was able to explain in detail. Her explanations reflected her active participation and good understanding of the projects. As she plans for her higher education, it would be beneficial for her to choose a path carefully so that it aligns well with her long-term career goals and supports her future growth.	Overall, Priyadarshini demonstrated strong communication skills with clear and well-structured responses throughout the interaction. She showed enthusiasm, good narration ability, and a strong willingness to learn and improve her skills. Her internship experiences in the same organization across different roles have helped her gain confidence and better clarity about her strengths as well as the areas where she needs to strengthen her technical capabilities. As she plans for her higher education, choosing a direction that aligns well with her long-term career goals will be important. With continued focus on skill development and by learning to manage situations calmly without getting overwhelmed by stress, she is progressing in the right direction and shows good potential for future growth.	9.00	2026-03-08	2026-03-08 07:05:37.944
+278	32c86b70-9817-4baf-b2d5-3c73100c7fe3	efa89ff0-babb-47d8-9694-afcbe18d049e	7	5	6	7	7	8	6	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	Since candidate is preferring core line,  recommended to prepare in that related skillset which will be helpful to get better placements and sustain.	6.00	2026-03-08	2026-03-08 07:06:33.294
+279	b6729536-3ebd-4861-86ba-d778b29de32c	54ad8399-936a-47f5-bfc8-db3194c32ea3	7	6	6	8	7	8	7	Ability to understand the questions and answer 	Must prepare thoroughly on all the contents of his CV	A potential candidate but has to prepare in depth 	6.00	2026-03-08	2026-03-08 07:06:37.043
+280	8f40c921-bf3a-474c-a155-aae7bca001da	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	8	7	6	7	7	8	7	Team building, \nFast learner,	Communication,	Good !!\nA little more guided preparation would help a lot.	7.00	2026-03-08	2026-03-08 07:07:45.319
+281	3a082634-ffab-49ca-88cf-a3f08638f042	0d77a15a-eaec-418e-93ba-7317ea498599	7	6	7	7	6	7	8	Bhaavana looked confident and spoke succinctly. She conveyed her focus on pursing higher education in a transparent manner. 	Needs clarity of thought and direction/purpose - pursuing higher education Vs. employment, before approaching placements.  \nCan work on improving her listening, comprehension and verbal communication skills. 	Bhaavana is aspiring to pursue higher education and was not sure what to take away from the mock interview session. Wish her all the best!	6.00	2026-03-08	2026-03-08 07:08:45.961
+282	b9b3c1ad-adb6-4e08-aaf2-4c949c40c569	8ef5450c-442e-440e-b14f-9b98542fd9bf	8	8	7	8	8	8	9	Confident candidate, acquired leadership skills thru events	need to gain awareness about the recent trends	Good candidate. Can focus more in his interested areas	8.50	2026-03-08	2026-03-08 07:09:20.608
+283	95bf410c-d41d-47cd-8658-a13f696f9e16	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	9	7	8	8	8	8	6	Technical knowledge	Need to be confident and try to learn, how to manage unknown question.\nTechnical skills and coding knowledge need to skill up.	Good	7.00	2026-03-08	2026-03-08 07:10:53.735
+284	aa8228ac-abb4-4714-bdaa-71f5909e35ed	5c9635b4-b0e1-40ac-947e-93714df4d582	8	8	9	8	7	7	8	good at grasping complex concepts\nStrong technically\nAccountability\nTeam work	Usage of fillers,\nToo fast in explaining, \nSlow down and communicate your thoughts with clarity, \nListen before answering,\nCoherence in responding	All good and set for a role in a product based organization. Needs composure and understanding of stakeholders	8.00	2026-03-08	2026-03-08 07:11:38.63
+286	cca176c2-f1b8-4747-8463-2de632e79cf5	6a9107b1-6b87-42c5-8994-967a28c2b0d1	6	4	4	7	5	7	7	good resume knowledge, knows stuff about what is there in her resume	can update her resume and modify it to a better format, and she has good communication skills but can phrase sentences better and improve her general awareness.	She is a very good candidate; with a few changes mentioned above, she can come out with flying colours	6.00	2026-03-08	2026-03-08 07:12:48.275
+288	c889cbbc-49cd-43e6-b792-993b0e2aa41b	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	3	3	1	1	6	6	4	Good in basic communication	Lacks basic technical knowledge. need to go in depth	should complete turn around to be industry ready	3.00	2026-03-08	2026-03-08 07:13:49.748
+287	ddb16c1a-c4d5-4cff-84ec-f9a1295d0699	6b65b0e5-ad3f-4756-a04d-f15f072ab740	9	8	8	8	8	8	8	Good communication skills.\nExplained his project clearly and demonstrated good understanding.\nShows interest in Python and willingness to learn.	Needs to improve his confidence level while communicating.\nShould develop a more bold and assertive communication style.\nNeeds to focus more on clarity and consistency while speaking.	The Student has good basic communication skills and was able to explain his project well. He also showed interest in learning Python, which is a positive sign for technical growth. However, he needs to improve his confidence and be more bold and clear in his communication to present his ideas more effectively.	7.50	2026-03-08	2026-03-08 07:12:55.863
+289	1d175cbd-6955-46e1-a02e-58efeb5f4a88	db338578-8876-4dec-a6d5-2d0094828b16	7	6	5	5	5	5	6	NA	Needs to improve the project details and concepts explanation. 	Average. 	5.50	2026-03-08	2026-03-08 07:14:29.769
+290	3d5bcc19-91c9-4c2c-98cb-832e2b362dda	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	7	9	8	7	9	8	Has more Interest, and is upskilling regularly	Should be able to explain well about the technologies used	Good knowledge, should improve the way of communicating	8.70	2026-03-08	2026-03-08 07:14:41.885
+291	bc3c7f8a-39c7-4fe1-ae89-ac7b9614cea6	81f895c5-36b8-4d09-8241-80e64868fe56	6	6	5	5	5	6	7	Good Attitude and team player	Need to improve in technical sides, 	Need to learn more, Don't read, 	6.00	2026-03-08	2026-03-08 07:14:44.905
+292	1a61a996-00b2-4caf-b268-2d3c952b64be	990d6c56-fa9b-4848-8696-21e832fbcfd3	10	10	9	10	10	8	10	Great Introduction, Good Technical Knowledge, Great Examples & Application	Nothing major, keep working on the project outcomes	Excellent Candidate, great potential with strong domain knowledge.	9.50	2026-03-08	2026-03-08 07:15:18.764
+293	335eb41c-c4a8-467b-a423-765852117267	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	9	5	6	6	8	8	10	The Candidate is really confident.\n	The candidate lacks clarity in answers.	Needs to tone down speed.	7.80	2026-03-08	2026-03-08 07:18:06.975
+294	3aa60d21-a753-4480-a5e7-ba5115d17c80	a0df520f-d839-4acf-b594-7cad857eeaa7	5	5	3	3	6	6	5	Ambitious 	Technical Knowledge should improve . 	Clarity is needed 	5.00	2026-03-08	2026-03-08 07:18:28.187
+295	4107d149-4723-458b-b1fb-456caf6b55e3	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	9	9	9	9	9	9	9	Very clear in her ideas and though process	Nil	Will definitely be a future entrepreneur	9.00	2026-03-08	2026-03-08 07:19:23.169
+296	01ae16e7-a847-4c13-bf1d-206b01ff79bc	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	8	8	9	9	8	9	9	Attitude, technical Knowledge.	communication skill	GOOD knowledge, Work with many tools	8.50	2026-03-08	2026-03-08 07:20:00.085
+297	3e542768-002e-4e28-aeeb-53d8b492aec2	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	8	8	5	5	7	7	7	Good communication skills, attitude towards learning	Can improve in AI/ML , NLP concepts.\nNeed to practice more coding SQL/Python.\nGet exposure to one of the web technology : Azure/AWS/GCP.\n	Prathiksha is able to communicate well, good attitude towards learning.\nNeed to improve technical skill, and presentating the projects technically.	6.50	2026-03-08	2026-03-08 07:20:49.519
+298	9e542a99-85e5-4ef3-8880-13e5b290f6da	dc83d654-7865-4342-9437-16bfcb075e6a	7	8	7	9	7	9	9	good  confidence 	can improve in her body language	good but need to improve behavioral aspect	7.80	2026-03-08	2026-03-08 07:21:19.643
+299	819f57ff-943c-407f-8c87-383dc70624ea	649453fd-ef30-42d1-8d2a-94c26237e814	8	5	5	7	6	7	7	Though candidate is from a non-IT department, candidate's resume and interactions show deep interest and inclination as an IT aspirant. Has good knowledge on the projects and MI concepts worked on internship and projects. \nHonest about using vibe coding for certain parts of the projects. 	Though candidate mentioned using vibe coding for frontend development, it is expected to know the basic concepts of the technology and code developed. Also, need to refresh on basics of OOPS and other technologies mentioned in the resume. \n\nWhile explaining projects, try to sequence the requirement of the projects, the users and the technology used. Can add 1 or 2 more details while explaining projects. \n\nCandidate seems to answer very briefly for most of the questions, while additional details are mentioned with little prompting or further questions. Can try to explain bit more detailed on concepts. Need to revise on probability and statistics which are important for AI and ML.	Candidate has a deep interest in AI, ML and with focus on basics on technology, can make a good mark in IT industry.	6.50	2026-03-08	2026-03-08 07:21:54.04
+300	33cb2f15-2c22-4e9d-a574-97823977b9cb	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	6	7	5	5	1. Good in Communication	1. To shape-up towards approach & goal\n2. More specific focus & clarity on thought\n3. More Deep diving in subject	Should be more focussed on career and subjects	5.70	2026-03-08	2026-03-08 07:22:22.804
+301	28f78ec8-69ec-40c9-a80a-e805c018ab24	50fa6865-037c-451b-8ecc-c4fd9bdb0334	8	7	8	8	9	8	7	speaking skills, positive and humble attitude	self confidence	overall the candidate performed well. he is well aware of the surroundings and future situations.  	8.00	2026-03-08	2026-03-08 07:24:07.734
+302	88c7a839-aa7f-4dd4-b078-3b2d959f6cd6	7d959ecb-3999-47cd-ae17-5aab0405cb97	7	6	5	8	6	6	7	Candidate has good technical knowledge and communication skills. 	Even though the technical knowledge is really good the candidate loses confidence. Need to work on that. 	The candidate is good in terms of knowledge and communication but needs to work on delivering the answer with confidence. 	8.00	2026-03-08	2026-03-08 07:24:13.113
+215	097ab68a-caea-42b9-9629-e3a8632e30b1	bf71f55b-86ba-46b8-afa1-1aea09f829e1	6	4	4	4	3	4	3	Obedient and pleasant personality 	.Communication : Both language , speaking and articulation \nSelf confidence \nNot able to judge on the expertise in the subject matter 	.Unable to judge on the skills on the subject matters as the student was not open or communicative 	4.00	2026-03-08	2026-03-08 06:37:40.973
+305	0b574786-41aa-4178-bdc0-76c4f7584e8e	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	8	8	7	7	9	9	8	Demonstrates confidence and willingness to learn, Personally  encouraged to strengthen Core Science fundamentals.	Encouraged to build a solid foundation in basic engineering subjects.	Shows strength in visual learning and online research, should focus on gaining practical understanding and real‑world exposure.	5.80	2026-03-08	2026-03-08 07:26:50.349
+306	4ea3b42f-1ac6-45b1-87e5-ef808b71df0e	cf6780cd-f597-4792-96f8-5e11206fae5e	10	9	9	8	10	10	9	he's strong in his domain and got the bigger scale of skills	Need to be more confident while speaking and keep a stable camera view to enhance your posture \nListening is the better while getting the problem requirement	He's a really good candidate with strong expertise in Cyber security \nLong way to go \nAll the best 	9.00	2026-03-08	2026-03-08 07:29:19.871
+307	a200e835-4285-4b3f-84c9-dfe5a0208061	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	8	6	7	7	7	8	6	Adapbility, Consistency.	over thinking, 	Good !!	6.50	2026-03-08	2026-03-08 07:31:00.851
+308	9e8fe944-7dee-4c01-a117-d10fc0c8bc18	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	7	4	4	8	9	7	Candidate has good communication skills and positive attitude towards learning and accepting criticisms. She is also good in thinking under pressure. 	Needs to strengthen core technical fundamentals and gain deeper hands-on experience to improve problem-solving ability and confidence in technical discussions.	The candidate currently demonstrates limited technical depth but shows a positive learning attitude, is receptive to feedback, and appears willing to put in the effort to improve. With the right guidance and consistent upskilling, she has the potential to develop further.\n	4.50	2026-03-08	2026-03-08 07:31:22.138
+309	accb1071-29d5-49f2-aa24-2a019b107e91	5f1975ba-b40d-4a05-b28d-5195c0db7348	7	9	8	9	8	10	9	Great spirit with a start-up mindset and is keen on developing his entrepreneurship skills. 	Highly ambitious and aims to lead a team after getting into a start-up. 	Be open to being a team player and team leader. Pranav has figured out clearly what he wants. 	8.00	2026-03-08	2026-03-08 07:31:26.142
+310	a522b62e-a42a-46f4-a88a-6e574a544102	39201be0-22a9-4afc-8bbf-9a7dd43637e6	8	6	6	7	7	5	7	Good technical knowledge but wants to move out of IT & undergo his management course in Netherlands. However, he is not clear yet to him vision. 	Needs to decide his immediate & future goals. 	Avg candidate, may have good growth in IT but willing to letgo for his management aspiration. 	6.00	2026-03-08	2026-03-08 07:31:54.512
+311	675d0f9c-86ed-421a-9052-c8c229dd7e48	217ae2de-4843-400b-964c-30302c10965e	9	8	8	7	7	7	8	Confidence and having ambition to become ML engineer	Need to study OOPS, AI programming language using claude code.	Sivaa demonstrates good confidence and ambition to pursue a career in Machine Learning. He shows a positive attitude and willingness to learn new technologies. However, he needs to strengthen his OOPs concepts and AI programming fundamentals to improve his technical skills for real-world projects.	7.50	2026-03-08	2026-03-08 07:32:41.866
+312	04f1394b-fe36-4409-9696-356955e9d010	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	6	7	7	8	7	8	7	Demonstrates good technical proficiency.	The candidate should prepare more on Data Structures and Algorithms (DSA), work on being more confident, and explain projects more clearly.	The candidate has explored Power BI. It would be beneficial to also explore the software/web development side in addition to the data domain.	7.50	2026-03-08	2026-03-08 07:33:16.015
+313	f39dac84-18d9-44f1-85a0-1f9228bbaf7f	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	4	7	9	3	6	9	4	good in communication	lacks confidence and technical knowledge	need to give more mock	5.00	2026-03-08	2026-03-08 07:33:16.678
+314	27309d23-1de4-40d4-a448-eafe3dcb127a	2920b45c-0ce6-4dec-8766-3892322ff1b0	6	5	5	5	6	6	6	He demonstrates strong enthusiasm and eagerness to take initiative toward his goals. His proactive approach and willingness to work toward his objectives are commendable and reflect a positive mindset.	He would benefit from gaining greater clarity on the career path he intends to pursue and aligning his efforts toward developing the appropriate skill set required for it. Improving his communication and presentation skills would further strengthen his profile. Additionally, presenting the projects he has worked on with greater technical depth and clarity would help him articulate his experience more effectively.	He demonstrates strong enthusiasm and eagerness to take initiative, which reflects a positive mindset and motivation to work toward his goals. To further strengthen his profile, he would benefit from gaining clearer direction on his intended career path and focusing on building the relevant skill set required for it. Improving communication and presentation skills, along with explaining his project work with greater technical depth and clarity, would help him present his experience more confidently and effectively.	6.00	2026-03-08	2026-03-08 07:33:45.791
+315	38010a43-7f12-4893-bbdc-f625e666cb9c	104e34a6-fd53-4012-a0f0-41df6842c833	6	4	7	6	6	6	6	Interested in the field and spends time to pick up relevant skills. Understands the need to standout. Willing to put in the effort.	To communicate clearly on the work done. On the technical front need to share the exact contribution done. To be self-aware when talking about achievements. 	Interested in the field and puts in the effort to pick up skills. To improve self-awareness and communicate clearly on the technical side in terms of work done.	6.00	2026-03-08	2026-03-08 07:34:00.432
+316	db1a988d-a721-4a0f-8f3c-1f3729802b62	cd263764-71e2-4ead-87a3-0c5e9aff9828	8	7	8	9	7	8	8	Demonstrates exceptional technical knowledge in AI/DS domain (9/10) with strong conceptual understanding and practical skills. Possesses solid soft skills with good communication ability (7/10), self-confidence (8/10), and professional appearance (8/10). Shows strong ambition and motivation (8/10) with clear career objectives. Maintains good general awareness (8/10) with understanding of industry trends. Displays managerial aptitude (7/10) indicating team leadership potential. Overall composed and articulate during assessment.	Primary area requiring improvement is quantitative aptitude - scored 23/40, indicating need for strengthening numerical reasoning and mathematical problem-solving skills. Should focus on speed and accuracy in data analysis and statistical interpretation. Would benefit from additional practice in computational thinking and coding optimization. Communication skills while adequate (7/10) can be enhanced through more active participation in group discussions and presentations.	Fathima Afraah M scored 7.86/10 overall, demonstrating good performance with notable strength in technical domain. Exceptional technical knowledge (9/10) in AI/DS is major asset for tech companies. Well-balanced soft skills with self-confidence (8/10), appearance (8/10), and ambition (8/10). GD score of 39/50 is respectable. Main area for improvement is quantitative aptitude (23/40) which is crucial for AI/DS roles. Recommendation: READY for placement with focus on technical and AI/ML roles. Suitable for organizations seeking strong technical talent with developing soft skills. Would benefit from projects focusing on data analysis and optimization algorithms before final placement.	7.80	2026-03-08	2026-03-08 07:34:04.772
+317	f036a6d6-c2d2-4e3f-ab25-a17fed5bd228	990d6c56-fa9b-4848-8696-21e832fbcfd3	7	7	7	7	9	7	9	Able to articulate well on the topics discussed	Need to focus more on the impact part of the project, project metrics to be discussed	Good Language, but slightly more casual approach.	7.00	2026-03-08	2026-03-08 07:34:46.027
+318	f17eb218-bdfd-406c-9a82-1b516e6f963e	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	9	9	7	7	8	9	Good in explaining concepts and about her projects	Could communicate better while explaining concepts concisely	Good	8.10	2026-03-08	2026-03-08 07:35:23.701
+319	fb900dff-7928-46a8-8424-14a487867e6e	d6a31449-5393-444e-89c7-f8ba9d35545a	5	5	5	5	5	5	5	1. Attitude	1. Communication\n2. Should be focussed\n3. Self-confidence\n4. Clarity in thought	Should be more focussed in all areas both technical & soft skills	5.00	2026-03-08	2026-03-08 07:35:29.35
+320	22548804-d74f-4bbd-94b3-0b1a8944bf80	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	9	8	10	9	10	9	he is technically strong and also very strong in automation and latest technologies	na	pakka candidate to work for MNC's	9.00	2026-03-08	2026-03-08 07:41:35.098
+321	a0f4fb74-73e5-45c5-8c61-5d71ad55806c	39201be0-22a9-4afc-8bbf-9a7dd43637e6	7	6	5	5	7	5	6	Decent communication 	Is unable to speak about his inter & project mentioned in the resume. He needs more clarity on what his career is set to be	Needs to understand & work for his future goals. 	6.00	2026-03-08	2026-03-08 07:41:59.565
+342	03fa8173-d5ce-477d-8813-a8e61bdc0e55	ce6d53c7-d3d3-401f-be95-013fa81fd707	7	8	8	7	8	8	8	Possesses good knowledge with practical application. Demonstrates a positive attitude and shows an understanding of environmental and societal aspects.	on the personality aspec if he can be groomed	should be trained on the video conferencing 	8.00	2026-03-08	2026-03-08 07:57:34.869
+343	738cf145-81dc-4961-9dc1-bbcd2c2f81b7	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	8	9	9	8	9	9	9	IOT system development	Technically learning more	Good Communication, technically strong, Teamwork	9.00	2026-03-08	2026-03-08 07:57:35.486
+344	8bf9da40-3967-475a-997b-8f011f4765c0	39201be0-22a9-4afc-8bbf-9a7dd43637e6	6	6	6	5	6	5	6	Decent Communication. Has background knowledge on cyber security but no project or intern experince.	His aspiration to cyber security is also for a short time & will be switching later in the future. He has to have a clear goal setting within next 6-8months to initiate his career path.	Avg candidate. Needs to have more focus on his career path. 	6.00	2026-03-08	2026-03-08 07:57:36.094
+346	3c42ca13-9f5f-472f-ac39-8187842552e2	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	7	7	8	8	7	8	very clear in her thought process and a quick learner, good communication skills	Nil	Will have a bright career in future if working for a food processing technology industry	7.00	2026-03-08	2026-03-08 07:59:14.825
+601	32e6245c-f483-4eb0-8829-942dca8c3d55	539ff319-c98a-440f-9541-c0e736fe44b3	7	8	8	7	8	7	7	has done some projects	need clarity in next steps	pls do a more indepth tech interview	7.00	2026-03-08	2026-03-08 10:54:39.786
+322	3b2808c2-550c-430c-9a05-76c247677dae	964b9c92-19e6-4140-8be6-a64973f93bfa	9	8	8	8	6	7	8	Mohammed made a sincere effort to perform well throughout the discussion. His aspiration to learn and develop IT skills despite coming from an Electronics and Communication Engineering (ECE) background reflects a positive attitude and willingness to expand his skill set. With continued effort in building his technical knowledge and practical exposure, he will be able to strengthen his capabilities and progress further in his chosen area of interest.	However, he would benefit from improving his language and communication skills so that he can explain his ideas more clearly and effectively. As he continues to build his IT skills, strengthening his communication will play a vital role in helping him present his knowledge confidently and support his future career growth.	Mohammed made a sincere effort to perform well during the discussion. His interest in developing IT skills despite coming from an Electronics and Communication Engineering (ECE) background reflects a positive attitude and willingness to learn. However, he would benefit from improving his language and communication skills so that he can explain his ideas more clearly and effectively. As he continues to build his IT skills, strengthening his communication will play a vital role in helping him present his knowledge confidently. Additionally, he should gain greater clarity on whether he would like to pursue opportunities in the core ECE domain or transition into the IT field, so that he can prepare accordingly and align his efforts with current industry expectations and standards.	7.80	2026-03-08	2026-03-08 07:42:58.525
+323	17c4f6aa-a509-45bc-97d5-d17c12502eb5	dc83d654-7865-4342-9437-16bfcb075e6a	5	6	5	7	4	5	5	good in his subjects 	Behavioral skills, Communication, Resume updating, Self Confidence   	need to improve 	5.70	2026-03-08	2026-03-08 07:43:01.865
+324	ea739780-6712-4a90-b489-8221729f109a	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	10	9	9	10	10	10	10	Great communication skill, confidence, tech knowledge, DSA	Everything is good	Excellent	10.00	2026-03-08	2026-03-08 07:44:42.176
+325	3f3b50c7-08b5-42b1-ba8e-05aa6f03859e	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	10	10	6	7	9	8	Empathetic, ambitious for government jobs, people-centric.	Needs to develop persuasive communication. 	Aspiring for competitive exams and is a good candidate for public welfare. 	7.00	2026-03-08	2026-03-08 07:45:22.893
+326	705b8c9d-5815-46c8-88ea-2b10be97ff1c	0d77a15a-eaec-418e-93ba-7317ea498599	8	8	9	9	9	8	8	1. Succinct and sharp in verbal communication\n2. Confident and presentable\n3. Well-read and self-aware	Nothing in particular	Mariam came across as very detail-oriented and professional. Her keen interest to explore internship opportunities and her futuristic planning were refreshingly pleasant to see. Wish her all the best!	10.00	2026-03-08	2026-03-08 07:45:33.323
+327	3678a622-3c5d-477b-abab-89a3c3b33a16	2447e995-8cd8-431b-80fd-2654f0b2298b	6	5	7	7	5	8	8	Demonstrated strong interest in learning and improving skills.	Needs to improve communication clarity and fluency.	Overall, the candidate performed well and demonstrated good communication and basic technical knowledge.	8.00	2026-03-08	2026-03-08 07:47:19.434
+328	187b4d97-78fe-4fd2-8ec3-99bc4de84672	6a9107b1-6b87-42c5-8994-967a28c2b0d1	8	8	8	9	10	10	9	Really great subject knowledge and is proactive, she appeared to me as an authoritative person which is a really good trait in an interview. communication skills are also really good.	Few changes in the resume as mentioned and slight improvement in technical knowledge 	Janani appeared to me as a great candidate and a viable option to be selected by interviewers a wee bit of changes and she will go places	9.50	2026-03-08	2026-03-08 07:48:06.726
+329	720ffb17-f674-4701-bc09-b053cc4bd440	a694622b-3ba8-4c82-bd05-08d8bfd5af50	7	4	4	6	5	5	8	No comments	English need improvement.  Need to learn computer basics in operating system. Not clear on the project he as done. Programming knowledge also needs to be improved.	Needs improvement	5.00	2026-03-08	2026-03-08 07:48:07.104
+330	81161e9f-b1ea-43cc-b3f3-40089e9c5f89	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	6	6	6	6	6	7	can grow up to a leader, has the ability to bind people	communication and presentation skills	Automation is his area of interest to work, will shine in that area if given an opportunity	7.00	2026-03-08	2026-03-08 07:48:45.377
+331	f3e0c5c9-0ff2-4c17-ab8c-c914f3f46221	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	7	7	9	1	7	6	5	very good general awareness	need to turn around on technical knowledge	need to work on basic functional knowledge.	5.00	2026-03-08	2026-03-08 07:49:39.259
+332	6d4cb6d7-08ac-4748-8b69-89460528c291	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	8	7	5	6	9	5	10	Good communication and self confidence	Has to start viewing things from the employer's point of view. She spoke more about her evaluation. Didn't have a defined aim	Candidate was good but needs training in how to give answers that the interviewer wants to hear more than her self-opinion.	7.00	2026-03-08	2026-03-08 07:50:28.147
+333	2902d589-dd45-4a97-aace-b8643f323183	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	5	6	6	6	1. Communication	1. Should be more focussed on the subjects\n2. Should be more aggressive	1. More focussed approach is required. Should be a self-starter	5.70	2026-03-08	2026-03-08 07:50:52.171
+334	4a7ae7d3-2e24-4b59-9424-05dc02c16507	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	6	5	3	6	5	3	3	Talks about her technical skills and has an idea of what she wants to become	Candidate lacked confidence and was not prepared for the interview	should work on communication and confidence.	5.00	2026-03-08	2026-03-08 07:52:54.473
+335	28a5ae59-3fbf-4055-b899-cb13182e975e	81f895c5-36b8-4d09-8241-80e64868fe56	6	7	7	6	6	6	8	Able to answer, 	Need to learn more things	Ok for further, 	7.50	2026-03-08	2026-03-08 07:53:25.396
+336	2c871563-65ac-4ef1-8fda-ca6c28afb823	539ff319-c98a-440f-9541-c0e736fe44b3	9	8	9	8	9	10	9	has a greate CGPA and good projects	need to show case that in the Github and also imporve on linkedin and build her personal brand.	Strong candidate, needs to show case her skills more in Git and linkedin. With atleast 1 post per week in Linkedin and 1 porject or a deep project updated atleast monthly in github	9.00	2026-03-08	2026-03-08 07:54:37.078
+337	a759a3fc-f5ec-4a4b-b9b4-cca7fe539828	217ae2de-4843-400b-964c-30302c10965e	9	9	8	7	8	8	8	Confident, have ambition to work in AI. done some intership and projects while stuyding college.	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project. 	Adharsh demonstrates good confidence, leadership qualities, and strong communication skills with interest in AI and data-driven solutions. He has gained practical exposure through internships and projects during his academic journey. Strengthening OOPs and core programming fundamentals will further enhance his technical capability for advanced AI and software development roles.	8.00	2026-03-08	2026-03-08 07:55:03.436
+338	46e5d681-a70c-4d81-baa5-c4a367686176	db338578-8876-4dec-a6d5-2d0094828b16	7	7	8	7	7	8	7	Good in general awareness since he is interested in UPSC services.  	Needs improve narration skill and confidence	Above average	6.50	2026-03-08	2026-03-08 07:55:50.625
+339	54d57056-bdac-48f2-b8dc-75741b608f05	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	8	7	6	6	7	7	7	Demonstrates confidence and a strong willingness to learn with genuine curiosity.	Requires stronger grounding in the basics of core engineering subjects.	Shows potential and is encouraged to strengthen subject knowledge, adapt to technological evolution, and stay engaged with emerging technology trends.	5.20	2026-03-08	2026-03-08 07:56:29.641
+340	5b439ef4-d685-4e7d-b797-221f281ab248	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	10	9	10	9	10	10	10	Confident, good communication, Has good knowledge about project and tech stacks.	Technical knowledge, Good communication skills	Excellent	9.00	2026-03-08	2026-03-08 07:56:49.047
+341	0c0abc94-afd4-40c2-950d-6ae600f718c4	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	8	6	7	7	5	8	7	fast learning,	Communication skills	Need improvements	6.00	2026-03-08	2026-03-08 07:57:11.842
+347	17e77478-bad7-4a3b-b036-019ea8ededaf	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	9	8	9	9	8	9	9	Good Technical Knowledge	Should be  more open to the job roles and responsibilities	Good way of communication, should be open to learn.	9.10	2026-03-08	2026-03-08 08:00:07.461
+348	3822a452-a328-4f7b-a8bd-524b4866722f	bf71f55b-86ba-46b8-afa1-1aea09f829e1	9	8	9	9	8	9	9	Very good communication skill and very good in the subject mater . Very pleasant personality 	Prioritizing the focus areas \n	Very ambitus and very positive person with very through knowledge in the subject . Asset to the college 	8.50	2026-03-08	2026-03-08 08:00:31.078
+349	2fd6d890-d6a7-46bc-a01a-4d09d9fd0066	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	8	7	7	7	8	8	8	Deepika has good communication.\nAware of basic concepts in programming	Deepika has to improve in clearly articulating the concepts.\nShe also needs to go through basic concepts with real life examples\n	Deepika has good communication. During the start of the interview, she was very confident. She was able to provide algorithms for problems given. She needs improvement in articulating concepts clearly. Focus on backend also to be full stack developer. 	8.00	2026-03-08	2026-03-08 08:01:03.513
+350	0ee6e922-bc7c-47d2-a0c3-19a3f64c3347	2447e995-8cd8-431b-80fd-2654f0b2298b	10	9	8	9	9	10	10	Demonstrated strong technical knowledge in VLSI and electronics fundamentals.\n\nExplained projects clearly with good understanding of concepts.\n\nShowed confidence and good communication during the interviewDemonstrated strong technical knowledge in VLSI and electronics fundamentals.\n\nExplained projects clearly with good understanding of concepts.\n\nShowed confidence and good communication during the interview	Can further strengthen practical exposure to industry-level tools and applications.	Overall, the candidate performed well and demonstrated good technical potential.\n\nThe student has a strong interest in VLSI and emerging technologies.\n\nWith continued learning and practical exposure, the candidate can perform effectively in a professional environment.	9.00	2026-03-08	2026-03-08 08:01:23.802
+351	0d3ed5ad-e4d5-4d45-bb0e-997b80673aef	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	9	6	4	9	6	8	Strong communication skills and clear articulation of project objectives; demonstrates good functional understanding of the domain and the purpose of her projects.	Needs to strengthen technical depth and show greater initiative in experimenting with newer technologies and implementing incremental improvements in her project work.	Shows good functional awareness and interest in learning; however, this interest should translate more consistently into practical enhancements and deeper technical exploration in her work.	6.50	2026-03-08	2026-03-08 08:02:40.828
+352	877d567d-d403-46fe-a03b-2395c6ffa751	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	6	7	8	8	7	8	Communication skills are really good. Technical knowledge is good. 	Tends to over explain leading to lengthy and vague answers. 	Overall the candidate is good but should learn to keep his answers crisp and conscise. 	7.00	2026-03-08	2026-03-08 08:03:02.481
+353	8c9a886e-a3ef-4d30-98a8-556c4e5ff6c4	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	9	10	9	10	10	10	Strong in identifying her key areas of interest - food and medical industries. 	Identify target group of companies that align with medical interests.	Commendable enthusiasm towards food and medical topics. Potential candidate for multiple industries in India and abroad. 	9.50	2026-03-08	2026-03-08 08:05:20.997
+354	9da5810c-7e15-4ac3-9c44-92ced255d7d2	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	10	9	8	6	8	8	8	very good in communication and general awareness	needs to go in depth in technical knowledge	good candidate. high potential	8.00	2026-03-08	2026-03-08 08:05:24.968
+355	f889fe75-2cbd-41aa-bf26-65a01bc45dc3	a694622b-3ba8-4c82-bd05-08d8bfd5af50	8	6	8	8	8	7	8	Technically good. communication is good.	Need to learn basics in computer operating system	Good	7.00	2026-03-08	2026-03-08 08:06:22.093
+356	2e3a3d7c-f33a-4b8b-9276-395554b16fcf	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7	7	7	8	8	8	7	Good subject knowledge and communication skill along with general awareness	Talk in a way more commanding manner, don't show nervousness. and a bit improvement in resume based knowledge	A really good candidate; with few changes she will flourish.	8.00	2026-03-08	2026-03-08 08:06:36.209
+304	28820349-8c42-4874-9cc5-e529122d3841	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	10	10	10	10	10	10	10	Confidence, problem solving, clarity in speech, Communication, tech and project knowledge.	Focus on Aptitude.	Extraordinary 	10.00	2026-03-08	2026-03-08 07:26:42.62
+358	5f49a1a9-39f5-413f-848e-995b9d09551c	fcce01c3-007c-4299-a17f-9d5f4402c6ec	8	7	7	6	7	7	8	Communication is good and has clear understanding on the current knowledge. Well presented and maintained a good body language also. He maintained a good energy during the entire interview, 	Need to improve listening skills and can work on general knowledge on multiple small and big brands in market as his focus is on consumer electronics. 	Overall a good interview with high energy	6.50	2026-03-08	2026-03-08 08:06:48.187
+359	15f56565-c0ef-414f-b7e5-ca8ade61a571	104e34a6-fd53-4012-a0f0-41df6842c833	3	2	3	3	2	3	3	Able to share about work done. Interested in learning.	To pick up technical skills. To be able to clearly communicate the work done. 	Interesting in learning. Need to pick up technical knowledge in depth and communicate clearly.	3.00	2026-03-08	2026-03-08 08:07:17.775
+369	f4a8afda-b740-4297-be95-2ff01b02a2ea	cd263764-71e2-4ead-87a3-0c5e9aff9828	4	4	4	4	4	4	4	Could not assess any in the interview.	He needs to develop a clearer understanding of what he wants to do.	He lacks clarity about what he wants to do and needs to work on it. He also needs to work on his communication.	4.00	2026-03-08	2026-03-08 08:13:03.233
+370	c923edab-f218-48a5-a9b2-52e7d02901f8	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	9	8	9	9	9	8	8	has a deep understanding of aspects in her study\nhas a clear vision\ngood communication skills	Nil	will be able to shine in her career under some closed guidance 	8.00	2026-03-08	2026-03-08 08:13:23.968
+360	064b4b50-d7ba-4f10-b35b-cb4702424938	dc83d654-7865-4342-9437-16bfcb075e6a	7	7	7	8	7	9	6	good in his Explanations and communications  	Self Confidences \nShorty Briefing the answers  	Good need to improve in  Self Confidences 	8.30	2026-03-08	2026-03-08 08:07:56.341
+364	1ee882b4-b855-4889-9864-ae050e2c6674	54ad8399-936a-47f5-bfc8-db3194c32ea3	8	6	6	6	8	7	6	Communication Skills 	Technical Depths and details	Has to learn technical details much more indepth  	6.50	2026-03-08	2026-03-08 08:09:14.358
+365	e91db852-72c8-4767-a136-e4f3497ef032	39201be0-22a9-4afc-8bbf-9a7dd43637e6	7	6	6	7	6	7	7	Smart student. can explain his internship & projects while most were unable to.	Wanted to start a business or join father's business. However, looking for a job placement as per his father's instructions. 	Seems a good learner for IT but has to understand & decide his future path.	6.00	2026-03-08	2026-03-08 08:09:27.719
+366	9e5341b0-9264-4001-86e2-bb527c6e61bc	54ad8399-936a-47f5-bfc8-db3194c32ea3	8	9	7	5	9	9	9	Communication, People Relation Skills 	Technical Skills 	Has to learn technology 	8.00	2026-03-08	2026-03-08 08:10:55.408
+367	954da0d1-3b4c-41b8-b270-7cf02297592a	52535048-47f2-42cb-91ec-65a4824c9908	9	9	10	10	9	10	9	Ambition oriented, have a good market study and AI updates, a good vision and mission\nHe have a good roadmap for himself to see in another 5 years \nExcellent in clarified information. 	He is having great knowledge and skilled can improve more to excel in his areas to focus	Excellent	9.50	2026-03-08	2026-03-08 08:12:38.024
+368	975fc7fa-6dc8-4999-be19-de354af57f2e	db338578-8876-4dec-a6d5-2d0094828b16	8	7	7	7	7	8	7	Clear in his ambition	But lacking in analysis. He has speak with confident	Average	6.00	2026-03-08	2026-03-08 08:12:44.273
+371	6147b941-97d6-4163-8128-ac0be61591a2	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	5	6	5	5	1. Attitude\n2. Communication	1. Focus on subjects\n2. Brush-up on technical aspects\n3. Sharpen acumen	Should be more focus on approach and subjects	5.70	2026-03-08	2026-03-08 08:14:45.45
+372	151a0387-3e44-47bc-8f71-4ac8e00dc27f	44f338a5-56b0-4ad1-8258-79826e1445b3	8	8	8	9	8	8	8	Very good candidate. 	Nothing. 	Go with the flow. You are awesome.	8.00	2026-03-08	2026-03-08 08:15:58.261
+437	de74f68f-f05e-45c5-b8b5-4269dabac5ef	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	8	6	8	7	8	7	8	Communication and inter personal skills.	Focus on leadership skills and training	Good	8.00	2026-03-08	2026-03-08 09:05:05.846
+439	35c0ff1a-6f4e-4055-a2d3-51738405cce7	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	6	4	7	7	5	6	6	Domain Knowledge	Communication & learning	Good	6.00	2026-03-08	2026-03-08 09:06:03.792
+373	4e9357e0-bbc7-48f4-b629-17125f1053ff	2447e995-8cd8-431b-80fd-2654f0b2298b	10	9	9	9	8	10	9	Demonstrated a good interest in electronics and semiconductor technologies.\nExplained projects with clarity and showed enthusiasm for learning new technologies.	Can further strengthen core electronics fundamentals.\nCan improve confidence while explaining technical concepts.	Overall, the candidate demonstrated good enthusiasm and a positive learning mindset.\n\nWith continued practice and deeper technical exposure, the candidate has good potential for growth in the electronics field.	9.00	2026-03-08	2026-03-08 08:15:58.602
+374	6d4cb6d7-08ac-4748-8b69-89460528c291	fcce01c3-007c-4299-a17f-9d5f4402c6ec	7	6	5	5	5	7	6	Communication is good, well presented 	Can work on technical knowledge, and confidence. 	Need to work on body language while attending interview and should learn about AI	5.50	2026-03-08	2026-03-08 08:19:13.216
+375	ca7b2899-e2be-4d5b-b8ac-41a02e97492d	990d6c56-fa9b-4848-8696-21e832fbcfd3	9	9	10	10	9	10	10	Great technical Knowledge, great communication, well structured & great knowledge on design	Little more confidence provided the subject knowledge he possesses	Great command over the subject, good achievements overall	9.50	2026-03-08	2026-03-08 08:19:35.572
+376	4bd872f3-f2f7-45d9-87a3-883483694a70	cd263764-71e2-4ead-87a3-0c5e9aff9828	9	9	9	9	9	9	9	OUTSTANDING PERFORMER - Perfect score of 9/10 across all assessment dimensions. Demonstrates exceptional confidence and articulation (9/10 communication skills, 9/10 self-confidence). Possesses excellent technical knowledge in mechanical engineering (9/10) with strong practical understanding and problem-solving abilities. Exhibits exceptional leadership qualities and managerial aptitude (9/10) with natural ability to motivate teams. Shows remarkable general awareness (9/10) and industry acumen. Maintains impeccable professional demeanor and appearance (9/10). Demonstrates exceptional ambition (9/10) with clear vision and drive for career advancement. Among the best candidates evaluated in this cohort.	Only minimal area for improvement identified. Quantitative aptitude score of 22/40 presents opportunity to enhance numerical and analytical reasoning skills. While not a significant limitation given exceptional soft skills, strengthening quantitative ability would make candidate even more competitive. Recommend practice with analytical case studies and data interpretation problems to round out already excellent profile.	EXCEPTIONAL CANDIDATE - Achieved perfect 9.00/10 overall assessment score with 9/10 ratings across all seven evaluation dimensions. This is an outstanding achievement indicating comprehensive excellence. GD score of 45/50 demonstrates exceptional group discussion performance. While aptitude score of 22/40 is the only area below expectations, it is not reflective of candidate's true potential given the exceptional soft skills and technical competency demonstrated. HIGHLY RECOMMENDED for immediate placement in top-tier organizations. Ideal candidate for leadership development programs and fast-track career advancement. Can serve as benchmark candidate for future evaluations. Placement certainty: VERY HIGH.	9.00	2026-03-08	2026-03-08 08:21:55.783
+377	e8b52e8a-883f-4dba-8e76-8663e8bc71db	217ae2de-4843-400b-964c-30302c10965e	9	9	9	9	10	9	9	Good in academics, in communction. Interested to work in AI development projects. 	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project. 	Rajalakshmi demonstrates strong communication skills, confidence, and a positive attitude toward learning. She shows good academic interest and enthusiasm to work in AI development projects. Strengthening her OOPs fundamentals and programming concepts will help build a stronger foundation for real-time IT projects.	9.50	2026-03-08	2026-03-08 08:22:02.993
+378	dbd68461-6833-473c-a763-0954ddc0f89f	aaec9758-627f-40bb-b8b2-e92110d36327	6	5	6	4	6	5	4	Shows basic awareness of the subject area and demonstrates willingness to learn	Needs improvement in core technical concepts, problem-solving approach, and clarity in explaining ideas	Candidate demonstrated limited understanding of key concepts and requires further learning and practical exposure.	5.00	2026-03-08	2026-03-08 08:24:00.985
+379	16b425e3-d5f2-4d4c-b6e1-74e177ca4a6a	39201be0-22a9-4afc-8bbf-9a7dd43637e6	7	6	7	7	7	7	7	Talented candidate. Willing to be flexible to any role given though her aspiration is towards Ai	Could be more outspoken	Good Candidate. Needs training & sustainability to a corporate environment. 	7.00	2026-03-08	2026-03-08 08:24:14.703
+380	3c6a274a-1bb2-4e33-87cf-32445b975b08	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	8	8	8	9	8	7	7	good candidate	can give more attention to detail	good candidate	8.00	2026-03-08	2026-03-08 08:24:25.208
+381	a20c6c5a-4ef3-41e3-9ddb-c308d55d5a13	52535048-47f2-42cb-91ec-65a4824c9908	9	9	9	9	10	8	9	Excellent in skills and knowledge \nHave a  positive attitude	Can improve more on the presentation and upskill to excel more on this existing skills	Excellent	9.50	2026-03-08	2026-03-08 08:25:14.229
+382	d35995c4-daf6-4d65-b69d-9a6c81205077	52535048-47f2-42cb-91ec-65a4824c9908	5	3	5	5	4	4	3	Not a strong candidate, need to improve lot on the soft skills while he have basic knowledge in his core skills	Not a strong candidate, need to improve lot on the soft skills while he have basic knowledge in his core skills	Below Average	5.00	2026-03-08	2026-03-08 08:26:39.805
+383	7d8f7668-6048-4383-b08f-b2c885dc2002	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	8	9	8	8	has technical skills and good way of communicating the same	need to post his projects in Github and make a better linkedin page	have given feedback	8.00	2026-03-08	2026-03-08 08:27:25.48
+384	f49bb6e2-a8f2-4c1c-8fec-6881660f6823	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	9	6	7	8	8	8	9	Communication\n	NA	Good !	7.50	2026-03-08	2026-03-08 08:28:11.456
+385	48be4361-9456-4745-9206-2b52f9362149	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	7	8	8	8	had clear idea on what role he wants to get in	Need to ensure his git and linkedin gets to the next level	can do better	8.00	2026-03-08	2026-03-08 08:28:53.302
+387	5742405f-cb58-4ed6-9d16-66b29b7e5e87	fcce01c3-007c-4299-a17f-9d5f4402c6ec	8	7	8	8	7	8	8	Good confidence and positive attitude, Well presented during the interview and had a good body language	Can evaluate the aptitude score and focus on weak points to improve theoretical knowledge. Need to  build self confidence as lesser self doubts	Good excel in future if all points improved and work on self confidence. 	6.50	2026-03-08	2026-03-08 08:29:45.525
+388	f51be337-a107-4bc3-9411-e2db1e2982a1	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	6	7	7	7	6	7	will be a good team player, sincere and dedicated\n	has to gain indepth knowledge food sample testing processes & related compliance standards 	Is a slow learner	7.00	2026-03-08	2026-03-08 08:29:58.051
+389	d0d86feb-4639-4f63-9705-e3bf400959b5	dc83d654-7865-4342-9437-16bfcb075e6a	8	8	7	7	8	8	8	communication skills \ntechnical skills 	should review resume before the interview 	Good 	8.40	2026-03-08	2026-03-08 08:29:58.846
+386	b2e6ed6a-6161-4488-8922-4fad36c750a4	81f895c5-36b8-4d09-8241-80e64868fe56	8	8	8	7	9	8	8	Good Leadership role, and commutation skills	More in technical areas	Good activities, Good attitude, Good leadership 	8.00	2026-03-08	2026-03-08 08:28:56.843
+391	4e7c2d61-8ba3-4cfe-92ab-58042652ffce	d6a31449-5393-444e-89c7-f8ba9d35545a	7	6	7	8	7	7	8	1. Communication\n2. Confidence\n3. Self starter	1. Technical Knowledge\n2. General Mechanical Trend awareness	Good Candidate, more vibrant	7.50	2026-03-08	2026-03-08 08:31:49.866
+392	d106315c-716d-410b-832e-0514731527b4	2447e995-8cd8-431b-80fd-2654f0b2298b	9	9	8	8	8	8	9	Demonstrated good understanding of electrical engineering fundamentals and power systems concepts.\n\nExplained internship experience at TANGEDCO clearly and showed practical exposure to power plant operations.	Can further strengthen depth in advanced electrical machines and power system concepts.\n\nCan improve clarity while explaining complex technical concepts.	Overall, the candidate demonstrated good technical potential and a strong interest in the electrical engineering field.\n\nWith additional practical exposure and continued learning, the candidate can perform effectively in industry environments.	8.00	2026-03-08	2026-03-08 08:32:41.048
+393	d14f31dd-8e02-45fd-818f-fa054ecdba0d	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	6	5	7	7	7	5	The candidate has good technical skill and is eager to learn.	The candidate needs to work on his communication skills. The Candidate is not able to answer fluently without breaking in between. Needs to frame the answers in his mind and answer confidently	The candidate needs to work on the way he delivers the answers	6.50	2026-03-08	2026-03-08 08:33:03.833
+394	32a5441f-9dfe-4bb4-b903-e43f54e07df6	6a9107b1-6b87-42c5-8994-967a28c2b0d1	8	7	7	9	7	9	9	Good technical knowledge,and managerial attitude, sound in subject related stuffs, project and resume-based knowledge	Slight improvement in communication skills ( a bit more fluency and rephrase as mentioned in the meeting); dont be nervous	Harisha is a really good candidate with a lot of potential, some minute changes as mentioned above and she will go places	9.00	2026-03-08	2026-03-08 08:33:38.879
+395	41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	8	6	5	9	9	9	10	Very good attitude & technical Knowledge.	General Awareness	Good for a fresh graduate.	8.00	2026-03-08	2026-03-08 08:34:47.512
+396	50b44118-7ce7-445b-aff6-ee2a805bca9a	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	9	9	6	10	9	9	9	Strong in technical	Can articulate in a better way	good potential	8.50	2026-03-08	2026-03-08 08:35:33.75
+397	6a788949-c3c4-4fa3-be3a-a3ee9535c15a	0d77a15a-eaec-418e-93ba-7317ea498599	8	8	7	8	7	7	8	Darshita was pleasant to talk to. Well-groomed and presentable.\nShe is very focused on her higher education goal and has clarity on career prospects after that.	To work on her communication and clarity for better outcomes.  \nNeeds to adapt her story for the target audience persona. 	All the best for success in her endeavors	7.00	2026-03-08	2026-03-08 08:35:37.825
+398	0ee9cc0d-0540-410b-a6ef-7c88e3dbca3d	38236c5f-2faa-4940-aa37-60a206f3be14	7	5	5	5	4	4	6	Extrovert 	need to technical knowledge updated	Good communicator	5.00	2026-03-08	2026-03-08 08:36:55.149
+399	d8ce7dd1-6a12-400b-9fe3-d0ff97dfc0c8	217ae2de-4843-400b-964c-30302c10965e	9	9	8	9	9	9	9	Confidence, good in communication, good in academics. 	Need to study OOPS ( Object oriented programming langauage) Foundation for any IT project. \n	Kamalam demonstrates good confidence, communication skills, and strong academic performance. She shows a positive attitude toward learning and the ability to grow in the technical domain. Strengthening OOPs fundamentals and programming concepts will help her perform effectively in real-time IT projects.	9.00	2026-03-08	2026-03-08 08:37:17.52
+400	b85a97f2-802d-4961-9068-19614c0567db	38236c5f-2faa-4940-aa37-60a206f3be14	5	7	7	7	8	7	7	Good Knowledge in technical 	less clarity in process	No shortcuts interview shd be avoided eye contact lost during the interview 	5.00	2026-03-08	2026-03-08 08:39:22.345
+401	e7d95a9c-9583-44fe-b52f-dd3b003a87f5	d631f416-b5af-4ca2-956f-da772aff5f6f	9	8	9	7	9	9	9	Communication, Basic programming skills. Very confident. Ambitious.	Need to take up one language and practice more on the problems..	Over All Good. Need to practice more on the programming language... To certain extent she has the knowledge. But still needs improvement to go to the next level or placements.	8.00	2026-03-08	2026-03-08 08:39:35.527
+402	98d9c98c-68ec-4cb5-a1f9-2d267570eedd	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	6	7	7	6	8	7	Is practicing and upskilling regularly	Communication should be improved	Has to improve the way of communication, and conveying about her personal as well as professional concepts	7.00	2026-03-08	2026-03-08 08:39:44.675
+403	0114fe5b-ec06-4567-848c-11e28fdb8824	539ff319-c98a-440f-9541-c0e736fe44b3	7	7	8	7	8	8	7	had an idea that he wants to be a data engineer	but needs to work on the same and build his capabilty have given some tips	can surely be a good data engineer in future	7.00	2026-03-08	2026-03-08 08:40:06.573
+404	406f091a-e23e-4fdf-bf38-07ed3bf967e4	0d77a15a-eaec-418e-93ba-7317ea498599	8	9	9	10	8	10	10	1. Clear, confident and intentional about pursuing employment.\n2. Evident passion for field/domain & career-minded\n	1. Chalk out a strategy for each interview - company and target persona\n2. Develop industry know-how by following sectors and specific companies of interest\n\n	Amrith is a bright young mind waiting to take on the industry with his passion for field/domain. Has a sense of purpose and holds leadership potential and I wish him all success.	9.00	2026-03-08	2026-03-08 08:40:19.776
+405	03cd4019-0c9f-417e-a635-439f9dd1ae15	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	10	6	4	10	6	10	The candidate communicates confidently and presents ideas clearly, showing strengths suited for coordination and stakeholder-facing responsibilities.	Needs to strengthen core technical fundamentals and develop a clearer definition of solution architecture, including the project’s scope, strengths, and limitations. Candidate needs to have a clear understanding of and set the right expectations on the outcome. 	Limited technical depth; Refining the technical foundation and solution clarity would significantly strengthen the profile.	4.50	2026-03-08	2026-03-08 08:41:03.728
+407	f16421cd-7697-498e-87fc-c7b3325d01ee	d631f416-b5af-4ca2-956f-da772aff5f6f	8	7	8	6	9	8	8	Good Communication skills. Very honest in conveying. Strong in Basic Programming Skill	Need to practice and get ready for placements.	Over All Good. Need to practice more on the programming language... To certain extent she has the knowledge. But still needs improvement to go to the next level or placements.	7.00	2026-03-08	2026-03-08 08:41:23.818
+408	a2afc98d-59ac-4ea5-8d38-6c970c1708af	38236c5f-2faa-4940-aa37-60a206f3be14	8	8	8	8	8	7	7	Good Knowledge 	can be mentored well to be a entrepreneur 	Good happy for his performance 	8.00	2026-03-08	2026-03-08 08:42:10.104
+409	e6ce598c-450f-431a-9985-0dce3fdf7b7e	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	7	8	8	8	8	8	Confident and clear with what she wants.	She is good. Just could improve her appearance and presentation. 	She is doing her degree for the sake of graduating but wants to get into government job. The student is good at her academics and is a hardworking candidate.	7.70	2026-03-08	2026-03-08 08:42:26.219
+410	27c4c674-04c4-4df3-954b-d0dbb3a617e8	c34851b2-fce1-4c90-b896-3a1a666a841a	8	8	9	9	9	8	9	\n\n\n\n\n	\n	\n	9.20	2026-03-08	2026-03-08 08:42:57.612
+411	f77194e9-7350-46a0-9f49-126e0cb352e6	c34851b2-fce1-4c90-b896-3a1a666a841a	6	7	7	6	6	6	8	\n	\n	\n	6.50	2026-03-08	2026-03-08 08:44:26.876
+412	35a45c28-731f-4aa4-b1af-2a3b2a2271b1	fcce01c3-007c-4299-a17f-9d5f4402c6ec	8	7	7	6	6	8	7	communication is good and well presented. CV was decently presented. Has a clear understanding on the topics she wants to discover	Can work on grammatical errors and should avoid words like obviously during the interview	Can work on aptitude to improve her skills 	6.50	2026-03-08	2026-03-08 08:44:40.01
+413	c8c41f49-f44f-452e-bed0-b84ad3a33013	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	7	8	8	9	8	8	good communication skills and attitude	has to gain indepth knowledge technically on the entire process	will be a good team player	8.00	2026-03-08	2026-03-08 08:44:58.773
+414	518233eb-899a-4997-8204-4491e1e448ad	2447e995-8cd8-431b-80fd-2654f0b2298b	7	8	8	9	8	9	7	Demonstrated strong interest in analog and digital electronics with good understanding of fundamental concepts.\n\nExplained PCB design internship experience clearly and showed practical exposure to circuit design and layout tools.	Can improve clarity while explaining complex technical topics.\n\nContinued practice in system-level design and troubleshooting will strengthen technical confidence.	Overall, the candidate demonstrated strong technical interest and good foundational knowledge in electronics.\n\nWith additional practical exposure and continuous learning, the candidate shows good potential to perform well in hardware and electronics-related roles.	8.00	2026-03-08	2026-03-08 08:44:59.28
+415	151e40f2-f9da-48f0-929c-c5a12e913f00	c34851b2-fce1-4c90-b896-3a1a666a841a	6	6	7	6	6	6	7	\n	\n	\n	5.80	2026-03-08	2026-03-08 08:45:36.208
+416	27675e11-7f57-4733-b162-4b60e89b01dd	c34851b2-fce1-4c90-b896-3a1a666a841a	6	8	8	7	6	6	8	\n	\n	\n	6.40	2026-03-08	2026-03-08 08:46:33.324
+438	6b85aaab-1c46-48c4-8f37-f893bc930efb	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	7	7	7	8	9	6	7	Good communication & good technical knowledge.	should be confident, have clear visions & goals about the future.	Average.	7.50	2026-03-08	2026-03-08 09:05:25.885
+417	c1673388-cdfa-47d3-986c-eceb6031693b	cd263764-71e2-4ead-87a3-0c5e9aff9828	8	8	8	8	9	9	9	Strong performer with excellent soft skills - outstanding communication ability (9/10) and exceptional self-confidence (9/10). Demonstrates strong ambition and motivation (9/10) with clear career vision. Solid technical knowledge in electronics and communication engineering (8/10) with good practical understanding. Maintains professional appearance and positive attitude (8/10). Shows good managerial aptitude (8/10) indicating leadership potential. Possesses good general awareness (8/10) with industry awareness. GD score of 41/50 demonstrates strong group discussion capabilities.	Primary area for improvement is quantitative aptitude - scored 24/40, indicating need for strengthening numerical reasoning and analytical problem-solving skills. Should focus on improving speed and accuracy in mathematical computations and data interpretation. Would benefit from additional practice in technical problem-solving under timed conditions. Overall soft skills are well-developed; minimal improvements needed in this dimension.	Kavya P scored 8.43/10 overall, demonstrating strong performance with excellent soft skills. Outstanding communication ability (9/10) and self-confidence (9/10) are major strengths positioning her well for client-facing or team-leading roles. Strong ambition (9/10) with clear career vision. Consistent performance across technical and interpersonal dimensions (8/10 on all). GD score of 41/50 reflects strong group discussion capability. Quantitative aptitude of 24/40 is primary development area. Recommendation: READY for placement. Excellent fit for communication-intensive roles, project management, or customer-facing technical positions. Well-rounded candidate with strong soft skills foundation and solid technical competency.	8.40	2026-03-08	2026-03-08 08:46:38.897
+418	3a28b1ed-ae8d-42d6-8a98-9eb8d010b2aa	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	8	7	6	6	6	9	6	Has Potential, under good guidance, he can shine.	need to improve his general awareness & communication.	Average	7.00	2026-03-08	2026-03-08 08:47:15.7
+419	e243d102-ad72-47e3-adb0-0f756d39e12a	d6a31449-5393-444e-89c7-f8ba9d35545a	8	5	6	7	7	5	6	1. Communication\n2. Attitude\n3. Subject knowledge	1. Clarity in thought\n2. Focus & Approach towards goal	Good candidate and be more focussed	6.30	2026-03-08	2026-03-08 08:47:35.349
+420	037f969e-c3be-4dbb-9f6e-80ac8c98cd8d	c34851b2-fce1-4c90-b896-3a1a666a841a	7	7	6	7	7	7	8	\n	\n	\n	7.00	2026-03-08	2026-03-08 08:47:38.534
+421	876b3fb9-8977-4540-981a-790099ed05d2	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	9	8	9	10	10	10	TECHNOLOGY AND LAZZINESS.	need to handle the nervousness before an activity	good candidate for MNC's that too product based companies	8.00	2026-03-08	2026-03-08 08:47:50.586
+422	f77cb046-1218-4edf-9c74-2180509f828b	ce6d53c7-d3d3-401f-be95-013fa81fd707	9	9	9	7	9	9	9	The candidate demonstrates confidence, a pleasing personality, and a good understanding of technical topics.	Focus more on practical application of theoretical concepts and understanding how things work in real industrial environments.	good candidate based on techinical evaluation	8.00	2026-03-08	2026-03-08 08:48:19.78
+423	8199ea4a-671f-4386-a7ce-1151c4db2a87	c34851b2-fce1-4c90-b896-3a1a666a841a	6	6	6	6	6	6	8	\n	\n	\n	5.50	2026-03-08	2026-03-08 08:48:25.257
+424	d7874bf3-04f5-4732-8b2d-192d5c018b85	aaec9758-627f-40bb-b8b2-e92110d36327	8	9	8	8	8	8	8	Demonstrates strong understanding of LLM concepts and deployment approaches, with clear and structured explanations	Can further enhance knowledge in advanced optimization techniques and large-scale system design	Candidate performed very well, showing strong technical understanding and good problem-solving ability.	8.00	2026-03-08	2026-03-08 08:49:44.094
+425	90f3cca1-7440-4d22-9024-ad862b979a0c	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7	7	8	4	9	6	9	Good communication, general awareness and managerial skills	Can improve on technical knowledge and resume-based knowledge and update resume as mentioned in the meeting	see above	6.00	2026-03-08	2026-03-08 08:50:21.592
+426	58a10c53-f356-47b6-ab20-5d02b48a9b20	24421caf-3a14-4681-b9f9-f237f956d8d4	7	7	7	7	6	8	8	Proven technical knowledge by way of winning hackathons. Having detailed knowledge of projects completed. Able to explain the same in detail. Has very clear ambition and also flexible to pick up relevant opportunities to start the career. Very good, confident communication.	Communication - in terms of grammar and pronunciation needs a little brush up and polishing.	Overall excellent candidate with proven knowledge and ambitious to grow.	7.00	2026-03-08	2026-03-08 08:51:16.978
+427	3d07a508-5a30-4547-b02e-eb1a4cc78c23	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	8	6	8	7	8	7	8	Communication and inter personal skills.	Focus on leadership qualities and training	Overall good	8.00	2026-03-08	2026-03-08 08:54:10.45
+428	a809949e-4a73-45a2-b11b-2f0744571a8f	39201be0-22a9-4afc-8bbf-9a7dd43637e6	6	6	5	5	6	5	5	Is open to learn new technologies but needs to plan his long term goals	Candidate does not have a vision 	Avg candidate, needs to see set his career path soon & stay focused	6.00	2026-03-08	2026-03-08 08:54:43.692
+429	00df0dfd-b646-4698-9d67-f008dabfac30	2447e995-8cd8-431b-80fd-2654f0b2298b	9	9	10	9	10	10	10	Showed good problem-solving ability through projects	Can improve clarity while explaining complex technical topics.\n\nContinued practice in system-level design and troubleshooting will strengthen technical confidence.	Overall, the candidate demonstrated strong technical interest and good foundational knowledge	10.00	2026-03-08	2026-03-08 08:57:01.996
+430	5445087d-4411-4ef9-8f7d-26be93329455	d6a31449-5393-444e-89c7-f8ba9d35545a	7	6	6	6	7	6	7	1. Communication\n2. Technical Knowledge	More focus and core concept oriented	Good candidate	6.40	2026-03-08	2026-03-08 09:00:57.865
+431	d29ed03e-5f40-4d17-9c2e-8e53f83fe5a3	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	8	7	4	10	9	9	From a technical perspective, the candidate demonstrates a clear understanding of his projects, including their scope and limitations. Communicates well, shows curiosity, and is receptive to feedback.	Needs to build stronger technical depth through more hands-on implementation and deeper engagement with the underlying technologies.	Displays a positive learning mindset and handles technical discussions thoughtfully; with increased practical exposure, his technical capabilities can strengthen significantly.	6.50	2026-03-08	2026-03-08 09:01:35.939
+432	a9c06548-8662-4977-929e-303c76c3e2db	5cd29d5a-169e-41db-87a2-997e5fd5301f	9	9	9	9	8	9	9	Confident\nWas able to answer technically	Need to have eye contact\nToo much of hand movements	Need to work on his body language	8.00	2026-03-08	2026-03-08 09:02:29.286
+433	515a153f-7744-4b50-81b7-4e1f3da115bf	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	8	9	8	8	8	8	9	Good Technical Knowledge 	need to do more Technical courses 	Good	8.50	2026-03-08	2026-03-08 09:02:53.558
+434	3d5bcc19-91c9-4c2c-98cb-832e2b362dda	24421caf-3a14-4681-b9f9-f237f956d8d4	6	5	5	6	5	6	6	Sounds confident. Able to explain the project that he was involved. More inclined to ML. Aspires to learn Deep learning.	Need to learn more on front end, back end technologies and develop Deep learning skills.	Very good learner. Able to articulate the project well. With proper guidance he will be able to deliver better.	6.00	2026-03-08	2026-03-08 09:03:13.877
+435	7f281677-c4c1-4683-a5fb-82e2fc583317	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	5	5	7	5	6	7	Understands his subject well.	Communication needs to be improved and he needs to work on clarifying on what he wants to say. Needs to complete the sentences to explain his thoughts clearly. 	He is a good candidate but has to prepare and do proper research work for his career.	6.00	2026-03-08	2026-03-08 09:04:40.416
+436	ed146e19-1056-490a-a4f5-7bd3cc0a5a4f	fcce01c3-007c-4299-a17f-9d5f4402c6ec	6	7	6	6	5	6	6	CV was very well presented and was very clear to understand about him. Communication was decent enough. Projects were well explained 	Should work on current knowledge and make sure to have an eye contact with the HR while speaking. Needs to improve briefing about himself.	Well presented and should work on the points discussed with him on the call	6.00	2026-03-08	2026-03-08 09:04:52.357
+440	bbea4cee-54bd-480b-8367-dc1c42df510a	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	8	8	6	7	7	8	7	Good Communication Skills, good attitude towards learning.	Can improve SQL, Pyhton programming skills.\nNeed to get in-depth understanding of ML Algorithems & NLP\nGet exposure to one of the web technology : Azure/AWS/GCP.	Overall, Srihari's communication skills are good. Can practice more on programming & get deeper understanding op AI/ML concepts. learn any one web technologies.	7.50	2026-03-08	2026-03-08 09:06:49.751
+441	c8c26219-699d-4edd-bb38-21ce307014dd	38236c5f-2faa-4940-aa37-60a206f3be14	7	7	6	6	8	7	7	communication 	No general awareness need more technical exposure 	Good 	6.00	2026-03-08	2026-03-08 09:08:46.315
+442	3eaa9ac6-be26-44d2-948d-7b72bec295f3	aaec9758-627f-40bb-b8b2-e92110d36327	9	8	9	9	8	9	9	Demonstrates good understanding of computer vision concepts and practical implementation through a PPE detection project.	Can further strengthen knowledge in model optimization and large-scale deployment strategies.\n	Candidate performed well with solid understanding of AI/ML concepts and practical project exposure.	8.00	2026-03-08	2026-03-08 09:09:41.308
+443	421451e7-a61f-4dff-9e7c-3e8b9b8ea2e3	2447e995-8cd8-431b-80fd-2654f0b2298b	10	8	8	9	9	8	9	Demonstrated good understanding in her Projects. \nCan gain More Experience by researching. 	Communication is little required.\nShe has a lot to say but unable to phrase it	Overall, the candidate demonstrated good technical potential and a strong interest\nWith additional practical exposure and continued learning, the candidate can perform effectively in industry environments.	8.00	2026-03-08	2026-03-08 09:10:42.31
+444	e357f846-8c30-41a7-86d0-d14e3931004d	0d77a15a-eaec-418e-93ba-7317ea498599	8	7	8	7	8	8	8	Meenakshi is multi-talented - has foreign language proficiency in German. Her clarity and confidence are refreshing. 	1. CV needs to reflect a strong sense of purpose by choosing which path she wants to pursue - German language training or pursuing higher education. \n2. Student needs to make up her mind before appearing for interviews.	Meenakshi is a bright young student who has prior work experience. She has a passion for German Language training and is also looking for pursuing higher education. 	8.00	2026-03-08	2026-03-08 09:11:06.284
+445	e5faad65-1789-45fa-8674-fbb33186d231	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	8	5	7	8	7	7	Communication skill is good. Technical knowledge is good and has good understanding of concepts.  	When faced with questions that are least expected, the candidate tends to become nervous and finds its difficult frame answers. 	The candidate has good technical knowledge but I feel will not function well under pressure. Needs to learn to remain calm and answer the interviewer. 	7.50	2026-03-08	2026-03-08 09:11:48.628
+446	a8f7ffdd-561e-4f3b-a1fa-aae22b41131d	54ad8399-936a-47f5-bfc8-db3194c32ea3	8	7	6	5	8	8	7	Communication Skills; Asking Questions, Stable / assertive	Technical Path is not clear; has to choose one or two technical Skills and learn undepth	Potential but has to work hard to improve technical skills 	6.50	2026-03-08	2026-03-08 09:12:55.044
+447	bc2c6c62-b374-4b84-be9d-09bff4b9b136	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	6	6	6	6	Attitude	To be more focussed\nCommunication\nTechnical Knowledge	Good candidate but more to be moulded	5.60	2026-03-08	2026-03-08 09:13:17.901
+448	57dd40e3-cc3d-49ca-b744-0908d42fd2d0	4df9bf27-579a-4661-a2ea-703387a2bdaf	10	7	7	8	10	9	9	will learn and organized and eager to learn 	need to be more technical and learn the latest technologies	good for support and cloud based roles	7.50	2026-03-08	2026-03-08 09:13:36.89
+449	2c3347ea-4e52-464e-82cc-09bd9e4cd234	0d77a15a-eaec-418e-93ba-7317ea498599	8	7	7	8	7	7	7	Jayashree comes across as passionate and focused. Her interest is in securing employment which speaks of focus. Seems to be well-informed about career prospects relevant to her field of interest. 	Can work on her verbal communication to be sharper and clear.	Good interacting with her. Wish her all the best!	7.00	2026-03-08	2026-03-08 09:13:39.799
+450	48b1ad11-aadf-4b62-a9df-8ac7a81a438c	6a9107b1-6b87-42c5-8994-967a28c2b0d1	10	10	9	10	10	10	10	Awesome in all aspects	Just the resume changes said in the meeting	Really great candidate will sound knowledge in all aspects one can evaluate	10.00	2026-03-08	2026-03-08 09:13:57.214
+451	76ea3054-5739-435e-bed4-55df6682b0c5	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	9	8	8	8	9	9	9	Bershey is very confident and has good attitude.\nHe has good articulation skill. His answers were clear and crisp	He needs to focus on backend development topics and also on new emerging topics like cloud and AI	Bershey has good communication. He is clear on the concepts whatever he knows. He needs to improve in learning latest trending topics.	8.50	2026-03-08	2026-03-08 09:14:13.236
+452	4af10704-e3fa-4c73-9cf0-3ab817ada940	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	5	5	7	4	4	1	Demonstrates adequate technical knowledge in electrical engineering (7/10) with reasonable grasp of core concepts. This is the primary strength area for the candidate. Shows some foundational understanding of the discipline and subject matter.	CRITICAL DEFICIENCIES IDENTIFIED: Extremely low self-confidence score of 1/10 is severely limiting factor affecting overall performance. Communication skills critically weak (4/10) - must urgently improve verbal articulation, confidence in speaking, and presentation abilities. Managerial aptitude (5/10) and ambition (4/10) both below acceptable levels. General awareness (5/10) and appearance/attitude (5/10) need substantial improvement. Candidate requires comprehensive personality development, confidence-building programs, and intensive soft skills training. GD score of 35/50 and aptitude score of 28/40 also indicate need for structured preparation in quantitative and discussion skills.	SERIOUS CONCERN - Vaseekaran S scored only 4.43/10 overall, indicating critical performance deficiencies across most dimensions. Self-confidence rating of 1/10 is extremely problematic and severely impacts placement readiness. Communication skills (4/10) far below acceptable standards. Overall profile suggests candidate is struggling with significant psychological/confidence barriers that must be addressed. While technical knowledge (7/10) is acceptable, it is overshadowed by severe soft skills deficiencies. Recommendation: NOT READY for placement. Candidate requires: (1) Intensive personality development and confidence-building programs (minimum 3-4 months), (2) Professional counseling/coaching for self-confidence issues, (3) Structured communication skills training, (4) Aptitude preparation, (5) Group discussion coaching. Current status: REQUIRES SUBSTANTIAL INTERVENTION before placement consideration. Without addressing self-confidence crisis, candidate will struggle significantly in any role.	4.40	2026-03-08	2026-03-08 09:14:45.959
+453	049027f3-734f-42a4-aa11-543caca8629d	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	7	7	7	8	6	7	7	Kishore is able to explain his project clearly and demonstrates a good understanding of the work he has done.\n\nWhen questions are explored in depth, he is able to respond with relevant answers, indicating sound conceptual knowledge.\nShows good technical potential and willingness to learn.\nAppears to be a sincere and solid candidate who can perform well if given the opportunity.	Needs to work on verbal communication and confidence while speaking.\nSometimes struggles to articulate responses immediately, though he is able to answer when given time to think.\n\nAdditional Observation\nKishore experiences stammering due to a condition, but he is actively working on improving it and continues to make the effort to communicate effectively.	Kishore demonstrates good technical understanding and clarity in his project work. While communication is currently a challenge, his knowledge depth and willingness to improve make him a promising candidate who could perform well with the right opportunity and support.	8.00	2026-03-08	2026-03-08 09:14:52.558
+454	1ec8702f-66a7-4d65-86f8-2c562f622308	81f895c5-36b8-4d09-8241-80e64868fe56	6	6	7	7	8	7	7	Learning more things in outside	Technical side need to improve, You need more confident in your answer	Improve more technical side.   	7.50	2026-03-08	2026-03-08 09:15:13.77
+455	53bcfe04-7e2d-4776-ac2c-11fb1c28e4d2	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	5	5	5	5	5	5	5	Good project initiative	Communication, learning initiatives, strong domain knowledge, inter personal skills	Overall average	5.00	2026-03-08	2026-03-08 09:15:55.852
+456	b26ed963-30c2-4c00-bce1-9522ebd37a85	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	8	8	8	9	9	9	Focused on Sustainability as a job opportunity - a growing trend in many industries and R&D. 	Certifications on Life Cycle Analysis and EPD suggested	Patience and keen interest visibly seen during the interaction. Needs to develop stronger connections on various aspects of Environmental Sustainability for further self-development.	8.50	2026-03-08	2026-03-08 09:16:58.099
+502	15bfa627-6e88-4cc1-ae8c-ea47301ade75	38236c5f-2faa-4940-aa37-60a206f3be14	8	7	8	7	7	8	6	good communication 	general awareness 	can be groommed 	7.00	2026-03-08	2026-03-08 09:49:14.989
+457	e3b63cc6-5eaf-4135-a0ab-8717eeaa8917	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5	5	5	5	4	6	4	He looks sincere and dedicated. 	Needs to improve on Communication and can focus on what he wants to achieve. Should improve his CV as it does not contain any proper alignment or information..	Should work on certain soft skills like building confidence and improving basic communication	4.50	2026-03-08	2026-03-08 09:17:49.111
+458	97387603-6698-4b10-80b7-164d413e81e5	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	7	8	10	9	8	8	7	Sound technical knowledge & general awareness.	should be more confident, with his level of knowledge there's no need for doubts.	Good	8.20	2026-03-08	2026-03-08 09:19:14.876
+459	890e0d84-2cb3-44ec-bccc-61afc50410cd	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	7	8	7	8	6	7	8	Good attitude 	Has to have more technical knowledge and explaining the technical concepts	Work on communicating about technical concepts	8.30	2026-03-08	2026-03-08 09:19:41.22
+460	62dabc83-c2be-45ac-b1de-3abb143dc0d5	5cd29d5a-169e-41db-87a2-997e5fd5301f	6	6	6	7	5	6	7	Like to explore new things	Need to confident & loud while speaking\nNeed to improve his communication skills 	Need to work on communication skills	6.00	2026-03-08	2026-03-08 09:20:09.078
+461	8efa7788-bc3e-4ab0-bca9-5d044cf49b0b	c4e22006-3ed9-4250-91c8-6618d57253ed	7	7	7	6	6	7	7	Was able to explain his projects well	Strengthen the technical skills	With little efforts can reach great heights\n	6.00	2026-03-08	2026-03-08 09:21:18.422
+462	76211491-be7e-4a05-98f8-a3ef059fe1f3	458250d8-e65f-4171-9e11-3a6dff72a848	9	8	9	10	8	9	10	Technical 	Communication 	Good and need to improve on communication 	7.00	2026-03-08	2026-03-08 09:21:26.084
+463	dfb4d338-0cd7-4252-8f5e-9773ec6c9ed3	2447e995-8cd8-431b-80fd-2654f0b2298b	9	6	6	5	4	4	4	He can survive in the market for the next 2 years. If not improved in Technical terms and gain some knowledge he can't survive 	Should gain more hands-on experience with industry-level hardware tools and testing methods.\n\nCan improve clarity while explaining complex technical topics.\n\nContinued practice in system-level design and troubleshooting will strengthen technical confidence.	With additional practical exposure and continuous learning, the candidate shows good potential to perform well in hardware and electronics-related roles.	5.00	2026-03-08	2026-03-08 09:22:24.162
+464	4bd77e7d-9be3-4871-94f1-479dc11934d7	649453fd-ef30-42d1-8d2a-94c26237e814	8	6	5	6	5	7	6	Candidate seems to have knowledge on specific technical areas like Power platform, YOLO and Computer Vision. Has good knowledge on the projects and technologies that he had worked on and was able to answer most questions in this area.\n\nCandidate shows curiosity to learn various technologies and topics. 	As candidate seems to have signed NDA for the projects, he can be more prepared with the exact details that can be revealed to the interviewer to explain the projects worked on and sequence it as requirement of the project, the users benefitting from the changes and technologies used. \n\nThough knowledge on specific technologies is god, candidate needs to be prepared and have more knowledge on basics of other technologies like Java, Python and others mentioned in the resume.\n\nThere is also scope for improvement in communication, candidate seems to know few concepts, but unable to express and explain the same. 	Candidate has good knowledge on specific technical areas and shows curiosity to learn various technologies and topics. Can focus on the areas of improvement to prepare for the actual interviews in future.	6.00	2026-03-08	2026-03-08 09:22:56.352
+465	9c15faaa-8504-456b-a94f-b07b1f643286	c4e22006-3ed9-4250-91c8-6618d57253ed	8	6	7	6	8	8	8	Confident.Passionate about her interest in Energy Mgmt/studies. 	TEchnical knowledge, Clarity on which field she wish to pursue and prepare for it	GOod	7.00	2026-03-08	2026-03-08 09:23:03.911
+466	26462040-10a9-4d94-aba6-43b88de4be63	539ff319-c98a-440f-9541-c0e736fe44b3	7	7	7	7	8	7	8	has done some interesting project, has interest in Website development	needs to do more hands on project 	can surely imporve	7.00	2026-03-08	2026-03-08 09:24:08.03
+467	bc6e780a-8715-418a-8678-99a56144eb89	24421caf-3a14-4681-b9f9-f237f956d8d4	5	4	4	3	4	4	4	Has only limited knowledge about the projects done. Has good interest for UI/UX design.	Need to be aware of the details of the project even though played limited role. Be specific about the ambition - with identified skills / role. Need to communicate more confidently.	Currently very average in presenting herself. She needs more grooming support to perform better.	4.00	2026-03-08	2026-03-08 09:25:08.819
+468	b1dd9bc2-c844-41d3-a5b5-ebfd335dca8b	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	7	5	7	6	7	6	7	Attitude, open to learning, clarity of thoughts	Self confidence and being vocal	Overall okayish	6.00	2026-03-08	2026-03-08 09:26:12.831
+469	3d9a9dd5-3386-4583-94ba-4a5c392706a6	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	9	8	8	7	8	9	9	Praveen is very confident. Communication is good. He wants to pursue career in ECE only. But still he is aware of ML, AI and other latest technologies	If in case he plans to pursue career in IT, he needs to learn basic concepts in IT	Praveen is very confident. He wants to pursue career in defense. He needs to get trained in basic IT concepts if he wants to get into IT firm. 	7.00	2026-03-08	2026-03-08 09:26:17.864
+470	dfe59bae-f2b7-4216-8476-dd764a8bb26b	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	8	7	7	8	7	8	8	Good Communication Skills, Attitude towards learning.\nGood understanding on Blockchain technology.	Can do better in presenting the project.\nLearn AI/ML & GenAI concepts.\nPractive SQL & Python.\n	Overall, Jeevan is ale to explain what he as done in the project. Can do better in the technical presentation of his part. Get good understandng on AI/ML topics.	7.80	2026-03-08	2026-03-08 09:27:16.619
+471	e245fac6-bc7f-4551-a2ac-ccc03f7366be	38236c5f-2faa-4940-aa37-60a206f3be14	7	5	4	4	4	6	4	need to improve 	cn be technical learning needs to be updated 	Ok	4.00	2026-03-08	2026-03-08 09:27:56.797
+472	521466be-ed8a-43d5-91fe-a63c5b9f641a	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	9	9	8	9	8	8	9	Develop problem-solving skills, finding fault, and troubleshooting abilities	Technical knowledge 	Good Attitude 	8.50	2026-03-08	2026-03-08 09:29:02.286
+473	4febad14-2825-43f7-b20c-46a2c524981c	fcce01c3-007c-4299-a17f-9d5f4402c6ec	7	6	7	6	5	7	5	Good presentability and looked sincere and dedicated. 	Should improve on self introduction keeping it short and crisp. Need to work on his confidence as he looks very nervous during the interview. 	Can also worked on over all communication to build confidence and can conduct practice sessions at home to crack interviews	6.00	2026-03-08	2026-03-08 09:29:43.89
+474	9977c7f7-712d-4983-9cc2-3109b62b6803	d6a31449-5393-444e-89c7-f8ba9d35545a	7	5	5	6	7	6	6	Communication	General Trend Awareness in the Mechanical Stream	Good candidate and should be moulded	6.00	2026-03-08	2026-03-08 09:29:44.498
+475	6e5af564-1f45-401c-bdec-d8132508f6e6	a3ca42d8-ab64-421a-ab67-aeb12925661e	9	9	8	9	9	8	9	He is good in communication and his vision.	Needs to do more literature survey about his area of interest and vision. 	Excellent candidate	9.00	2026-03-08	2026-03-08 09:29:50.466
+476	4572a87c-c994-44a9-aa44-8ef2685124a0	7d959ecb-3999-47cd-ae17-5aab0405cb97	7	5	6	5	8	6	6	Communication skills are good. Frames the questions properly and is confident. 	Needs to update technical knowledge. 	Does not maintain eye contact while answering questions. Needs to prepare answers for basic interview questions like tell me about yourself. Is able to put his thoughts into words. 	5.50	2026-03-08	2026-03-08 09:30:28.58
+477	7cd187fd-5474-4b14-98e0-65fcfadf0926	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	7	3	3	8	7	5	6	Technical Knowledge, Attitude & Communication	Managerial traits, General knowledge & Confidence	Average	6.00	2026-03-08	2026-03-08 09:31:04.263
+478	cbff175a-bfeb-4991-aafe-ecebb038e87c	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7	8	9	6	6	9	6	Good general awareness and managerial capability and also ambitious, has good resume based knowledge	Can improve communication and technical skill as mentioned in the meeting along with resume inputs	Chandru is a really good candidate and will flourish with a few changes mentioned above	7.50	2026-03-08	2026-03-08 09:31:41.299
+479	aa3327de-22c1-4c07-8c2a-db9f30261b94	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	9	8	3	3	8	8	8	Shruthi was able to explain her project well.\nAs she is EEE student, I could not validate her technical ckills.\nThe above Validation for Technical and General awareness is for her IT skills.	If Shruthi wants to be in IT, she needs to work on her programming skills.. \nProbability, SQL, Python, AI/ML concepts, Gen AI concepts etc.\nGood to have exposure to one of the web technology : Azure/AWS/GCP.	As Shruthi is EEE student, I could not validate her technical ckills.\nThe above Validation for Technical and General awareness is for her IT skills.\nShe is able to communicate well and have good attitude towards learning.	6.00	2026-03-08	2026-03-08 09:32:10.212
+480	bfe6ef71-246a-4499-a7ea-45c6feffd1c1	aaec9758-627f-40bb-b8b2-e92110d36327	9	9	9	9	7	9	9	Demonstrates strong technical understanding with practical project exposure, including development related to PCOD sensor applications.	Can further strengthen knowledge in advanced AI/ML concepts and real-world system deployment	Candidate performed excellently with strong conceptual clarity, good communication, and impactful project experience.”	9.00	2026-03-08	2026-03-08 09:32:16.18
+481	6a65de32-2fe0-44e5-8c99-e919a952ab28	a3ca42d8-ab64-421a-ab67-aeb12925661e	10	9	9	9	9	10	10	Clear in Vision and his area of interest is an excellent and will support our society resolve the specific health issues. 	Recommended to perform literature study in his area of interest. 	Excellent candidate	10.00	2026-03-08	2026-03-08 09:33:56.822
+482	1a3e452d-73f9-4fed-981b-d93363e2da80	4df9bf27-579a-4661-a2ea-703387a2bdaf	10	9	9	10	10	9	10	technology, cryptogrphic knowledge, confidence	na	best candidate for mncs	9.00	2026-03-08	2026-03-08 09:33:57.004
+483	73528f23-8053-4ac2-84d8-0220e7e90c90	2447e995-8cd8-431b-80fd-2654f0b2298b	10	10	10	10	10	10	10	She has an ability to run on her own. Can manage any kind of task assigned to her.	Can give more hands on exposure in technical systems	Overall, the candidate demonstrated good technical potential and a strong interest in the field.	10.00	2026-03-08	2026-03-08 09:35:02.675
+484	1a15d587-ec8a-4bc3-8fff-fb99e73341e5	38236c5f-2faa-4940-aa37-60a206f3be14	7	8	8	8	9	7	5	great communication 	Less awareness in Technical 	Can be groommed	7.00	2026-03-08	2026-03-08 09:35:24.726
+485	0decfcd2-1182-47fe-9a74-d75d93615f83	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	10	7	6	10	7	10	From a technical standpoint, the candidate demonstrates solid foundational knowledge and is able to reason through system design challenges during discussion.	Needs to develop clearer alignment between technical approaches and project objectives, particularly in identifying scalable solutions rather than workarounds that limit the system’s purpose.	Technically capable, but would benefit from stronger problem framing and solution thinking to ensure that design decisions effectively address the core goals of the project.	7.00	2026-03-08	2026-03-08 09:36:34.341
+486	6ef44bbc-1f86-4358-8887-913e6370ddf3	a3ca42d8-ab64-421a-ab67-aeb12925661e	9	8	8	8	8	8	8	Good in communication.	Vision to be fixed clearly and against her Vision literature study to be performed.	Good candidate	8.00	2026-03-08	2026-03-08 09:37:18.844
+487	5c2c5e74-41ec-4d37-bb3d-5d76fd098794	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	5	4	4	4	4	5	Confidence and Looks	Needs to improve communication skills and know about everything that he has mentioned in the resume. 	The student has no clue of what he is learning and doing. He does not have any idea about what he has mentioned in the resume. Needs to get serious and workhard.\n	4.70	2026-03-08	2026-03-08 09:37:41.174
+488	051982ff-cea9-4e77-8b15-8fa9f829dca4	c4e22006-3ed9-4250-91c8-6618d57253ed	8	7	7	5	7	7	7	Confident, aspiring	Thorough study on the technical skills is required to pursue his passion in ML	Good	7.00	2026-03-08	2026-03-08 09:37:43.1
+489	64e6390e-44e3-4b60-a29b-da402ffa4a8a	5cd29d5a-169e-41db-87a2-997e5fd5301f	8	8	8	8	8	9	9	Clarity\nConfidence	A little louder while speaking\n	He has good clarity of his career choices	8.50	2026-03-08	2026-03-08 09:37:54.041
+490	7f88abb9-7940-4cdc-b99e-21715e682c52	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	6	5	7	7	6	7	7	Coding knowledge, able to explain the project clearly	Communication and confidence	Overall goog	7.00	2026-03-08	2026-03-08 09:38:16.155
+491	252358b5-6c12-43ae-b19d-b65d2ee063f2	a3ca42d8-ab64-421a-ab67-aeb12925661e	8	8	8	8	8	8	8	Good in communication.	Vision to be fixed clearly and against her Vision literature study to be performed.	Good candidate.	8.00	2026-03-08	2026-03-08 09:38:29.925
+492	a2e0f3a4-5806-4250-ba3c-bcd02bc53a2c	24421caf-3a14-4681-b9f9-f237f956d8d4	4	3	3	2	3	2	2	She was not prepared for the interview	She was not prepared for the interview. She was unable to explain the projects done.	She need to gain more practical experience in the project done and learn to explain the same.	3.00	2026-03-08	2026-03-08 09:39:38.842
+493	3cdc243b-1991-4aab-bc8d-3b404d065153	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	4	4	4	4	4	4	Maintains decent appearance and positive attitude (7/10), which is the primary strength. Demonstrates acceptable professional presentation and willingness to engage with the assessment process. Shows ability in group discussion with GD score of 43/50, indicating capacity to participate in team settings.	SIGNIFICANT DEFICIENCIES ACROSS MULTIPLE AREAS: Critical weakness in technical knowledge (4/10) - inadequate understanding of core engineering concepts. Communication skills critically low (4/10) - severe difficulty in articulating ideas and expressing thoughts. Managerial aptitude (4/10), general awareness (4/10), and self-confidence (4/10) all severely below acceptable standards. Ambition and motivation also critically weak (4/10). Most critically, aptitude score of only 18/40 indicates severe deficiency in quantitative and analytical reasoning - among the lowest scores. Requires comprehensive intervention across technical, soft skills, and confidence dimensions.	CRITICAL ASSESSMENT - Naveen Harish B S scored 4.43/10 overall, indicating severe performance deficiencies. While GD score of 43/50 shows some capability in group settings, this is vastly overshadowed by critical weaknesses elsewhere. Aptitude score of 18/40 is extremely concerning - among the lowest observed - indicating severe struggles with quantitative reasoning and analytical thinking. Technical knowledge (4/10) is far below acceptable standards. Communication skills (4/10), self-confidence (4/10), ambition (4/10), and general awareness (4/10) are all critically weak. Only appearance (7/10) provides minimal strength. Recommendation: NOT READY FOR PLACEMENT. Candidate requires: (1) Intensive technical remediation in engineering concepts, (2) Comprehensive soft skills and personality development program (minimum 4-6 months), (3) Structured aptitude training with focus on quantitative skills, (4) Professional coaching for communication and confidence. Current status: Requires SUBSTANTIAL LONG-TERM INTERVENTION. Without significant effort and support, candidate will struggle severely in any professional setting.	4.40	2026-03-08	2026-03-08 09:40:26.957
+494	05ade5c7-ae17-4558-bb5e-dd5e99f8f15a	a3ca42d8-ab64-421a-ab67-aeb12925661e	10	9	9	9	9	10	10	Clear in her vision and area of interest.	Against her Vision lot of literature study to be performed.	Excellent	9.00	2026-03-08	2026-03-08 09:41:31.072
+495	175a1341-ab76-428d-81d7-77f3b16ac17e	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	9	8	7	8	9	8	9	Jeffrin is confident on her answers. She is aware of basic AI and ML concepts	Needs to understand concepts with real life scenarios. Need to get exposed to web applications and software development basics.	Jeffrin has good exposure to AI and ML concepts. But needs to get trained on other programming languages 	8.00	2026-03-08	2026-03-08 09:41:59.804
+496	5c71628e-d3d9-4811-b021-998b2b388e6d	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	8	6	3	7	8	10	confident and clear about the future	little bit technical knowledge	need to be in marketting kind of roles	6.90	2026-03-08	2026-03-08 09:42:13.195
+497	16cc8606-5683-4b62-b9ca-2a050d4421f3	fcce01c3-007c-4299-a17f-9d5f4402c6ec	6	4	5	6	5	7	5	Well presented during the interview 	Should work on AI and other technical knowledge about her own industry. Need to improve self confident. Should work on self introduction. 	Need to work on over all soft skills as well as technical knowledge	5.00	2026-03-08	2026-03-08 09:43:05.633
+498	56225877-f78e-4088-8c9d-15ab1bd87e69	a3ca42d8-ab64-421a-ab67-aeb12925661e	9	8	9	9	9	9	9	Good in communication and technical knowledge.	Vision to be fixed clearly and against her Vision literature study to be performed.	Good	8.00	2026-03-08	2026-03-08 09:43:22.178
+499	d121fb18-a3d3-4a85-880d-765613d31a95	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	9	8	9	9	9	9	9	Knowledge & attitude.	Can work on managerial aspects.	Really good potential, can try for Bharat Future Leaders Program (BFLDP).	9.00	2026-03-08	2026-03-08 09:45:29.68
+500	416f9261-2e84-4666-a861-184add985c54	81f895c5-36b8-4d09-8241-80e64868fe56	8	7	8	7	8	7	8	Good Ability to answer on all	More on technical skills	Good	7.60	2026-03-08	2026-03-08 09:46:58.901
+501	7bffe557-d591-43c0-874c-65b80111cac8	6a9107b1-6b87-42c5-8994-967a28c2b0d1	7	7	6	8	6	7	8	Good technical knowledge and appears to be ambitious with a good attitude	need some improvement in communication skills (better fluency) and general awareness	Sudeshwar is a really good candidate and with the above mentioned changes he will come out with flying colours.	7.00	2026-03-08	2026-03-08 09:47:55.411
+504	c8388555-2e5f-4329-bd90-f966b94d1389	aaec9758-627f-40bb-b8b2-e92110d36327	6	7	6	4	5	5	4	Shows basic understanding of core concepts and is able to explain ideas at a fundamental level.	Needs improvement in depth of technical knowledge, problem-solving approach, and practical application of concepts	Candidate demonstrated average performance with basic understanding but requires further learning and hands-on experience\n	6.00	2026-03-08	2026-03-08 09:51:22.106
+505	31035a29-4799-4624-944a-2b1220720266	539ff319-c98a-440f-9541-c0e736fe44b3	8	9	9	9	9	9	9	good candidate, has done projects which are properly documented. has clear idea	Just keep the good work and do atleast 1 project per month and keep posting in Git, and also use Athropic and Codex	good	9.00	2026-03-08	2026-03-08 09:52:15.815
+506	46b0a193-b783-442e-828f-2fa1c48e26e7	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	10	10	10	10	10	Have good grasp on the Full stack development - Java and React   	Improve on Aptitude, java fundaments and react fundaments \nLearn more on AI RAG applications 	Keen on full stack java development, good communication and confident candidate\n	10.00	2026-03-08	2026-03-08 09:52:45.331
+507	1ea59620-42fd-4d8e-8352-cd821d3e05bc	5f1975ba-b40d-4a05-b28d-5195c0db7348	10	10	10	8	8	7	10	Gokulavasan is good at expressing his thoughts and has a good hold on the general aptitude. He is confident and bold in sharing views. 	He needs to clearly aim for a career path and decide where to go next by the end of his final year. 	With efforts on improving communication skills and clarity of his career path, Gokulavasan will be an asset to the organization that he joins. 	8.00	2026-03-08	2026-03-08 09:52:47.986
+508	67846e25-22cd-4fea-88c5-72f3da58acb6	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	7	8	7	8	8	8	Confidant and knows what he is doing and what path he needs to follow to achieve his dream job.	He needs to work on his technical part and improve his CGPA.	A really good candidate and is clear and focused with what he wants to do and achieve.	7.50	2026-03-08	2026-03-08 09:53:12.456
+509	2295eb98-2649-496e-bdab-b7edfaf18bc9	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5	4	4	4	4	4	4	Decent communication	Needs to improve body language and commitment towards the interview. CV was not aligned and was in a screenshot format. 	Make sure to be well prepared before the interviewer with your updated CV and keep your entire focus with them. 	4.00	2026-03-08	2026-03-08 09:53:21.542
+510	76b5ed92-8fb0-40af-b2a2-c74f713da496	d631f416-b5af-4ca2-956f-da772aff5f6f	7	5	6	5	5	6	7	Came forward for the interview to face. 	Need to practice and get ready for placements. Rather believing on Digital help on getting code, even after sensitizing to be honest, got and pasted the code from internet. Meaning, even if are unaware or yet to learn or acquire some skills, we should come forward and inform about that, rather hiding.	He has to improve and come out of fear and face the reality and start putting the efforts on acquiring the skills.	6.00	2026-03-08	2026-03-08 09:54:41.467
+511	25f66b04-a5f8-440d-963a-4445bdbba059	42dbf0f4-4340-4d04-b344-a249cd2b25ba	7	8	8	9	6	9	8	Knows the content & has industrial working experience.	Slightly can be better in communication & responses can be little shorter.	Looks very genuine & eager to work, passionate.	7.00	2026-03-08	2026-03-08 09:55:32.27
+512	3de29801-8f0e-43e4-b063-8f29cd51c75b	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	8	8	9	8	has good real world project	need to put the code in github and make short video of working models	good candidate	8.00	2026-03-08	2026-03-08 09:55:56.118
+513	f8f5fa2b-d308-416f-9b6f-795abaae257a	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	7	7	8	8	5	6	6	Strengths\n\nNimal is articulate and able to express his ideas with good clarity.\n\nDemonstrates strong theoretical knowledge, particularly in Power Systems.\n\nActively participates in technical initiatives such as the IIT workshop, where he was part of the winning team in a Robotics Workshop for Electrical Engineers.\nShows interest beyond his core area, indicating curiosity and willingness to explore multiple domains.\nTook initiative in academics by choosing Marine Engineering independently, reflecting strong personal motivation.\nHas leadership exposure as an NSS Lead, showing responsibility and coordination ability.\nDisplays a high level of commitment and willingness to put in extra effort to achieve goals.\n	Needs to further strengthen communication skills for more structured and confident presentation.\nTends to overthink at times, which may affect decision-making speed.\n	Nimal demonstrates good theoretical knowledge, initiative, and leadership exposure. His participation in technical workshops and willingness to explore different domains reflect strong motivation and learning mindset. With improvement in communication and managing overthinking, he has the potential to perform well in technical roles.	8.00	2026-03-08	2026-03-08 09:56:21.829
+514	16485858-2df6-4b52-b567-52ccc8943851	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	8	5	7	8	8	9	Communication and confident are the strengths of the candidate. 	Needs to maintain eye contact. 	Overall the candidate is good and has done well with the interview 	9.00	2026-03-08	2026-03-08 09:56:31.606
+515	0c126d35-19f2-4288-8f94-4aacd7881983	81f895c5-36b8-4d09-8241-80e64868fe56	7	8	7	8	7	8	6	Good ability to answer	More in Technical side 	Ok to skills	7.30	2026-03-08	2026-03-08 09:59:01.969
+516	5aa2ff6c-ad0b-452d-a783-075099ab05e2	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	8	5	5	6	8	7	7	good communication skills, a quick learner	has to gain indepth knowledge on the technical aspects\n	will be a team player, will be a sincere contributor to the task assigned for	7.00	2026-03-08	2026-03-08 09:59:46.704
+518	536127a1-04e3-4ac2-b0a5-ec11d43ab844	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	5	5	5	5	7	5	5	Demonstrates a strong technical mindset with good analytical thinking.\nHas industry exposure through a Project Internship at Bosch Group, which adds practical understanding.\nShows the ability to go deep into technical topics and analyze details thoroughly.\nPossesses good theoretical knowledge in his domain.\n	\nNeeds to improve articulation and communication while explaining ideas.\nTends to go into excessive technical detail, which can sometimes make explanations less concise.\nShould work on presenting key points more clearly and in a structured manner.	Sanjay demonstrates strong technical inclination and attention to detail, supported by his internship exposure. With improvement in communication and the ability to summarize technical concepts effectively, he has the potential to perform well in technical and engineering roles.	5.00	2026-03-08	2026-03-08 09:59:46.937
+519	aef6e97e-ff16-4bac-ad7d-57eb26627e50	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	10	10	10	10	10	good on communication and have basic skills on technology 	1. Work on Aptitude and Reasoning for placement  and basic coding questions \n2. Try to Develop more skill and project on the machine learning and RAG applications  ai side projects \n3. try to select a niche\n	Nithya have good communication skill and technical skill just need to select a niece and work on it 	9.00	2026-03-08	2026-03-08 10:00:00.431
+543	cfac5947-64e2-434e-b2e0-daab571c4391	7d959ecb-3999-47cd-ae17-5aab0405cb97	9	7	7	8	9	8	8	Candidate is confident and is able to voice out his thoughts properly. He shows the drive to improve and upskill himself	Tends to give very long answers. 	Overall a well rounded candidate. Answer needs to be crisp and needs to maintain eye contact	8.00	2026-03-08	2026-03-08 10:15:25.874
+544	a05012e1-4919-49cf-9d92-0ba642683ef0	d6400b5f-5117-4826-8aa2-20e215edfb2b	9	8	5	5	8	7	8	The candidate communicates clearly and demonstrates a basic understanding of building simple applications	Needs to strengthen conceptual understanding of AI and automation, and focus on designing solutions with more complete functional considerations.	With deeper conceptual clarity and careful consideration of user experience and applications of technical concepts, the candidate can improve significantly.	6.50	2026-03-08	2026-03-08 10:15:26.066
+520	06391f38-0b76-4f71-a34b-357913ecf0c1	cd263764-71e2-4ead-87a3-0c5e9aff9828	6	4	4	8	8	8	8	Demonstrates excellent technical knowledge in electrical engineering (8/10) - major strength with strong grasp of core concepts and practical understanding. Possesses strong communication skills (8/10) with clear articulation and effective expression. Shows strong self-confidence (8/10) and high ambition (8/10) indicating good career motivation and drive. Professional appearance (6/10) with acceptable presentation standards.	Primary areas requiring improvement: Managerial aptitude (4/10) and general awareness (4/10) are significantly below acceptable standards and require substantial development. Candidate needs to develop leadership capabilities, strategic thinking, and broader industry/market awareness. Quantitative aptitude score of 21/40 indicates need for strengthening numerical reasoning and analytical problem-solving skills. GD score of 28/50 is below average and suggests need for improved group discussion performance and collaborative engagement. Should focus on enhancing these areas while leveraging strong technical and communication strengths.	Dharshini M scored 6.57/10 overall, demonstrating moderate performance with distinct strengths in technical and soft dimensions. Excellent technical knowledge (8/10) and strong communication skills (8/10) are major assets. High self-confidence (8/10) and ambition (8/10) indicate good motivation for career development. However, significant weaknesses in managerial aptitude (4/10) and general awareness (4/10) limit overall effectiveness. Quantitative aptitude (21/40) and GD score (28/50) both below average. Recommendation: MODERATELY READY FOR PLACEMENT with focus on technical roles. Candidate is suitable for engineering positions requiring strong technical knowledge and communication but may struggle in management tracks. Can develop leadership and awareness through focused training. Suggest leveraging technical strengths while addressing managerial and strategic thinking gaps through professional development programs.	6.50	2026-03-08	2026-03-08 10:00:26.609
+521	fd39cdbb-113d-484a-94a8-79d22e84680a	4df9bf27-579a-4661-a2ea-703387a2bdaf	8	8	8	5	8	7	7	Attitude.	need to learn some more technology	good	5.00	2026-03-08	2026-03-08 10:00:31.333
+522	a19fd527-9d8a-4b07-9ed9-b65b089da329	54ad8399-936a-47f5-bfc8-db3194c32ea3	8	7	7	5	8	8	7	Communication and Over all knowledge on the skills listed in the CV	Technical Skills must be deeper	overall performance is good but has to improve technical and IT Industry 	7.00	2026-03-08	2026-03-08 10:00:53.366
+523	bb6335ce-3a63-4955-824b-61380ba0bb27	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	3	3	3	2	3	2	Ambitious, Clear in What he wants, Enthsiastic	Fair communication given his background of his Schooling. Flummoxed while being cornered with Questions from the Basics. Need to work on the Basics and how to handle the Twisted questions. 	Good Candidate, who has a Potential to be trained for getting a good placement in the next year. 	5.50	2026-03-08	2026-03-08 10:01:05.19
+524	58a0270a-62de-4bf5-b720-b54571c13ede	5f1975ba-b40d-4a05-b28d-5195c0db7348	9	9	10	9	9	9	9	Lakshanaa can focus on any given topic and master it. Her focus at present is Pharma and is interested in pursuing higher studies abroad after gaining work experience in companies like Biocon, Dr Reddy's, Novartis, etc. 	Her doubts on a straight career path from Bachelors --> masters --> PhD needs to change to flexible career path based on her needs.  	Lakshanaa knows where she is headed but needs guidance on tuning her career. She is a futuristic person with an ambition for the Pharma industry. She will be an asset to the industry that she joins. 	9.00	2026-03-08	2026-03-08 10:01:37.841
+525	8f86c362-ed56-4a1c-bd86-a8f3548baeb0	42dbf0f4-4340-4d04-b344-a249cd2b25ba	9	8	9	8	9	8	9	Highly confident, knows the content, preparation has been good, Versatile.	Time Management.	Ambitious & Quick learner.	9.00	2026-03-08	2026-03-08 10:01:49.12
+526	c45fbc24-212b-40e2-89c5-e2520ee54b2a	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	6	7	6	8	6	9	9	Has good  knowledge in concepts	Not able to answer clearly, irrelevant, and no clear answers for some questions	Good knowledge but need to improve communication	7.20	2026-03-08	2026-03-08 10:02:06.825
+527	74016b70-42ea-4ac3-b617-f712e213b73d	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	9	9	8	9	9	9	8	Problem analyzing, finding solutions, and team management	Electronics Technical Skills.	Good Communication, Good Aptitude, Good Ability.	9.00	2026-03-08	2026-03-08 10:02:11.436
+528	374967ac-ad14-4bc0-9cb0-cac87fb4a794	81f895c5-36b8-4d09-8241-80e64868fe56	6	6	7	7	8	7	6	Learning more things in outside, 	Technical side need to improve, You need more confident in your answer	Improve more technical side.	6.70	2026-03-08	2026-03-08 10:02:26.372
+529	d24af4ca-00c9-4fa5-acb4-412ef174e2c5	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	10	10	10	10	10	skilled in IOT and networking and cybersecurity	1. Work on Aptitude and Reasoning for placement  and basic coding questions prep insta 100 for placements   if possible then learn datastructures \n2. Learn networking concepts - routing and switching protocols and cybersecurity - go on oswap 10 and bwap 	Overall a good candidate   	9.00	2026-03-08	2026-03-08 10:04:19.461
+530	2a2c141a-acdb-4fe7-9d68-0f268945057c	c34851b2-fce1-4c90-b896-3a1a666a841a	6	6	5	5	5	5	6	 	 CONFIDENCE LEVEL LOW, IMPROVE COMMUNICATION SKILL	 	5.20	2026-03-08	2026-03-08 10:06:36.367
+531	fe8510d1-d9a3-472d-b13b-9bde47186bee	42dbf0f4-4340-4d04-b344-a249cd2b25ba	9	8	8	8	9	8	9	Good in communication, preparation has been good, strong in basics.	Time management.	Good in providing solutions & arriving at closures. 	9.00	2026-03-08	2026-03-08 10:06:37.371
+532	a20ca561-ebda-4c4a-aacf-f5f69c9c37ee	dc83d654-7865-4342-9437-16bfcb075e6a	8	6	7	8	7	7	6	technical knowledge 	rework on his resume \nProjects \nCommunication a bit 	Need to improve 	6.80	2026-03-08	2026-03-08 10:06:55.145
+533	2cf23dd3-fb4e-4c9b-a2a1-6ee081a4a129	104e34a6-fd53-4012-a0f0-41df6842c833	3	2	5	4	5	4	5	Interested in a specific domain and has the ability to make progress. Understands high level end user requirements. Able to communicate on the domain.	To pick up technical skills to be applied in the domain. Must be able to communicate technical decisions clearly.	Has good understanding of the domain (or the product). Needs to pick up technical skills to add value.	5.00	2026-03-08	2026-03-08 10:08:15.8
+535	d18b5bba-3633-45e8-a583-b9d83a566ea2	5cd29d5a-169e-41db-87a2-997e5fd5301f	8	8	8	8	8	6	7	Wants to learn and upgrade himself in latest technologies	Lack clarity about his ambition	Overall Good	8.00	2026-03-08	2026-03-08 10:10:59.621
+536	8045c512-1ad9-4021-baa6-b1ab33ab59e1	4df9bf27-579a-4661-a2ea-703387a2bdaf	8	4	5	3	3	1	1	NA	communication, resume, technology	good but need to improve alot	3.00	2026-03-08	2026-03-08 10:12:07.512
+538	4b4c247a-1503-41c1-bc7f-203a916783c1	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	9	9	9	9	9	9	9	very clear in her thought process, good communication skills	A I based technology	will be a good team leader, can bind the team with her knowledge	9.00	2026-03-08	2026-03-08 10:13:30.912
+539	d4422035-cfac-4864-8aae-18462ccf4db1	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	10	9	8	10	10	Good Technical knowledge on all basic technology 	1. Work on Aptitude and Reasoning for placement  and basic coding questions prep insta 100 for placements \n2. try to a bring a live project in the resume and select a niece in ai or ml or full stack development and develop some live project 	good candidate need slight improvements 	9.00	2026-03-08	2026-03-08 10:13:56.601
+540	0689d3ab-98b3-4b1f-84df-b0bdfa21de11	5cd29d5a-169e-41db-87a2-997e5fd5301f	8	8	8	8	8	8	8	Good clarity of thought	Need to learn the terminology about Data Analytics if she wants to pursue a career in DA 	A bit nervous during the interview	8.00	2026-03-08	2026-03-08 10:14:13.217
+541	a7f75d73-ba69-4920-b9f9-e61978678b33	81f895c5-36b8-4d09-8241-80e64868fe56	7	7	8	6	6	6	7	Good Attitude	Need to learn more  technical 	Good	6.70	2026-03-08	2026-03-08 10:14:18.222
+542	3c6a274a-1bb2-4e33-87cf-32445b975b08	42dbf0f4-4340-4d04-b344-a249cd2b25ba	7	6	6	5	7	6	7	Able to communicate & manage.	Preparation could have been better.... as the content was not clear. 	Need to be bit more confident & body language can be better.	6.50	2026-03-08	2026-03-08 10:14:22.835
+545	dc10ab1b-7a37-44f6-b436-9f56f13ff909	cd263764-71e2-4ead-87a3-0c5e9aff9828	7	6	7	8	7	8	7	She is intelligent kid and has 9.0 cgpa so academically strong. She is clear about what she wants to do in future.	Communication and appearance has to be worked on.	She is a very good candidate.	7.10	2026-03-08	2026-03-08 10:16:04.162
+550	3f6742dc-f094-4cf6-aae2-c054490f5bf0	54ad8399-936a-47f5-bfc8-db3194c32ea3	9	9	9	8	9	9	9	Communication and Clarity 	Technical and Real time problem / solution areas 	Excellent performance 	8.50	2026-03-08	2026-03-08 10:18:28.879
+537	2374f5a3-b7c3-41f1-867b-88cb77d776bc	c34851b2-fce1-4c90-b896-3a1a666a841a	7	8	7	7	8	6	9	\n	\n	\n	9.00	2026-03-08	2026-03-08 10:13:01.024
+546	38010a43-7f12-4893-bbdc-f625e666cb9c	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	10	10	10	10	10	Technically sound and hirable candidate 	1. Work on Aptitude and Reasoning for placement  \n2. work on Datastructure striver sheet, 13 dsa patterns sheet algo expert solve medium level questions \n3. Learn on RAG side 	Good strong technical sound hirable candidate 	10.00	2026-03-08	2026-03-08 10:16:17.797
+547	e82007fe-2394-4f86-888b-785fd7a27021	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	9	8	8	7	6	9	8	Has good confidence	Should improve more communication, by keeping it concise	Work on conveying things directly	7.80	2026-03-08	2026-03-08 10:16:19.264
+534	b1b1be82-285d-4313-b50c-82ec04ecc331	e5cabf10-53a9-430a-a64c-34eaa3fffdb5	10	10	8	8	8	10	10	1. Good on communication and Confident  candiate	1. Work on Aptitude and Reasoning for placement  and basic coding questions prep insta 100 for placements \n2. Try to develop a skills and project on particular and showcase in resume with a github or hosted link \n3. all the best for the her government exam and  placement preparation\n  	Good candidate and need slight improvement on the communication and interview skill \n 	9.00	2026-03-08	2026-03-08 10:10:27.204
+549	17c6e987-b4a0-4726-bb15-c85550251455	6a9107b1-6b87-42c5-8994-967a28c2b0d1	2	1	1	1	1	1	1	NA	seems not interested in placement	Not interested in placements and was using chatgpt to answer questions	1.00	2026-03-08	2026-03-08 10:17:51.583
+551	a2cf2141-d7d1-435a-b8e4-034af9ae9e96	864fdade-0299-4871-a060-3c55442a1355	8	8	7	7	9	6	8	Good communication and confidence.	Need to give more detailed answers.	Good attempt, keep practicing to improve further.	7.00	2026-03-08	2026-03-08 10:18:43.83
+552	9be68bae-9772-4de8-a67a-d6c849f684eb	42dbf0f4-4340-4d04-b344-a249cd2b25ba	8	8	8	9	8	8	9	Communication was good & looked so confident. Content oriented & technically sound.	Could add practical examples while explaining the strengths & weaknesses.	Good to be in managerial roles.\nOverall, has a good potential.	8.50	2026-03-08	2026-03-08 10:20:33.78
+553	985cba0a-84b2-4292-a7b2-71e63fa75c2e	dc83d654-7865-4342-9437-16bfcb075e6a	6	5	6	7	5	7	7	he could able to explain about his projects 	Should Reframe his resume \nCommunication Skills  	Need to Improve 	6.50	2026-03-08	2026-03-08 10:20:34.202
+554	2bd49bce-fa3a-49d4-a618-39523ae71e57	864fdade-0299-4871-a060-3c55442a1355	8	8	8	7	8	7	7	Clear answers and positive attitude.	Improve confidence while speaking.	Overall good performance.	8.00	2026-03-08	2026-03-08 10:20:38.479
+555	aa149584-4e72-4200-8ee8-7c2933ff3fae	5cd29d5a-169e-41db-87a2-997e5fd5301f	7	8	8	8	7	8	7	Showing an attitude to learn and also leadership qualities	Too fast while speaking, she needs to slow down a bit	Need to improve her communication	7.00	2026-03-08	2026-03-08 10:22:18.245
+556	7857e076-b7bf-4d26-b7cc-197ba20c43d5	864fdade-0299-4871-a060-3c55442a1355	7	7	6	8	7	8	8	Good subject knowledge and clarity in answers.	Work on body language and eye contact.	nice effort, can do even better with practice.	7.00	2026-03-08	2026-03-08 10:22:19.851
+557	d2839665-643c-4f92-940b-56f141d31acd	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	6	7	7	8	7	8	will be good team player	Leadership skills\nhas to have more insights on Research 	Should gain more knowledge on Research methodology	7.00	2026-03-08	2026-03-08 10:24:22.684
+558	b49fcc8c-afea-4041-8573-4c39d0d2778f	864fdade-0299-4871-a060-3c55442a1355	8	7	7	6	7	8	8	Quick responses and good listening skills.	Try to explain answers with examples.	Good interview performances.	7.00	2026-03-08	2026-03-08 10:25:34.937
+559	ea65df8f-57d8-4c98-b8d5-f0e7231e0c54	aaec9758-627f-40bb-b8b2-e92110d36327	5	4	5	4	5	4	5	Shows basic awareness of technical concepts but requires stronger foundational understanding.	Needs significant improvement in core programming concepts, technical depth, and ability to explain solutions clearly.\n	Candidate demonstrated below-average performance and requires considerable improvement in technical knowledge and practical skills.	6.00	2026-03-08	2026-03-08 10:27:25.563
+560	80c60096-ac0f-4a14-8a72-e82b4af28f56	864fdade-0299-4871-a060-3c55442a1355	9	9	8	7	8	8	7	Confident speaking and good presentation.	Improve answer structure and clarity.	Overall a good attempt.	9.00	2026-03-08	2026-03-08 10:27:35.747
+561	0716c393-bd54-4be7-9c55-1fe211e4dc91	c34851b2-fce1-4c90-b896-3a1a666a841a	5	6	5	6	5	6	5	\n	CONFIDENCE LEVEL LOW , IMPROVE COMMUNICATION SKILLS	\n	5.00	2026-03-08	2026-03-08 10:28:08.921
+562	52c13b7a-c16c-4e33-9e98-048dfc6862e1	4df9bf27-579a-4661-a2ea-703387a2bdaf	9	9	9	10	10	10	10	technically strong, 	na	good candidate	9.00	2026-03-08	2026-03-08 10:29:36.717
+563	c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	6	7	7	7	8	8	8	Karunya has good communication skills. Have good knowledge on ML.	Karunya needs to improve in basic programming topics. She needs to focus on behavioral skills	Karunya looks very confident and has good communication skills. She needs to scale up in IT concepts if planning to take up opportunities in IT 	7.00	2026-03-08	2026-03-08 10:29:45.354
+564	5bf4551d-4f10-4d59-8c0b-1deb7eaa6446	864fdade-0299-4871-a060-3c55442a1355	7	7	8	8	7	8	8	Positive attitude and willingness to learn.	Need to improve communication fluency	Good effort, keep practicing.	8.00	2026-03-08	2026-03-08 10:30:37.772
+565	76d9dc51-8924-4faa-baa0-79b5a2502b7f	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	9	9	8	8	9	9	9	Stefan is good in communication skills, was able to articulate well.\nGood attitude towards learning.	Can improve in-depth understanding of ML / GenAI concepts/models.\ncan improve SQL/Python coding skills.\nGet exposure to one of the web technology : Azure/AWS/GCP.	Overall Stefan did well. he is confident and have good communication skills. Can still improve in-depth understanding of  ML/GenAI conceprs.	8.50	2026-03-08	2026-03-08 10:32:34.905
+566	e1448bd1-dee7-4627-bf11-51eab6063206	864fdade-0299-4871-a060-3c55442a1355	8	7	7	7	7	6	8	Good understanding of questions and calm approach.	Can improve confidence and voice clarity.	Decent performance overall.	7.00	2026-03-08	2026-03-08 10:32:44.943
+567	4c482b96-1133-4e14-936a-09bda4a4e498	864fdade-0299-4871-a060-3c55442a1355	8	7	6	6	7	7	6	Good confidence and clear introduction.	Provide more examples in answers.	Good start, more practice will help.	7.00	2026-03-08	2026-03-08 10:34:25.226
+568	2449271b-9f19-4464-b2eb-f6acbd045dfa	104e34a6-fd53-4012-a0f0-41df6842c833	2	2	3	3	3	3	3	Able to understand the problem domain. Knows at a high level what needs to be done.	Needs to pick up technical skills. Share about work done by the individual. Pick up communication skills.	Pick up technical knowledge and ability to communicate clearly.	3.00	2026-03-08	2026-03-08 10:34:51.692
+569	4ab87f11-2f55-493b-b76c-2a3866ec8770	458250d8-e65f-4171-9e11-3a6dff72a848	10	10	10	10	10	10	10	Tech and communication 	Na	Excellent 	9.00	2026-03-08	2026-03-08 10:35:38.821
+570	e1a724db-ad29-4995-8706-0e51d6c90785	864fdade-0299-4871-a060-3c55442a1355	9	9	8	9	9	9	9	Polite communication and good attitude.	Need to reduce hesitation while answering.	Overall satisfactory performance.	9.00	2026-03-08	2026-03-08 10:36:25.708
+571	d966cea9-872b-4e2d-86a1-ecf975d55b10	104e34a6-fd53-4012-a0f0-41df6842c833	1	1	1	1	1	1	1	Has worked only on basic project.	Needs to be pickup a lot of the technical skills. Needs to be patience and communicate the work done. 	Pick up technical skills by working on projects. Learn communication skills to share what you think.	1.00	2026-03-08	2026-03-08 10:36:40.312
+597	e934297b-ff88-4426-bc7b-7096c31d1030	539ff319-c98a-440f-9541-c0e736fe44b3	7	7	7	6	6	5	6	lacks in communcation unable to convey clear	need clarity on next step	improve communcation and get clarity on what to do next	6.00	2026-03-08	2026-03-08 10:52:31.342
+599	3445d8dc-afe2-48fb-ac17-a5dc9db5d729	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	2	2	2	2	2	2	Humble and Ready to Listen, Observant	Tech. basics to be improved, Needs Relearning. Low in Confidence and Communication is average. 	Need to put on lots of effort to clear the Campus Interviews. 	4.00	2026-03-08	2026-03-08 10:53:15.395
+602	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	3	3	3	3	3	3	Good attitude, Tech. Basics are good. Clarity of thought, Knows what he wants in his Career.  	Not Evaluated in his Aptitude and Logical Skills. Have to give more importance to clear the Campus Hiring exercise. 	Very Good Candidate with good Potential. Needs Re-Learning the basics. If he's focused, he will make it good in the Campus Recruitment drive. 	6.00	2026-03-08	2026-03-08 10:56:33.587
+572	67ceac98-83a5-407b-ad88-8f89f2328ee9	cd263764-71e2-4ead-87a3-0c5e9aff9828	9	9	9	9	9	9	9	EXCEPTIONAL CANDIDATE - Perfect 9/10 rating across all seven assessment dimensions. Demonstrates outstanding excellence in every evaluated area: impeccable appearance and professional demeanor (9/10), exceptional technical knowledge in computer science (9/10), outstanding communication ability (9/10), strong self-confidence and composure (9/10), remarkable general awareness and industry acumen (9/10), excellent managerial aptitude with natural leadership qualities (9/10), and exceptional ambition with clear vision (9/10). Consistently exemplary across all competencies, indicating comprehensive excellence and well-rounded capabilities.	NO SIGNIFICANT AREAS FOR IMPROVEMENT identified. Candidate demonstrates excellence across all assessed dimensions with uniform 9/10 ratings. Only potential development opportunity (not an area of deficiency) is continued expansion of technical expertise as new technologies and programming paradigms emerge. Recommend ongoing professional development and advanced certifications to maintain competitive edge, though this is standard practice rather than remedial need. Candidate is already at exemplary performance level across all competencies.	OUTSTANDING ACHIEVEMENT - Mahalakshmi achieved perfect 9.00/10 overall assessment score with 9/10 ratings across all seven dimensions - an exceptional result demonstrating comprehensive excellence. This uniform, exceptional performance across appearance, managerial aptitude, general awareness, technical knowledge, communication skills, ambition, and self-confidence indicates a truly exceptional candidate. While aptitude and GD assessments were not completed (scores show 0), the evaluation scores demonstrate an exceptionally capable individual. HIGHLY RECOMMENDED for immediate placement in top-tier organizations. Ideal candidate for leadership development programs and fast-track career advancement in premier tech companies. Can serve as exemplar candidate for future cohorts. Exceptional fit for roles requiring technical excellence combined with strong interpersonal and leadership capabilities. Placement certainty: EXTREMELY HIGH. This candidate represents the pinnacle of performance among all evaluated candidates.	9.00	2026-03-08	2026-03-08 10:37:44.805
+573	5c71319b-3279-4bbc-b582-c419b20a9cae	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	9	7	8	8	9	9	8	positive attitude, good communication skills	In depth knowledge on the subject to be gained\n	will be a good team player, sincere hard contributor	8.00	2026-03-08	2026-03-08 10:37:59.828
+574	48865e86-b110-4bc0-9166-657d8bcc2bf5	864fdade-0299-4871-a060-3c55442a1355	8	8	7	9	8	9	7	Good basic knowledge and positive mindset.	Improve communication and answer length.	Good attempt, keep developing your skills.	8.00	2026-03-08	2026-03-08 10:38:03.279
+575	d1e6c7a7-1118-4731-92d6-f970bcb59b0d	7d959ecb-3999-47cd-ae17-5aab0405cb97	8	7	6	8	8	9	9	Communication skill is good and is confident.  	Can work a bit more on the delivery	Overall an all round good candidate. 	8.00	2026-03-08	2026-03-08 10:38:08.751
+576	a2197f4c-b857-4611-9031-2b6a23239b24	dc83d654-7865-4342-9437-16bfcb075e6a	7	8	7	8	8	8	7	Communication Skills \ntechnical skills 	reframe his resume 	Good 	8.50	2026-03-08	2026-03-08 10:38:35.231
+577	8f551e00-cb94-44ff-801b-71d377ddaa28	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	9	8	6	7	9	8	8	Good communication skills & attidude towards learning.	Can improve technical skills, need to practive SQL/Python codding.\nGet exposure to one of the web technology : Azure/AWS/GCP.\nGet deeper understang of ML/GenAI models/ concepts.\n\n	Overal Gaurav did well, was able to articulate his project. But still needs to work on technical skills. Practice Probability and Stats. 	7.50	2026-03-08	2026-03-08 10:40:14.578
+578	9436c480-79ff-40b4-9709-eed6ffa15957	458250d8-e65f-4171-9e11-3a6dff72a848	9	8	6	6	5	7	9	Attitude 	Communication, lack of confidence and current studies 	Better	6.00	2026-03-08	2026-03-08 10:42:19.003
+579	9e8fe944-7dee-4c01-a117-d10fc0c8bc18	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	2	2	3	3	3	2	Enthusiastic and Clear in What she wants. Fair knowledge in Technical Basics. 	Unable to handle the Twisted Questions. Need to work hard in the Basic Aptitude and handle the Complex Questions. 	Overall, Good Candidate, But need to be trained hard in the Basics and Logical Ability. 	5.00	2026-03-08	2026-03-08 10:43:02.728
+581	3b9b89e6-d606-4889-bc90-766e44d78d13	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	2	3	3	2	3	2	Fairly good at the Technical Basics, Ambitious	Unable to Handle the Complex Questions which are Twisted. Confidence level is slightly low 	Overall, Good, Needs improvement in Communication, Confidence. Can be Trained well to get a placement from good Organisation.	5.00	2026-03-08	2026-03-08 10:45:56.858
+582	e6d680f8-d4fd-409b-8bef-edc6a6814471	81f895c5-36b8-4d09-8241-80e64868fe56	6	7	6	7	6	7	7	Good to ability to answer	Need to learn more technical side	Good	7.20	2026-03-08	2026-03-08 10:46:16.389
+583	8db5374a-2189-4b0a-9fb1-ae91b6393f46	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	7	8	8	7	8	has done many project which is good.	the code are not updated in Github, try doing one project every month and adding in Github	can surely do more hands on simple projects to learn more	8.00	2026-03-08	2026-03-08 10:46:18.821
+580	30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	c34851b2-fce1-4c90-b896-3a1a666a841a	6	7	6	7	8	8	9	\n	\n	GOOD	7.90	2026-03-08	2026-03-08 10:43:57.495
+585	fdcd5fe5-ddf6-414f-9f0a-5ad6f3f5f04b	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	9	8	3	3	8	9	9	Chandrasekhar is good in communication, was able to articulate well in the projects he is involved.\nAbove evaluation is based on his IT skills but not on his core skills (EEE)	-None- on his core skills (i have not evaluated)\nif Chandrasekhar wants to move to IT/ explore opportunities in IT, then he to get expertise in the following\n> Python, SQL, AI/ML/GenAI\n>Get exposure to one of the web technology : Azure/AWS/GCP.	Chandrasekhar is good in communication. I have not evaluated him in his core skills (EEE)	6.00	2026-03-08	2026-03-08 10:47:04.619
+586	2e683e93-873a-404b-919a-463338292329	649453fd-ef30-42d1-8d2a-94c26237e814	7	7	8	7	8	8	8	Candidate is good in communication and has good knowledge on recent projects that he had worked on. Project explanation and details were also given well.	Though candidate has good knowledge on AI and ML related topics, needs more focus on refreshing SQL, Java, Python and react js as mentioned in the resume. 	Good communication and AI / ML knowledge and can refresh on other topics basics. 	7.00	2026-03-08	2026-03-08 10:48:17.709
+587	cf4a8285-f6c2-4860-8f8d-3529a1374be5	c34851b2-fce1-4c90-b896-3a1a666a841a	5	4	4	5	5	5	5	\n	\n	NEED TO IMPROVE LOT.	3.40	2026-03-08	2026-03-08 10:48:42.59
+588	dcd2f622-6f0b-42ca-a9e3-c0b414f3f968	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	7	8	8	7	has good level of projects	Would be helpful, build your github page	Would be helpful, build your github page	7.00	2026-03-08	2026-03-08 10:50:17.142
+589	b24243bf-9dd1-4cf7-ab29-36fa3d549f5b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	10	8	9	9	9	9	9	positive approach, good communication skills, quick learner, have more knowledge on research aspects	Usage of A I to research in his field of study	will be a good contributor	9.00	2026-03-08	2026-03-08 10:50:18.986
+590	35a569b1-f730-439c-863f-10291647a362	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	2	2	3	2	3	2	Fair Knowledge in the Technical Basics. Looks like hard working. Good Attitude. 	Communication and Confidence to be Improved. 	Good Candidate who can be Trained to clear Campus Interviews	5.00	2026-03-08	2026-03-08 10:50:19.429
+591	0b153f16-c17d-4a17-98cf-6715b40a64d9	d6400b5f-5117-4826-8aa2-20e215edfb2b	10	9	6	6	8	9	9	From a technical standpoint, the candidate has solid hands-on experience and demonstrates a constructive mindset toward solution building and continuous learning.	Needs to improve articulation and stay more updated with evolving technologies; also should focus on simplifying solutions where appropriate and develop stronger techno-functional adaptability.	Shows good potential and the right learning attitude; Better awareness of current technologies, and guidance in solution design, he can progress well.	7.00	2026-03-08	2026-03-08 10:50:22.191
+592	4a45f5b3-531b-4d4d-8f8c-22dafad93229	c34851b2-fce1-4c90-b896-3a1a666a841a	5	4	5	5	4	5	5	\n	\n	\nNEED TO IMPROVECOMMUNICATION SKILL, CONFIDENCE	4.80	2026-03-08	2026-03-08 10:50:55.529
+593	a42a78c8-5c8e-43d0-b2b3-051eda4cbb52	7d959ecb-3999-47cd-ae17-5aab0405cb97	9	8	7	8	8	8	9	Attitude is good and communication skill is good.	Needs to keep his answers crisp. 	The candidate needs to keep the answers crisp. Tends to give very lengthy answers. Has good attitude and shows interest in upskilling. 	8.50	2026-03-08	2026-03-08 10:51:01.376
+594	6cb101f4-05e5-4a39-b29a-b0f16c1cfed9	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	7	8	8	7	Good projects	can explain better	have a more indept tech evaulation	8.00	2026-03-08	2026-03-08 10:51:02.949
+595	fc36cc60-f4a2-4b57-aefb-d7f8c6a083d4	539ff319-c98a-440f-9541-c0e736fe44b3	8	7	8	7	8	8	7	good projects	needs clarity on next steps	have a more indept tech evaulation 	7.00	2026-03-08	2026-03-08 10:51:43.962
+596	3eaa9ac6-be26-44d2-948d-7b72bec295f3	c34851b2-fce1-4c90-b896-3a1a666a841a	7	6	6	7	6	6	9	\n	\n	\n	6.50	2026-03-08	2026-03-08 10:52:15.224
+604	65883298-b905-46cf-b270-acc84d7f838c	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3	3	2	2	3	3	3	Good Communication and interpersonal Skills. Enthusiastic	Not clear in what she wants. Tech. Basics are weak. 	Needs to be clear in which Stream she has to chose in get in. Also Learn the Subject Basics in the field she chose to enter in. 	5.00	2026-03-08	2026-03-08 10:59:27.96
+605	b2c56a10-484e-4657-a107-a6cd702d045c	7d959ecb-3999-47cd-ae17-5aab0405cb97	7	8	7	7	8	8	8	Candidate has good knowledge, is adaptible and shows that he is upskilling himself	Has this need to answer immediately when the question is over and sometimes misunderstands the question	Overall the candidate is good and an all rounder. 	8.50	2026-03-08	2026-03-08 11:00:46.135
+606	295d5fdf-a7bc-4a2b-9452-708b88a403a3	458250d8-e65f-4171-9e11-3a6dff72a848	7	7	7	6	8	8	9	Self confidence 	Personality skil	Good	6.50	2026-03-08	2026-03-08 11:00:52.885
+607	5f5ecb94-ee4d-42e9-8059-06d67aed7a93	104e34a6-fd53-4012-a0f0-41df6842c833	4	3	6	7	7	6	7	Willing to spend time to figure our root cause of the issue in problem domains. Understands technical domain. Able to communicate clearly in terms of work.	Has scope to improve on the technical skills in terms of the range of problems to work on. 	Need to improve on the self-awareness. Improve range of technical skills.	6.00	2026-03-08	2026-03-08 11:01:55.152
+608	e96b16a3-3e71-4561-9803-4f6b392cce3a	458250d8-e65f-4171-9e11-3a6dff72a848	9	9	9	9	8	8	9	Good in technical and confidence 	Communication 	Good	8.00	2026-03-08	2026-03-08 11:02:04.37
+609	daef5ff4-02d1-4e03-8d5c-f87b02c5bbc6	458250d8-e65f-4171-9e11-3a6dff72a848	10	9	9	8	9	9	9	Good in technical and self confidence 	Na	Good	8.00	2026-03-08	2026-03-08 11:04:05.245
+610	75fa97e5-674a-452a-b506-edb4b706ea3c	4df9bf27-579a-4661-a2ea-703387a2bdaf	10	9	10	10	10	10	10	communication	na	good	9.00	2026-03-08	2026-03-08 11:08:35.733
+611	17d704f6-f2b5-4d34-ac51-9fa746aa2d36	dc83d654-7865-4342-9437-16bfcb075e6a	7	7	6	8	7	7	6	good communication \n	need to reframe resume \nImprove technical aspects 	Good, But need to improve in detail Explanation 	7.20	2026-03-08	2026-03-08 11:11:48.131
+612	5317e5ef-237c-4391-a797-d04938a63d7c	d631f416-b5af-4ca2-956f-da772aff5f6f	8	5	5	5	5	7	7	Confident in communicating.	Need to improve in Basic coding skills.	Need to improve in Basic coding skills.	6.00	2026-03-08	2026-03-08 11:12:23.273
+613	20e9963a-ed23-4484-bf0a-e75251004a0b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	5	5	4	4	5	5	will be team player	should be a fast learner,\ngain indepth knowledge on the subject	improve the communication skills	6.00	2026-03-08	2026-03-08 11:12:47.285
+614	fb534978-892f-401b-aa84-e5ec3c495812	dc83d654-7865-4342-9437-16bfcb075e6a	6	6	6	7	7	7	6	Good communicator 	Reframe his resume \nTechnical Knowledge mentioned the resumes should to Explained Properly 	Need to Improve 	6.90	2026-03-08	2026-03-08 11:13:46.837
+615	d20da77c-7052-4712-aea6-0faf65371364	d631f416-b5af-4ca2-956f-da772aff5f6f	8	7	5	5	7	7	8	Good Communication skills.	Need to practice and get ready for placements.	Good Communication skills. Very honest in conveying. NEed to practice Basic Programming Skill	6.00	2026-03-08	2026-03-08 11:13:47.28
+616	47dd250f-ac31-40cf-9bd1-26f6460e7a7d	d631f416-b5af-4ca2-956f-da772aff5f6f	8	7	7	6	8	8	8	Good Communication skills.	Need to practice more on the programming language	Good Communication skills. Very honest in conveying. NEed to practice Basic Programming Skill	7.00	2026-03-08	2026-03-08 11:14:44.384
+617	2779e96d-ab5a-44c5-adef-e5557a3843de	d631f416-b5af-4ca2-956f-da772aff5f6f	7	6	5	5	6	6	7	Good Communication skills.	\nNeed to learn the things in depth	Need to learn the things in depth	6.00	2026-03-08	2026-03-08 11:16:08.971
+618	e806bf21-c4bf-4e45-9b28-38bb6bc5114f	d631f416-b5af-4ca2-956f-da772aff5f6f	10	8	7	5	7	7	7	Communication Skills	Need to learn the things in depth	Need to learn the things in depth	6.00	2026-03-08	2026-03-08 11:17:09.155
+619	126fe1fe-2052-490c-bbf2-ad0de6d0b79d	d631f416-b5af-4ca2-956f-da772aff5f6f	5	5	5	5	5	5	5	Good Communication skills.	Need to learn the things in depth	Need to learn the things in depth	5.00	2026-03-08	2026-03-08 11:17:43.195
+620	23259f1d-418b-4d20-b658-e65abc871bdc	d631f416-b5af-4ca2-956f-da772aff5f6f	6	5	6	6	6	6	6	Good Communication skills.	Need to learn the things in depth	Need to learn the things in depth	5.00	2026-03-08	2026-03-08 11:18:09.538
+621	09b435e0-dd2e-4875-8017-465133c1e7b7	d631f416-b5af-4ca2-956f-da772aff5f6f	6	6	6	6	6	6	6	Good Communication skills.	Need to learn the things in depth	Need to learn the things in depth	6.00	2026-03-08	2026-03-08 11:18:38.189
+622	3aa60d21-a753-4480-a5e7-ba5115d17c80	d631f416-b5af-4ca2-956f-da772aff5f6f	6	6	6	6	6	6	6	Good Communication skills.	Need to learn the things in depth	Need to learn the things in depth	6.00	2026-03-08	2026-03-08 11:19:03.31
+623	82e508e0-2233-4a71-9d2a-99fe3e51cd75	104e34a6-fd53-4012-a0f0-41df6842c833	9	8	7	6	8	6	7	Able to pickup skills without prior knowledge. Understands the need to backtrack when needed to figure out what needs to be done. Communicates clearly on technical domain.	Has scope to pick up on technical skills by working on a range of domains.	Understands the need to ask relevant questions. Possess ability to pick up technical knowledge.	8.00	2026-03-08	2026-03-08 11:29:48.633
+624	1404ca08-8c2c-499b-be0b-7df146c60c95	649453fd-ef30-42d1-8d2a-94c26237e814	6	4	5	5	5	7	5	Candidate has good English skills and is able to talk fluently, however, most answers are restricted to 1 line and needs to be bit more detail. Candidate seems to have knowledge on the projects she worked on. 	Explanation needs to be bit more detailed on projects, each detail is being provided with a followup question. Though she is from non-IT department, as she is an IT aspirant, should focus on the basics of the programming language. \n\nAlso, candidate expressed interest in UI designing and can focus on some course / certification related to the same that can be added to the resume. \n\nCandidate could be bit more confident and detailed in communication.	With focus on areas on improvement, candidate can steer towards IT aspiration. 	5.00	2026-03-08	2026-03-08 11:43:52.695
+625	d35995c4-daf6-4d65-b69d-9a6c81205077	3bb7ac61-b27f-4979-b200-79ff470f486f	8	5	5	3	5	5	5	His appearance and attitude is fine. 	He has to improve upon fundamentals, problem solving, practical and project skills	He has to study a lot and possess proper focus of work	5.00	2026-03-08	2026-03-08 15:18:48.722
+626	28820349-8c42-4874-9cc5-e529122d3841	3bb7ac61-b27f-4979-b200-79ff470f486f	10	10	9	9	10	9	9	His technical foundations, problem solving, practical and project skills are excellent	He has to develop the projects using different components from the scratch which is expected in the international level	His overall performance is superb and awesome	9.00	2026-03-08	2026-03-08 15:25:43.403
+627	a20c6c5a-4ef3-41e3-9ddb-c308d55d5a13	3bb7ac61-b27f-4979-b200-79ff470f486f	10	10	8	6	10	8	8	Her managerial aptitude and communication skills are fine	She has to improve upon problem solving and project skills even better	Her overall performance is very good	7.00	2026-03-08	2026-03-08 15:31:49.596
+628	74312d06-f49b-4b7d-88e7-fd45da78ff62	3bb7ac61-b27f-4979-b200-79ff470f486f	10	7	7	7	8	8	8	Her aptitude and communication skills are fine	She has to improve upon problem solving and project skills in a structured way	Her overall performance is very good	7.00	2026-03-08	2026-03-08 15:36:14.717
+629	f794cdd6-fb55-4a0d-be72-fbbfaaa7203c	3bb7ac61-b27f-4979-b200-79ff470f486f	9	4	4	3	5	4	5	His appearance and attitude is fine.	He has to improve upon fundamentals, problem solving, practical and project skills	He has to study a lot and possess proper focus of work	4.00	2026-03-08	2026-03-08 15:38:41.021
+630	6f3fc290-2f18-458c-a410-199c71c03ca6	3bb7ac61-b27f-4979-b200-79ff470f486f	9	5	4	4	5	5	5	Her appearance and attitude is fine.	She has to improve upon fundamentals, problem solving, practical and project skills	She has to study a lot and possess proper focus of work	4.00	2026-03-08	2026-03-08 15:42:04.316
+631	db13ea9f-42f8-476c-a85b-88c332d0682e	3bb7ac61-b27f-4979-b200-79ff470f486f	9	4	4	3	4	4	4	His appearance and attitude is fine.	He has to improve upon fundamentals, problem solving, practical and project skills	He has to study a lot and possess proper focus of work	4.00	2026-03-08	2026-03-08 15:45:24.394
+632	1fdec66b-6677-4cbf-b320-a65e5abbf864	3bb7ac61-b27f-4979-b200-79ff470f486f	9	4	4	3	3	4	4	His appearance and attitude is fine.	He has to improve upon fundamentals, problem solving, practical and project skills	He has to study a lot and possess proper focus of work	4.00	2026-03-08	2026-03-08 15:46:57.39
+633	c96bf50a-7be7-4426-a830-95a7eca92cd2	3bb7ac61-b27f-4979-b200-79ff470f486f	10	9	9	9	9	9	9	His technical foundations, problem solving, practical and project skills are excellent	He has to develop the projects using different components from the scratch which is expected in the international level	His overall performance is superb and awesome	9.00	2026-03-08	2026-03-08 15:48:55.65
+634	bc345b3b-a0f3-4b64-ad46-e1adae8ec97a	3bb7ac61-b27f-4979-b200-79ff470f486f	9	4	4	3	4	4	4	His appearance and attitude is fine.	He has to improve upon fundamentals, problem solving, practical and project skills	He has to study a lot and possess proper focus of work	4.00	2026-03-08	2026-03-08 15:51:08.524
+635	c25e65ae-fcfa-485a-9aa5-b171d72aa82a	3bb7ac61-b27f-4979-b200-79ff470f486f	9	7	6	6	7	6	6	Her appearance and attitude is fine.	She has to improve upon problem solving and project skills in a structured way	Her overall performance is satisfactory	6.00	2026-03-08	2026-03-08 15:55:26.436
+636	c5e76483-5372-4722-b138-1a543b373c16	3bb7ac61-b27f-4979-b200-79ff470f486f	9	5	6	5	5	6	5	His appearance and attitude is fine.	She has to improve upon problem solving and project skills in a structured way	He has to study a lot and possess proper focus of work	5.00	2026-03-08	2026-03-08 15:58:07.644
+637	471c590e-7a7a-4f13-ad1a-5c84b26068c5	920b5fba-b331-4010-8858-8a5b3fb29a02	8	9	9	8	9	9	8	candidate good in communication and self appearance and aptitude	need to improve technical skills in java she has to learn collection framework and exception handling etc.	candidate good in communication and presentation but need improve technical skills.	7.00	2026-03-09	2026-03-09 06:31:33.502
+638	b3585119-d9be-44b5-9533-7e4e7de35f73	920b5fba-b331-4010-8858-8a5b3fb29a02	9	8	7	7	9	8	9	candidate good and communication and presentation	need to improve technical skills	good in communication and  presentation need to improve technical skills	7.00	2026-03-09	2026-03-09 06:34:16.754
+639	e04fd488-1dd8-4680-9115-3b88dbd70ba5	920b5fba-b331-4010-8858-8a5b3fb29a02	7	6	5	7	7	5	8	candidate looks  good in core technologies ,communication good	he has to improve technical skills . he has interested in IT jobs but not having skills. and problem solving skills has to improve and interview presentation need to improve. 	good in core  technologies , not good in IT skills need to improve overall skills 	6.00	2026-03-09	2026-03-09 06:41:55.159
+640	727f98ba-12c3-4c2b-9005-efe81f77cdf5	920b5fba-b331-4010-8858-8a5b3fb29a02	8	8	8	8	8	8	8	Good in presentation, communication, core technologies.	need to improve IT skills 	overall  good  in presentation, communication, core technologies. but need to improve  IT skills	8.00	2026-03-09	2026-03-09 06:50:36.155
+\.
+
+
+--
+-- Data for Name: feedbacks; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.feedbacks (id, "hrId", "technicalKnowledge", service_and_coordination, communication_skills, future_participation, punctuality_and_interest, suggestions, issues_faced, improvement_suggestions, submitted_at) FROM stdin;
+1	4035df10-9201-4099-a43e-cca84b787aae	1	5	10	9	7	Good interview coordination overall.	Minor scheduling delays.	Better queue management.	2026-03-07 11:52:36.206
+2	cf415188-a2f8-4630-8d83-fcc47cd12feb	6	4	8	10	8	Good interview coordination overall.	Minor scheduling delays.	Better queue management.	2026-03-07 11:52:36.213
+3	836f143d-1d98-4bd6-9c10-6ce63f5823a5	9	4	6	4	9	Good interview coordination overall.	Minor scheduling delays.	Better queue management.	2026-03-07 11:52:36.218
+4	8df1bbee-25fc-4f27-b669-90de0566b88e	8	7	5	7	10	Good interview coordination overall.	Minor scheduling delays.	Better queue management.	2026-03-07 11:52:36.224
+5	d87930eb-1abb-4d91-8cab-999af479a773	8	1	7	5	1	Good interview coordination overall.	Minor scheduling delays.	Better queue management.	2026-03-07 11:52:36.23
+6	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	7	10	10	10	9	Brilliant coordination, almost seamless. 	Minor technical issue with one resume, but quick workaround given.	Students need to update their resumes, have it include their portfolios. Most students said their reusmes were out of date. 	2026-03-08 06:32:21.386
+7	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	6	8	7	7	7	The wait time can be reduced, time and effort of the interviewers can be valued and utilised better, great job by volunteers in coordinating, students can show better interest	wait time	Students to be scheduled well ahead, listed and coordinated accordingly.	2026-03-08 06:38:25.1
+8	3bdac905-7cfa-4a31-85de-39ec2f854afd	10	10	8	10	10	The students are well-versed in their respective domains. However, the main concern is that they tend to diversify too much and attempt to learn everything at once. This could be addressed by organizing focused technical talks and guiding them toward clearer directions.	No issues	Resume Building Sessions for Students	2026-03-08 07:05:42.903
+9	1cdcde69-9c74-4f47-8da6-335a93fe0cfd	8	9	8	9	9	Its a welcome initiative to connect the students with the industry experts. This will help the students to prepare and succeed in their careers	No glitches	Good coordination and please continue in the future as well	2026-03-08 07:32:22.821
+10	2920b45c-0ce6-4dec-8766-3892322ff1b0	7	9	8	9	9	I had a positive experience interviewing the students and gained valuable insights into how the current generation is thinking. Many of the candidates were impressive, with some standing out as truly exceptional. The volunteers and placement cell coordinators were very supportive and ensured the interviews were conducted smoothly. Additionally, the software platform used for the process was well‑designed, intuitive, and user‑friendly.	The overall experience was very good, and the process was smooth with no issues encountered.	In general for the Students:\n- Gain greater clarity on the intended career path and align efforts toward the right skill set for that direction.\n- Strengthen core technical skills relevant to the chosen role.\n- Improve communication and presentation skills to convey ideas more confidently.\n- Explain project work with more technical depth, clarity, and structured end‑to‑end flow.\n- Use first names instead of titles like “sir” during presentations, while maintaining a polite and professional tone.\n- Build strong fundamentals first and use AI to enhance efficiency, not as a substitute for core knowledge.\n	2026-03-08 07:40:38.15
+11	990d6c56-fa9b-4848-8696-21e832fbcfd3	8	10	10	10	10	Very good initiative , really happy to support this drive.	Well executed	Very well organized with detailed plan & assessment 	2026-03-08 09:11:32.114
+12	a3ca42d8-ab64-421a-ab67-aeb12925661e	10	10	10	10	10	This is a very good initiation from the College side, requesting college to provide HR training to improve students interview presentation (explaining the students view in better manner).	Some of the students internet found poor. 	Process is good but as recommended under general suggestion HR training is most important for Students to explain their views. 	2026-03-08 09:25:55.685
+13	d6a31449-5393-444e-89c7-f8ba9d35545a	6	7	7	8	7	Overall good drive	Here and There no much	1. Aptitude Test Training\n2. More focus on strengthening the students in the Core Areas\n3. Latest Technology Training	2026-03-08 09:32:13.147
+14	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	8	9	8	8	8	Overall, the candidates were confident and communicative. Strengthening technical fundamentals and software-related concepts would further improve their readiness for industry roles.	No issues were observed during the drive.	The process was smooth overall	2026-03-08 09:44:32.38
+15	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	7	10	10	8	8	Coordination was excellent. It was smooth without any hindrance	No technical glitches or scheduling issues faced 	Few candidates have plans to pursue higher education or attend other competitive exams. Please plan to skip those candidates in order to save everyone's time and effort.	2026-03-08 09:54:25.155
+16	a694622b-3ba8-4c82-bd05-08d8bfd5af50	7	10	7	10	7	It was good	No issues	Timely login and change backup ground of students when they login	2026-03-08 10:18:24.656
+17	54ad8399-936a-47f5-bfc8-db3194c32ea3	6	9	8	10	9	Drive is good and happy to interview handful of candidates (8 Interviews) and keep it up as it is much desired initiative for preparing the students for Campus hiring process 	Not much, technical snags do occur which were sorted out 	A day before the Interview schedule; the  Placement Manager may have a brief discussion and a walk through of using the applications / documenting process required 	2026-03-08 10:28:04.405
+18	aaec9758-627f-40bb-b8b2-e92110d36327	6	8	7	8	7	AWESOMELY ARRANGED	-	Needs to improve their resumes better	2026-03-08 10:30:47.232
+19	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	8	9	8	8	7	Good Initiative for students so that they could be prepared for their placements	There were some issues in scheduling candidates.	Good 	2026-03-08 10:42:04.418
+20	81f895c5-36b8-4d09-8241-80e64868fe56	7	9	9	8	9	Good	NA	NA	2026-03-08 10:47:24.032
+21	2447e995-8cd8-431b-80fd-2654f0b2298b	7	10	7	9	8	The students can be given 2 to 3 rounds of interview samples before entering into the corporate interview.	Some students faced issues while connecting. You can provide your lab facility for the people who cannot afford or attend properly.	Te Initiative is really a good idea for the students... Just try to have some offline mood interviews also. It will help them to groom well.	2026-03-08 10:47:43.376
+22	9ecb3c46-4943-4255-8f07-ee963f9a7b4b	7	10	10	10	9	Only one Suggestion:\nif the students are getting evaluated on the code subjects (EEE,ECE etc..) try to tag them to the right evaluater.\nBeing an IT professional I could not validate their technical skils.	-none-	Overall very good experience.\nOnce sugestion on the tool - "Give save option for the evaluation of the canditate before submitting"\nthat means, as an evaluator, i can keep adding my points and save it without submitting. once I have finished editing my points then i can subit the form.\n	2026-03-08 10:53:20.647
+23	d6400b5f-5117-4826-8aa2-20e215edfb2b	5	10	10	10	10	An overall good exercise to give students an industry-level hiring experience. Setting the expectations and the mindset amidst students as part of preparations would be an added advantage. 	There were no such issues. It was a seamless experience. The volunteers were very helpful. 	Application was easy to use. It would be better if the dashboard covers student-level grade insights as well. A summary stats on the grades issued by the interviewer could act as a guide while evaluating the candidates. 	2026-03-08 10:55:41.26
+24	539ff319-c98a-440f-9541-c0e736fe44b3	8	8	8	10	10	pls do a in-dept technical evaluation as mostly students wanted to be part of core companies, fo this technical evaulation by the field specilist would be the right way forward	none	pls do a in-dept technical evaluation as mostly students wanted to be part of core companies, fo this technical evaulation by the field specilist would be the right way forward	2026-03-08 10:57:05.403
+25	e4d9b090-495e-4d82-9c3e-d8048154ccd6	5	7	7	8	8	Most of the Students tend to forget the Basics. Needs to be STrong in the Basics in order to get placed. 	Nothing in Specific. 	Process is good. Only the Subject Knowledge of the Students should be intact. As stated above they tend to forget the basics and concentrate only in the Latest Skills. 	2026-03-08 11:02:37.8
+26	458250d8-e65f-4171-9e11-3a6dff72a848	9	10	9	9	9	As am from HR role, You can split into techie and non techies 	No	Mentioned above 	2026-03-08 11:06:28.652
+27	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	7	9	8	10	9	AI is the demand for the hour, every aspect students shall be taught about linking AI to their field of study	nil	prepare the students to cater to the needs of the industry than a prototype modelling	2026-03-08 11:15:23.388
+28	1da76e1a-a0c3-47ad-a2c5-656406fd12e2	9	10	10	10	10	Can have some real-time career guidance initiatives, apart from these preparations.	Nothing of such, everything was smooth.	Most of them with high potential, doesn't have the clear picture of long term goals, a small career coaching or counselling event will help them a lot. 	2026-03-09 03:18:53.916
+\.
+
+
+--
+-- Data for Name: hr_profiles; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.hr_profiles (id, name, company_name) FROM stdin;
+4035df10-9201-4099-a43e-cca84b787aae	Rajesh Kumar	TechCorp
+cf415188-a2f8-4630-8d83-fcc47cd12feb	Ananya Singh	Innovate Solutions
+836f143d-1d98-4bd6-9c10-6ce63f5823a5	Suresh Raina	DataFlow Inc
+8df1bbee-25fc-4f27-b669-90de0566b88e	Meera Nair	Global HR
+d87930eb-1abb-4d91-8cab-999af479a773	Vikram Rathore	NexGen Systems
+d6400b5f-5117-4826-8aa2-20e215edfb2b	Niranjana 	4i apps
+ae997d6b-df7d-4502-815a-0aa529067bd1	Arun Raj	Accenture(HR 3)
+a895d6bc-408f-4590-a7b2-d228d3627109	Vanitha	Agnostic solution
+e5cabf10-53a9-430a-a64c-34eaa3fffdb5	Bala Murali	Aigilx Health 
+e10c2e0c-a564-4758-845b-f0c1cf560f7b	David 	Aigilx Health 
+8886fad8-d8b2-4d0f-8868-77b08b8497a9	Anitha V	Amazon(HR 1)
+7d959ecb-3999-47cd-ae17-5aab0405cb97	Ram Mohan	Amazon(HR 2)
+e13fa7d8-959e-4caa-b474-1e839b1b7a5b	Balaji Arumugam 	AMD
+4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3	Sriram Venkatesalu	Annular Technologies(HR 1)
+ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	Selvakumaran Balraj	Annular Technologies(HR 2)
+4755002c-b849-46a3-8d7d-09a6f0244fe0	Saran Kumar 	Anubavam(HR 2)
+0d77a15a-eaec-418e-93ba-7317ea498599	Karthik Ramkumar	Apollo Hospitals
+6a497e8f-dd59-4675-b85e-34a93e32d4b0	Nitya Ananthanarayan	ARIVARA AI ROBOTICS AND INNOVATIONS
+2a227454-03a0-441c-9b10-480f36a9d715	Valliappan Narayanan	AT&T
+75a6826c-d81c-4a4e-bd2c-108235b551e3	Merlyn Nisha Peter	Atos
+ed67443c-9181-4796-85bf-e211c619f335	Balaji Varadarajan	BigTapp Analytics
+1da76e1a-a0c3-47ad-a2c5-656406fd12e2	Joshuah Francis	Biocon biologics
+c4e22006-3ed9-4250-91c8-6618d57253ed	Archana Rajamanickam	Bonfiglioli
+662d4572-ecc9-4f5a-b8b6-8007c9e4aa66	Revathi	BOSCH(HR 1)
+a16f26ae-83b3-4288-ba7d-7efb541104c4	Yashoda Singh	Brightstar Foods India Pvt Ltd 
+7a5b4ddd-9942-4ad0-9e3e-f47322600108	Sudha Chirladinne	C2E
+670a56fe-1f9b-4f3a-aba0-a25ac6c7861d	Aarthy Dharshana Lipton	Capestart
+eee239d8-0363-488a-80c3-0c415c7b2217	Santosh Kumar Bodi	Carborundum Universal Limited
+be09fd13-7df4-4c1b-befa-693875fd4fc7	Vivek Mathana Sekaran	Castrol
+1222491e-2d54-48f0-9552-8d2a28af1c4f	Nandhakumar	Caterpillar Inc
+a0df520f-d839-4acf-b594-7cad857eeaa7	Pravitha Lakshmi	Certitude works
+7e9ba3b4-5cb9-4ec8-b9d9-64111de58a10	Ravi Shankar S	CES
+3cdd50e0-99a6-43aa-8f8c-aa9f3662ee85	Sabari Girisan	Cipla
+a76abe4d-2ec1-4a41-bf2f-0dc0fbea095b	Gautham	ClarAqua
+bf71f55b-86ba-46b8-afa1-1aea09f829e1	Shyamala Nagasundaram	Clounomy Technologies Pvt Ltd
+f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	Kishok kumar 	Cognizant(HR 4)
+6a9107b1-6b87-42c5-8994-967a28c2b0d1	Raghul S J	Comcast(HR 1)
+9ecb3c46-4943-4255-8f07-ee963f9a7b4b	Ushasri paturu	Company A(Daimler Truck Innovation Center India)
+964b9c92-19e6-4140-8be6-a64973f93bfa	Ambika Srinivasan	Company E(Nihon Technologies)
+2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	Kannan 	Company F
+3bdac905-7cfa-4a31-85de-39ec2f854afd	Subramanian Ramanathan	Company G(Disprz )
+d4cf1e25-663d-48a1-806c-b1b4a72b5e34	Vishali Rajan	Company H
+5cb3705c-557e-4ea0-82c7-efe26cb3386d	Sushmitha Patil	Cornerstone Information Technology
+52535048-47f2-42cb-91ec-65a4824c9908	Isai Arasi Raja	Cprime Inc(HR 2)
+42dbf0f4-4340-4d04-b344-a249cd2b25ba	Badri	Daikin
+104e34a6-fd53-4012-a0f0-41df6842c833	Sudarsan GP	day at work
+990d6c56-fa9b-4848-8696-21e832fbcfd3	Aswath Sampath	DELL
+2422aedc-4c1f-4a1e-842a-d0e4212dd7a3	Nageshwaran 	DHL
+99899cab-68ed-4572-9c0e-aba3021e37f5	Vivek Loganathan	Digiwin Media solutions 
+39201be0-22a9-4afc-8bbf-9a7dd43637e6	Vignesh Sundar Rajan	DP World
+6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	Madhavan B	Elgi Equipments Limited
+f9313801-25be-479c-8f3d-352c59c9166e	Mr .Prabhu Selvaraj 	Flipkart
+db338578-8876-4dec-a6d5-2d0094828b16	Gopinath Sonaiyan	Flyers Soft
+1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	Kishore Eakambaram	Foxconn
+a3ca42d8-ab64-421a-ab67-aeb12925661e	Venkatesan M 	Geneith Pharmaceuticals Limited
+6f127d1b-9a45-41d4-9fcb-da121c576e16	Jeeva Nandhan	GreenPOD Labs
+5715a9d1-abdd-4c08-8c98-647024ebd6d6	Srinath J	Guardian Link(HR 1)
+2fc20e91-2e7d-467b-94da-2f73a380bf37	Anitha Josephine	Guardian Link(HR 2)
+7ffe825f-1a1c-479d-b53a-6b359e2b0fb3	Gowtham Prakash	Guidewire
+d631f416-b5af-4ca2-956f-da772aff5f6f	Senthil Ashok	HCL Tech
+f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3	Revathi D	HCL(HR 1)
+3f2f858e-a92b-4440-98b6-0a25ca5ea3b1	Gopinath V	HCL(HR 2)
+920b5fba-b331-4010-8858-8a5b3fb29a02	Thamizharasan	HCL(HR 3)
+864fdade-0299-4871-a060-3c55442a1355	Swarna Lakshmi Saran Raj	ILJIN Electronics pvt Ltd
+74a0f6ca-e9d4-48ce-80b4-463ce6f06489	Mary Sujatha	Indrayani Biotech Limited
+8439c4db-97c1-424b-bddd-76301e9c2f70	Manikandan	Infosys(HR 2)
+f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	Vinola R	Kashtech
+e6dc9aba-338f-40f4-bf50-27ee5504b737	Alex John 	KGiSL
+39892be7-d57a-4cf5-819c-818c3dcd0d38	Sri Balaji	L&T(HR 2)
+d6a31449-5393-444e-89c7-f8ba9d35545a	Narayanan	L&T(HR 4)
+55fbdf9b-b4c7-4844-babc-bba452abf569	Bala 	L&T(HR 5)
+6fbfe039-4af5-4d10-bb34-184b1e568b1b	Averyl Dsa SALDANHA	Legrand(HR 2)
+539ff319-c98a-440f-9541-c0e736fe44b3	Kavin Paul	Logitech
+eea52d8e-619c-4985-9891-2b417c468095	Karthick 	Maruti Suzuki 
+0ac45005-84e5-4b25-ad6c-1e998e94a611	Selvam	McDermott
+5772f06a-bf47-407f-b92e-74bf4a85aead	Jagdeesh Raju	Microsoft(HR 2)
+217ae2de-4843-400b-964c-30302c10965e	Rajesh Dayalan	MindX
+fee36876-2c43-49ca-bf38-cf3a9c65df00	George muller	Mindx constructions
+9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	Monisha	Mobicip
+ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	Akash	Mphasis(HR 1)
+2447e995-8cd8-431b-80fd-2654f0b2298b	Jeshran 	Nabati India 
+44f338a5-56b0-4ad1-8258-79826e1445b3	Malolan	Nibhav Home Lifts
+ce6d53c7-d3d3-401f-be95-013fa81fd707	Shila Tiwari	Nobel Automotive
+246e2354-457e-4112-af52-025952cca149	Jerin	Novactech
+c34851b2-fce1-4c90-b896-3a1a666a841a	Roopa Sri	Novartis(HR 1)
+c9d7022f-7e84-4876-a4fa-beda27a31cd5	Vijayalakshmi	nstore
+89cbe614-d6a2-4418-8571-27e9eea6568d	Augustine Raymond	NTPC Limited
+8dc2e306-0b99-47f4-ab15-7e64121bdd0e	Aseem Kumar Sinha 	ONGC
+50fa6865-037c-451b-8ecc-c4fd9bdb0334	Aanchal Srivastava	Payoda
+51c28633-94a9-4653-bbc8-47eca7fd98c2	Mohammed Ibrahim	Petrofac
+23aec277-cce6-4a42-b4c0-c31755cd2f28	Kanagam Nachiappan	Phycosol ecotech pvt ltd
+9b408827-9730-414a-a9ae-c8638060695c	Aswaththaman Jayaprakash	PlaySimple(HR 1)
+9fe45617-f211-43db-905c-28bd9a045d45	Chandan 	PlaySimple(HR 2)
+565b69ae-c54e-4f96-9d46-a31e869eccbf	Vishnu Prasad	Power Mech
+4df9bf27-579a-4661-a2ea-703387a2bdaf	Yukendran	Precision Biometric
+fc1f8f4c-1e4f-4bf1-b24d-e1fd342f2d36	Padmavathy P	Prumatech
+2920b45c-0ce6-4dec-8766-3892322ff1b0	S Kannan 	Qualcomm
+1cdcde69-9c74-4f47-8da6-335a93fe0cfd	Srinivasan Kumaresan	Royal Enfield(HR 1)
+551cc011-24d8-4fd4-bdd6-8b0cb84239ee	Murali Krishna U	Royal Enfield(HR 2)
+5f1975ba-b40d-4a05-b28d-5195c0db7348	Ramashree Saienath	Saint-Gobain
+91c6de71-9638-4b58-b266-47f3e7c6bfb9	Sivashunmugam Arumugam	Schneider Electric
+a55a5c41-087d-4ea5-bdb1-2c7345243b0e	Akshaya Sairam	SD Innovations
+d3211624-8dd6-409c-b000-bd7166f0755b	Ram Gowdham	Shell
+a694622b-3ba8-4c82-bd05-08d8bfd5af50	Karthik Kumar	Company L (Siemens)
+bd05543d-88b0-4ba2-af9c-3a21a2aee8d3	Mohanababu Ranganathan	Siemens(HR 2)
+24421caf-3a14-4681-b9f9-f237f956d8d4	Venkatesh VC	Smartcliff
+98996c73-8763-4ee8-bb8c-bfeaa7c791b0	Trishi raj	Solaris SE
+e4d9b090-495e-4d82-9c3e-d8048154ccd6	Vijayaraghavan	Staples
+0cc1387b-56c9-4ce6-a994-e1cf59c24632	Chinnaraj Durai Pandian	Straive
+674b5de7-296f-4f50-8359-9e337c508dd2	Hari Praveen	Sutherland
+efa89ff0-babb-47d8-9694-afcbe18d049e	Chandrasekaran	Sysveda Information Tech
+56996512-1176-493d-869f-c1cb3b9bd7ed	Rahul Jain	TAFE
+b871efe2-531c-4205-ab03-4e548db1e2a1	Aravindhan V	TATA Communications 
+38236c5f-2faa-4940-aa37-60a206f3be14	Anbumozhi Paramasivam	TCS(HR 3)
+81f895c5-36b8-4d09-8241-80e64868fe56	Udhaya Kumar Ravi	Tech Mahindra
+f1e9a93f-1e04-4540-9d63-4d34570f4cd2	Sasikala Sreedhar 	Telus International(HR 1)
+8c1d8564-6890-42e8-b25f-456e6ee88396	Prabhakar Ramakrishnan	TNQ tech
+ac74bc6b-de4f-4965-9cdb-3d3851da916a	Farhana Fathima	Tranxit
+aaec9758-627f-40bb-b8b2-e92110d36327	Nivedita 	Virtusa
+77da9640-33e1-4aba-a5fd-ff98ddfb57c4	Subashini Kannan	Wipro(HR 1)
+6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	Mukesh Kumar	Wipro(HR 4)
+fcce01c3-007c-4299-a17f-9d5f4402c6ec	Harshel Vyas	Zebronics
+54736253-a69f-44a5-975a-10998246fe9d	Praveen Kumar M	Zeckho IT Services
+5e31574a-8f3c-46c7-8f2e-fbd603c057a0	Divya V	Zoho(HR 2)
+cf6780cd-f597-4792-96f8-5e11206fae5e	Aswin S R	Clarivate
+7f1fffa7-2ca2-45a1-802d-35c7b7e22215	Vishali R	Mphasis(HR 2)
+5c9635b4-b0e1-40ac-947e-93714df4d582	Viknesh	Novartis(HR 2)
+3bb7ac61-b27f-4979-b200-79ff470f486f	Srinivasan T	Glosys Technologies
+68e11996-3b69-413e-a7d6-9b361f1d4b2b	S Sudha	Glosys Technologies
+cd263764-71e2-4ead-87a3-0c5e9aff9828	Chetan Kapildev Sharma	Merit Group
+dc83d654-7865-4342-9437-16bfcb075e6a	Nikitha Ravi	Chemfabs
+8ef5450c-442e-440e-b14f-9b98542fd9bf	Sudhan Kumar	Gmmco
+6b65b0e5-ad3f-4756-a04d-f15f072ab740	Pooja Sam	Solaris SE(HR 2)
+458250d8-e65f-4171-9e11-3a6dff72a848	Shivanesan	L&T
+54ad8399-936a-47f5-bfc8-db3194c32ea3	Rex	Marlensoft
+649453fd-ef30-42d1-8d2a-94c26237e814	Brinda	Company M
+33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	Saravana Velu	Stellantis
+5cd29d5a-169e-41db-87a2-997e5fd5301f	Shobita	Marlensoft
+\.
+
+
+--
+-- Data for Name: notifications; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.notifications (id, receiver_id, message, type, is_read, created_at, title) FROM stdin;
+1edf2b5b-c2ac-42b7-84a9-7bf60b63cfce	33d2dd38-0fd5-4e3d-bd9b-0b5159a11558	6 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 04:39:20.173	Student Transfer
+4225791c-2e0f-4cbe-9f94-a42021e5132f	a0df520f-d839-4acf-b594-7cad857eeaa7	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 04:51:37.289	Student Transfer
+6c22721e-42de-4538-98f2-9f02611baaa6	9209359d-918d-4573-a910-e4eabf365bbc	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 04:51:37.295	New Students Assigned
+888da14b-1316-43fb-b64b-1254b79e68a5	db338578-8876-4dec-a6d5-2d0094828b16	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:19:04.724	Student Transfer
+b33a871c-1b9b-442f-9f1a-4cdaf2496556	ef38f37b-c3a6-4f84-bad2-8321e970f3c9	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:19:04.729	New Students Assigned
+8e46bedd-0ffc-4fb3-82bd-63ce33e672fa	ce6d53c7-d3d3-401f-be95-013fa81fd707	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:28:27.481	Student Transfer
+f80be159-71c8-473f-9927-20226202bb63	27379fa2-37cf-40ea-8d4e-964d771a9a5a	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:28:27.486	New Students Assigned
+6721d76d-e4f6-456c-9985-5220f8dfda93	683327d9-605d-433e-9fe3-964005139e0b	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:44:37.53	New Students Assigned
+fd6fbe41-d02a-47a2-8abf-ad732090503e	683327d9-605d-433e-9fe3-964005139e0b	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 05:54:12.778	New Students Assigned
+ef0feede-f75e-4423-88d2-0fbb94c57299	2920b45c-0ce6-4dec-8766-3892322ff1b0	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:04:13.731	Student Transfer
+7e9f47c5-e248-478d-9a0b-b58e8855c9e2	12b69d4d-22d9-457b-83bd-51fd6dd550b7	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:04:13.738	New Students Assigned
+ac5b934b-e0a9-4817-8f35-aa87c4b05883	3bdac905-7cfa-4a31-85de-39ec2f854afd	2 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 05:44:37.525	Student Transfer
+4e165e2e-a6ff-49d9-8565-9579e67f6373	3bdac905-7cfa-4a31-85de-39ec2f854afd	2 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 05:54:12.774	Student Transfer
+d32fab8b-3e5d-4b40-9f50-13a741c88aed	2920b45c-0ce6-4dec-8766-3892322ff1b0	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:07:05.798	Student Transfer
+67838939-9976-45b4-be1c-41224a55f9d1	12b69d4d-22d9-457b-83bd-51fd6dd550b7	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:07:05.802	New Students Assigned
+a00e83ba-9bec-457d-8a2c-e61796c59687	2920b45c-0ce6-4dec-8766-3892322ff1b0	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:09:05.049	Student Transfer
+b68f992c-6276-498d-85f0-4410524c0542	12b69d4d-22d9-457b-83bd-51fd6dd550b7	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:09:05.056	New Students Assigned
+c6d1ed44-c903-4bfc-8105-6e5f42495926	a0df520f-d839-4acf-b594-7cad857eeaa7	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:11:17.778	Student Transfer
+c7bc35af-4ddd-47bb-ba4d-fe06d929c5d6	9209359d-918d-4573-a910-e4eabf365bbc	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:11:17.783	New Students Assigned
+4a797ce8-d4d7-4ab1-819e-d71737c906c2	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:21:16.494	Student Transfer
+84f0ee40-40a4-4aa7-9d74-ddda9491c038	0cbbab04-2092-4fd5-8334-e45fdf6e220b	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:21:16.5	New Students Assigned
+c21dfc70-7980-4167-9e1b-68a1145b7503	fcce01c3-007c-4299-a17f-9d5f4402c6ec	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:27:56.634	Student Transfer
+c16fa6b5-2f65-44c5-b0c3-14bf6d8bb80b	dcc94a38-bfd8-44a8-bcb1-6fe752136882	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:27:56.64	New Students Assigned
+78896a09-6d7d-4cca-a7b7-886cc37473c0	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:41:25.422	Student Transfer
+3864da2c-2c26-4fb4-837b-8081c2e8f65c	e2576d7e-38da-4faa-966e-9b0fbb52f590	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:41:25.428	New Students Assigned
+efaedff8-8166-4f58-ac8e-1b5d0c792257	4a8d50e8-223a-4085-badf-b4fa8f63f47e	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:46:29.895	New Students Assigned
+3c517cca-83fa-45dc-85c5-e9ffbb872461	a0df520f-d839-4acf-b594-7cad857eeaa7	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:51:52.743	Student Transfer
+995486ac-13e9-4077-b228-0f73d27e6196	9209359d-918d-4573-a910-e4eabf365bbc	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:51:52.753	New Students Assigned
+d2500119-04af-444a-aacb-f842877865f7	efa89ff0-babb-47d8-9694-afcbe18d049e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:53:07.154	Student Transfer
+d7ac1445-eb34-411e-9aaa-585428f99502	323065de-d86d-47ee-838b-69e9dc6ef1c4	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:53:07.158	New Students Assigned
+6a9f68e0-9181-427d-8629-701586e1dac9	4f9c5ebf-c0dc-4fa9-a288-2b53bc490d6e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:53:07.162	New Students Assigned
+f3141d3b-e169-4384-9b00-9cb4c1976a76	4a8d50e8-223a-4085-badf-b4fa8f63f47e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:53:30.203	New Students Assigned
+ccfc69a6-1ff4-4cc5-ac72-68d6f3abc288	fcce01c3-007c-4299-a17f-9d5f4402c6ec	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:58:28.7	Student Transfer
+2e505169-e98f-49eb-adf6-6c85a062561a	dcc94a38-bfd8-44a8-bcb1-6fe752136882	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 06:58:28.705	New Students Assigned
+ca9bafb7-e443-4b3f-ac39-e94936697df6	24421caf-3a14-4681-b9f9-f237f956d8d4	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:28:55.57	Student Transfer
+fd5b5e4a-874b-4af4-abb1-72e84b44d3e0	8c4627b5-95fd-4094-b437-1cf342fcbe00	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:28:55.576	New Students Assigned
+0467be86-351d-4d2a-a524-2172714dac7d	a0df520f-d839-4acf-b594-7cad857eeaa7	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:30:39.668	Student Transfer
+55bf6183-df0b-47d6-bc24-5aba0999cca8	9209359d-918d-4573-a910-e4eabf365bbc	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:30:39.674	New Students Assigned
+3cf24071-c063-4b5a-8a70-56a33c578ead	a0df520f-d839-4acf-b594-7cad857eeaa7	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:30:58.356	Student Transfer
+95eace66-1971-4a69-92f8-a7feb910f030	9209359d-918d-4573-a910-e4eabf365bbc	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:30:58.362	New Students Assigned
+d2e07a07-988f-4ac3-bd5c-30567cc5127d	7b1d637b-3477-459d-afb7-d96d2b185e5d	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:33:48.986	New Students Assigned
+ad16a08a-5996-4881-b1d4-3f985983520b	7b1d637b-3477-459d-afb7-d96d2b185e5d	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:34:42.98	New Students Assigned
+2e884891-c3a1-4fcc-9289-104b4c4f6794	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:42:20.335	Student Transfer
+48e2c34e-07c5-4b3a-8074-c593776ed7ad	dcc94a38-bfd8-44a8-bcb1-6fe752136882	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:42:20.346	New Students Assigned
+b38d2f6d-ff22-4176-b4a4-e4033045adac	cd263764-71e2-4ead-87a3-0c5e9aff9828	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:44:33.24	Student Transfer
+9bdb700e-f5f2-4701-9561-3b6be77d419c	e4d9b090-495e-4d82-9c3e-d8048154ccd6	A new student has been added. Check out the dashboard.	TRANSFER	t	2026-03-08 06:53:30.198	Student Transfer
+ed3c2547-e512-4abc-a940-67eebb8ad0c8	2447e995-8cd8-431b-80fd-2654f0b2298b	2 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 07:33:48.98	Student Transfer
+70da274a-bc4b-4bc9-942e-ff8e0f74f372	649453fd-ef30-42d1-8d2a-94c26237e814	5 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 03:52:34.608	Student Transfer
+4352b143-1804-41b8-9e4b-4f4bafde3682	3cc7da2b-0993-45d8-b897-0150221476b3	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:44:33.245	New Students Assigned
+81cfc950-fadb-4176-849a-31a124b59110	cd263764-71e2-4ead-87a3-0c5e9aff9828	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:44:55.742	Student Transfer
+d2ea30fa-8d07-4453-b6e7-4b4d13430469	3cc7da2b-0993-45d8-b897-0150221476b3	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:44:55.747	New Students Assigned
+3a17cce9-cda5-4884-972e-629e0ce8ebd3	cd263764-71e2-4ead-87a3-0c5e9aff9828	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:45:29.852	Student Transfer
+cc9021c3-bda0-4661-9c90-215821dbabd7	3cc7da2b-0993-45d8-b897-0150221476b3	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:45:29.866	New Students Assigned
+bf15403f-9dcf-405a-9f90-8e9cbf85d2f0	cd263764-71e2-4ead-87a3-0c5e9aff9828	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:45:57.106	Student Transfer
+e84d765c-adc6-4795-b6fd-da370e216335	3cc7da2b-0993-45d8-b897-0150221476b3	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:45:57.113	New Students Assigned
+1ece427e-b712-4cd0-a308-5090b1b97012	cd263764-71e2-4ead-87a3-0c5e9aff9828	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:47:14.747	Student Transfer
+12c4578a-c469-47eb-bf88-6e8aa6a540f3	3cc7da2b-0993-45d8-b897-0150221476b3	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:47:14.751	New Students Assigned
+fe515744-49d0-4162-a49c-6b897205b4b7	a3ca42d8-ab64-421a-ab67-aeb12925661e	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:51:13.887	Student Transfer
+c77522b0-af4e-4cb2-8491-7ea779490546	d48db17c-292c-4a69-ae58-ff91be3e8f41	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 07:52:37.285	New Students Assigned
+4d9a5b20-1e21-49f4-a489-9119cabc047e	54ad8399-936a-47f5-bfc8-db3194c32ea3	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:02:41.984	Student Transfer
+48ae5c22-c302-4911-960f-66ba539d90ae	f7e111d5-d366-4220-add8-83c41fe7dd99	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:02:41.991	New Students Assigned
+4be5d3ba-3e2b-4be0-b902-4141725e17d6	a3ca42d8-ab64-421a-ab67-aeb12925661e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:07:53.506	Student Transfer
+b5a8861c-2471-4603-8ba5-4015278c8c16	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 06:46:29.891	Student Transfer
+0679d1f7-3407-418d-9595-6ad13d693831	5cd29d5a-169e-41db-87a2-997e5fd5301f	6 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:15:10.684	Student Transfer
+4f0b24b7-d899-4628-9ec3-bfb4f5be4147	5cd29d5a-169e-41db-87a2-997e5fd5301f	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:21:44.944	Student Transfer
+65530f1b-c31e-46a9-8097-cc6bfcebd6fa	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:22:26.91	Student Transfer
+9e416585-17bc-466b-957a-e4bcb6198700	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:25:19.869	Student Transfer
+16e07845-acdb-46b0-8148-ccb39a78d9b7	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:26:01.252	Student Transfer
+6261ce13-2883-49e7-97dd-91bb76846750	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:26:21.077	Student Transfer
+4a3b2939-488f-4b4c-8ddb-868acc95e680	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:27:42.948	Student Transfer
+ada1564a-0a47-475f-88ad-551bf8a1c0df	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:29:03.372	Student Transfer
+d9f2fa97-dfe4-4343-9811-959d959a5a23	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:31:29.394	Student Transfer
+f06787cc-7aac-4a70-95b7-5679e5833a20	5cd29d5a-169e-41db-87a2-997e5fd5301f	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:31:53.225	Student Transfer
+411addb6-6aef-4781-adf4-7c4a70a43233	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:32:37.072	Student Transfer
+89aeeba6-06eb-42f8-b939-5f1427c2a87d	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:32:42.442	Student Transfer
+d3bca02d-d5d4-4e12-a21d-40fabba7a10b	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:34:17.894	Student Transfer
+bd179c14-f072-4a13-a9ee-9416affb879a	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:48:16.037	Student Transfer
+3608ccf9-acfd-4f19-96d6-1fbea73bc000	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:51:07.965	Student Transfer
+e1bd3644-80af-49d5-9137-6bb27a07158d	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:53:04.414	Student Transfer
+e49efd1f-e45b-400d-9c88-f2729c5505bd	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:53:51.941	Student Transfer
+78585f68-a5af-487c-b169-dfb78c9caffa	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:54:27.688	Student Transfer
+983c3fae-dc1c-47b7-96eb-9e6d1d2aa4e1	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:54:27.702	New Students Assigned
+9eaf394a-5925-4f3e-a5ba-832b169f443a	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:55:15.241	Student Transfer
+4c38fd24-98fe-49b5-a01c-85418688436d	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:55:15.249	New Students Assigned
+ce9d4f7c-55aa-42d9-8e17-2ec1ad244de3	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:55:31.74	Student Transfer
+c164df4f-e8bd-4f09-81a3-d0b71fd67c73	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:55:31.747	New Students Assigned
+6452cb18-a60e-434e-9899-4d4f0ace7b7d	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:55:54.388	Student Transfer
+1840f5f6-975b-4093-9b52-bfbec7f370f0	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 08:58:36.562	Student Transfer
+375a0f28-9d98-4e7e-bde8-9e466329f75f	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:02:19.444	Student Transfer
+29504037-7c66-4ca8-9b72-5c0641e0c035	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:02:19.451	New Students Assigned
+8949ceb2-694c-4372-8722-a9ef8f5e9220	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:05:55.36	Student Transfer
+57d7450f-715d-4c7f-ab60-1b4860c94516	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:05:55.367	New Students Assigned
+28d6088f-995d-4395-b30f-4e483775e54e	24421caf-3a14-4681-b9f9-f237f956d8d4	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:14:37.289	Student Transfer
+7b16ad4f-22ac-4770-ac98-12a976110fa6	8c4627b5-95fd-4094-b437-1cf342fcbe00	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:14:37.3	New Students Assigned
+85b70a95-4445-4a1d-bc82-3832b534aea6	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:16:55.909	Student Transfer
+1d222b37-0b6c-48d2-9691-5aa0855bd160	d355909d-d3d5-49f0-a00a-88ed836c401b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:16:55.915	New Students Assigned
+658b65ef-bb57-46f3-ba2f-7f562ff8d3a8	d554e134-b28e-446f-9e47-7d985391764e	A new student has been added. Check out the dashboard.	TRANSFER	t	2026-03-08 08:07:53.512	New Students Assigned
+a554abbc-5552-40d5-b83c-1f5983ea62cf	d554e134-b28e-446f-9e47-7d985391764e	3 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 07:51:13.894	New Students Assigned
+1a3139de-7f31-444d-b05d-0cc558f2fed9	952c9087-df52-4737-bcf0-659121486278	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:21:44.774	New Students Assigned
+27a59e19-5b49-4187-a08a-0df333a72b8d	d6400b5f-5117-4826-8aa2-20e215edfb2b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:22:33.956	Student Transfer
+b5207347-a630-4586-bfea-1ad2b3a4ef0a	02481999-8975-4df9-abe1-f9eb6d3b4a34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:22:33.963	New Students Assigned
+1cfd36d1-2b64-44f6-a641-e78b0860975b	d6400b5f-5117-4826-8aa2-20e215edfb2b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:22:45.392	Student Transfer
+a76c3a06-11a7-4e6d-9ca1-75d489de4bd8	02481999-8975-4df9-abe1-f9eb6d3b4a34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:22:45.399	New Students Assigned
+947cb96b-9a41-4579-951c-1ff10dfdab51	d6400b5f-5117-4826-8aa2-20e215edfb2b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:23:15.048	Student Transfer
+f79a0216-768f-4232-9c20-266fad4ab1e6	02481999-8975-4df9-abe1-f9eb6d3b4a34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:23:15.054	New Students Assigned
+a6861412-6f58-448f-961b-60c9ad9ef3df	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:23:50.244	Student Transfer
+d8a4d3e1-496f-4e76-9fa5-1d4e6d67d9d0	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:23:50.251	New Students Assigned
+9a5f3e0a-0bed-46b4-a7d8-424940c51446	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:24:12.977	Student Transfer
+93ab7139-a268-424c-99ed-b2ea7940e165	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:24:12.982	New Students Assigned
+14a3735e-f560-402a-a345-f66531c4a4e8	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:24:49.126	Student Transfer
+0ac94113-1e2c-475a-90d1-4d694b05de8f	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:24:49.134	New Students Assigned
+087e7489-ea78-4e90-9a74-7713d6842e3b	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:25:25.285	Student Transfer
+09f7dbee-c4ef-446b-bac8-f0df0dcb8f86	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:25:25.291	New Students Assigned
+4476bffc-ca1f-49ac-a9a1-38ccd5295c54	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:31:54.301	Student Transfer
+5d934063-69d9-49b8-85ca-73faca0a832e	e86d5b0c-0195-4ff4-8546-bb1feaff27fb	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:31:54.307	New Students Assigned
+b26954d9-baac-46d4-88c5-2cdd9a8dd741	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:32:34.106	Student Transfer
+43f78bce-754e-43a8-94cf-846cfaac59f4	e86d5b0c-0195-4ff4-8546-bb1feaff27fb	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:32:34.114	New Students Assigned
+d55b403a-c9ef-401d-b376-4d8c4718ab24	539ff319-c98a-440f-9541-c0e736fe44b3	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:33:36.358	Student Transfer
+6654f6d0-dda4-410c-a8de-d8e323500808	2ab3a0ca-1084-4af7-8447-c73766c44811	3 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:33:36.364	New Students Assigned
+4a444908-386f-4fd9-9536-d13a428fe35e	5c9635b4-b0e1-40ac-947e-93714df4d582	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:34:56.032	Student Transfer
+98f1c638-7bbc-4e7d-a733-80c3e93555f9	f48650e2-4091-4021-a596-4987b8c7cd2c	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:34:56.038	New Students Assigned
+7f24124e-a4b5-4d84-905b-1b4776f7bb24	5c9635b4-b0e1-40ac-947e-93714df4d582	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:35:42.72	Student Transfer
+420f94ff-88aa-4e16-a395-ff4935970185	f48650e2-4091-4021-a596-4987b8c7cd2c	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:35:42.727	New Students Assigned
+f37f06b6-0b44-47b2-af47-60f5fd8be3c1	5c9635b4-b0e1-40ac-947e-93714df4d582	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:39:40.508	Student Transfer
+e9d2b775-28a0-431a-8777-d03c6e8830a1	f48650e2-4091-4021-a596-4987b8c7cd2c	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:39:40.516	New Students Assigned
+54c4dbef-8619-4d09-9152-c4924a33a50f	5c9635b4-b0e1-40ac-947e-93714df4d582	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:41:17.419	Student Transfer
+6cd640bc-e0e0-4b1a-bde1-2c668c096c49	f48650e2-4091-4021-a596-4987b8c7cd2c	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:41:17.433	New Students Assigned
+3c2b6390-a39d-4099-b35e-4b54863e6d5e	5c9635b4-b0e1-40ac-947e-93714df4d582	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:42:12.525	Student Transfer
+4d9ec451-68d0-409b-ba84-52c756e73f48	f48650e2-4091-4021-a596-4987b8c7cd2c	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:42:12.53	New Students Assigned
+420fa454-fca8-485c-bf32-c70df5d7a673	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:46:09.189	Student Transfer
+bdef4d97-369e-41fb-8f75-c4d76c5175c1	0cbbab04-2092-4fd5-8334-e45fdf6e220b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:46:09.222	New Students Assigned
+67586a34-341e-4a85-bd2a-4e88bf2e1a82	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:46:40.933	Student Transfer
+382b7da4-a9e1-4f49-950a-c8c2de5718e7	0cbbab04-2092-4fd5-8334-e45fdf6e220b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:46:40.94	New Students Assigned
+639efa8e-94fd-4eed-8904-3a32fa15843b	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:47:01.284	Student Transfer
+538f7fc4-b804-4721-9e76-ef6092e9a3fb	0cbbab04-2092-4fd5-8334-e45fdf6e220b	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:47:01.307	New Students Assigned
+117d90a8-e11e-45a8-bd54-27efb794f9ba	5cd29d5a-169e-41db-87a2-997e5fd5301f	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:48:38.336	Student Transfer
+9acba600-97a1-416a-b4fd-335c4ff3ff15	54ad8399-936a-47f5-bfc8-db3194c32ea3	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:55:39.949	Student Transfer
+005aa512-aa2d-4219-be0a-552d20ea6fc7	f7e111d5-d366-4220-add8-83c41fe7dd99	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:55:39.957	New Students Assigned
+8a2c7838-8322-4784-a373-aec7fd8c1ac3	54ad8399-936a-47f5-bfc8-db3194c32ea3	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:55:53.473	Student Transfer
+438881fa-e371-4afb-908a-679ba0b66ec4	f7e111d5-d366-4220-add8-83c41fe7dd99	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:55:53.478	New Students Assigned
+8a33917b-76b9-43b1-9843-ed29bd19b78e	c4e22006-3ed9-4250-91c8-6618d57253ed	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:56:52.695	Student Transfer
+5f82c6df-5752-434f-9467-a68e9b88ed37	3e7b46a5-278b-446a-9567-3b0e4a49212d	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:56:52.7	New Students Assigned
+3c412f8f-a7b2-4600-9454-f84a2c113e27	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:57:28.155	Student Transfer
+28dd9066-3fa5-48a2-a8b9-a39eda79d90d	e86d5b0c-0195-4ff4-8546-bb1feaff27fb	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 09:57:28.16	New Students Assigned
+32f79ac5-bbed-44dd-8e09-7625132e488b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:00:09.338	Student Transfer
+d4681d03-f7b2-44f1-a2bc-a0772720e04a	feb7a4ec-7cff-4bce-8509-ece6baa0ec11	5 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:00:09.347	New Students Assigned
+3dd18df4-41a8-4bf4-a86f-c1007afed104	c34851b2-fce1-4c90-b896-3a1a666a841a	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:01:20.676	Student Transfer
+553cee69-3b1e-4e92-ac92-3a65b830c454	535a7aaa-46f5-4290-922a-f49376145eb5	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:01:20.683	New Students Assigned
+3af69fd2-d958-4de9-9ace-296e9d739b81	c34851b2-fce1-4c90-b896-3a1a666a841a	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:02:03.517	Student Transfer
+c0c0014e-5286-4b21-b5fb-1f318a905457	535a7aaa-46f5-4290-922a-f49376145eb5	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:02:03.529	New Students Assigned
+0a97bc83-d1d6-45f0-8976-654108ddc0af	539ff319-c98a-440f-9541-c0e736fe44b3	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:02:28.148	Student Transfer
+b2e71ada-0f2c-4cd6-85a1-aa3163883179	2ab3a0ca-1084-4af7-8447-c73766c44811	4 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:02:28.154	New Students Assigned
+fe41882f-4476-4211-b539-8e4f79ec0095	4df9bf27-579a-4661-a2ea-703387a2bdaf	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:05:22.428	Student Transfer
+617171ea-3744-4cdd-a11f-751b2478a8d8	e2050730-0a09-47ca-9c71-4d225fbeeda4	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:05:22.434	New Students Assigned
+5445c557-ba14-44b4-b008-34ec4cd93195	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	4 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 07:52:37.279	Student Transfer
+bf53d588-ed71-4a9a-bd58-ded25833ae45	c34851b2-fce1-4c90-b896-3a1a666a841a	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:15:55.694	Student Transfer
+38ee3c38-4ce4-458d-a84f-b027cab50abb	535a7aaa-46f5-4290-922a-f49376145eb5	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:15:55.7	New Students Assigned
+8fef50a6-4f8d-4ba9-981c-380794dd65e0	c34851b2-fce1-4c90-b896-3a1a666a841a	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:23:30.803	Student Transfer
+2ea28d2b-75a1-4e5a-bdb5-553a9a7a1417	535a7aaa-46f5-4290-922a-f49376145eb5	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:23:30.81	New Students Assigned
+e2bfb8b9-13ae-473e-bb30-38f3877170fa	d631f416-b5af-4ca2-956f-da772aff5f6f	6 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:32:20.645	Student Transfer
+bfe1576e-e012-4921-81ba-de172689cd4c	41421f0c-31a3-4a3b-a089-d9b6d39dee9b	6 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:32:20.651	New Students Assigned
+b3ed0753-a1ee-4335-af9a-ee1d83cfbf7c	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:41:05.935	Student Transfer
+e22de2d2-d4c7-4a96-95ae-e5b0a0d59ebf	feb7a4ec-7cff-4bce-8509-ece6baa0ec11	2 new students have been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:41:05.941	New Students Assigned
+9153fd4a-3124-4ae4-ace3-827215403300	81f895c5-36b8-4d09-8241-80e64868fe56	3 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 09:21:44.763	Student Transfer
+1c16158c-6773-4293-92ac-6484a5505702	2447e995-8cd8-431b-80fd-2654f0b2298b	2 new students have been added. Check out the dashboard.	TRANSFER	t	2026-03-08 07:34:42.973	Student Transfer
+7e411d75-2f3a-45a4-9a20-bdeb0d4996fd	e4d9b090-495e-4d82-9c3e-d8048154ccd6	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:04.329	Student Transfer
+ce6e7494-e523-444d-a68b-541a1e42602a	4a8d50e8-223a-4085-badf-b4fa8f63f47e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:04.336	New Students Assigned
+ec84a1f9-3bb3-4e56-af0d-2db8b33ea649	e4d9b090-495e-4d82-9c3e-d8048154ccd6	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:25.908	Student Transfer
+965b203a-346d-433d-9a74-58a627a5f669	4a8d50e8-223a-4085-badf-b4fa8f63f47e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:25.914	New Students Assigned
+c8f93f2c-b9b0-44d4-9cd0-d8bf2803fc14	e4d9b090-495e-4d82-9c3e-d8048154ccd6	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:34.774	Student Transfer
+6f0c85d7-c82a-4f2d-aecb-2f3282a55068	4a8d50e8-223a-4085-badf-b4fa8f63f47e	A new student has been added. Check out the dashboard.	TRANSFER	f	2026-03-08 10:49:34.779	New Students Assigned
+\.
+
+
+--
+-- Data for Name: pipeline_profiles; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.pipeline_profiles (id, name) FROM stdin;
+cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Ananya
+1c23ba53-30f5-4913-aedb-4007ac32ea1e	Pranaya
+5011fcd3-30a7-4e6c-b515-126a0bfc3b50	Srinidhi
+\.
+
+
+--
+-- Data for Name: student_scores; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.student_scores (name, email, "regNo", dept, totalpoints, aptitude, core, verbal, programming, comprehension, subject_knowledge, communication_skills, body_language, listening_skills, active_participation, "GD", "Apt") FROM stdin;
+Abdul Rahman N	2023ae0366@svce.ac.in	2127230101001	AE		2	13	1	4	4	8	8	7	7	8	38	24
+Balaguru V	2023ae0282@svce.ac.in	2127230101002	AE		5	11	0	3	2	9	9	8	9	7	42	21
+DHANUSH D	2023ae0257@svce.ac.in	2127230101003	AE		3	13	1	3	3	9	8	8	9	10	44	23
+Divakar B	2023ae0385@svce.ac.in	2127230101004	AE		4	12	2	3	3	9	8	8	9	8	42	24
+Guha Prasath	2023ae0654@svce.ac.in	2127230101005	AE		3	15	1	1	4	9	8	7	9	10	43	24
+Harish	2023ae0346@svce.ac.in	2127230101006	AE		1	9	3	6	1	0	0	0	0	0	0	20
+Joshika M	2023ae0386@svce.ac.in	2127230101007	AE		4	15	3	2	3	9	9	8	9	10	45	27
+Mohamed Askar Meeran N	2023ae0434@svce.ac.in	2127230101008	AE		6	13	3	1	3	8	7	8	8	9	40	26
+Naveen.D	2023ae0369@svce.ac.in	2127230101009	AE		6	12	2	4	3	7	6	7	7	6	33	27
+puneeth vignesh	2023ae0430@svce.ac.in	2127230101010	AE		5	16	2	5	3	9	8	8	8	9	42	31
+SANTHEEPKUMAR K S	2023ae0405@svce.ac.in	2127230101011	AE		2	10	3	4	2	7	7	7	7	7	35	21
+SUBRAMANIYAN G	2023ae0332@svce.ac.in	2127230101012	AE		2	14	2	2	2	8	7	7	7	7	36	22
+THIRUSELVAN KJ	2023ae0244@svce.ac.in	2127230101013	AE		4	13	3	6	3	8	8	7	7	8	38	29
+Yuvraj D	2023ae0250@svce.ac.in	2127230101014	AE		4	16	3	3	1	9	8	8	8	9	42	27
+AKASH	2023ae1000@svce.ac.in	2127230101301	AE		1	12	1	1	2	0	0	0	0	0	0	17
+ABHI.M.P.K	2023bt0407@svce.ac.in	2127230201001	BT		3	6	0	3	2	6	7	8	7	7	35	14
+Akshara R S	2023bt0729@svce.ac.in	2127230201002	BT		3	9	2	7	3	8	7	8	7	7	37	24
+AKSHAYA N	2023bt0258@svce.ac.in	2127230201003	BT		4	9	2	5	4	8	7	8	7	8	38	24
+Bhaavana Shree S	2023bt0734@svce.ac.in	2127230201004	BT		6	10	4	3	4	8	7	8	7	7	37	27
+Bhagawath Kumar	2023bt0288@svce.ac.in	2127230201005	BT		3	9	2	2	1	10	8	9	9	10	46	17
+BHAVANI J BIO	2023bt0279@svce.ac.in	2127230201007	BT		5	11	3	6	3	8	8	8	9	8	41	28
+Dhinesh.v	2023bt0207@svce.ac.in	2127230201008	BT		2	3	2	4	2	5	5	10	5	2	27	13
+DIKSHA S	2023bt0722@svce.ac.in	2127230201009	BT		4	6	0	3	3	9	10	10	10	10	49	16
+Dishetha.K	2023bt0783@svce.ac.in	2127230201010	BT		3	8	3	3	2	10	8	10	10	10	48	19
+Divyadharshini.P	2023bt0379@svce.ac.in	2127230201011	BT		6	9	2	4	3	10	8	9	10	10	47	24
+GNANAKIRUTHIKA	2023bt0731@svce.ac.in	2127230201012	BT		3	7	2	3	3	9	8	8	9	9	43	18
+Gokulavasan S	2023bt0888@svce.ac.in	2127230201013	BT		7	12	3	5	4	4	7	4	6	7	28	31
+Gousiq J	2023bt0336@svce.ac.in	2127230201014	BT		3	7	0	5	0	2	5	4	6	6	23	15
+Guna sri N	2023bt0285@svce.ac.in	2127230201015	BT		3	10	3	2	2	8	7	7	8	8	38	20
+GURUDESH.MS	2023bt0955@svce.ac.in	2127230201016	BT		2	8	3	1	2	4	5	6	7	6	28	16
+Harini Sri	2023bt0854@svce.ac.in	2127230201017	BT		7	8	2	2	2	7	8	7	8	7	37	21
+HARIPRIYA G	2023bt0747@svce.ac.in	2127230201018	BT		9	7	2	4	4	8	9	9	9	8	43	26
+Harshavardhan	2023bt0276@svce.ac.in	2127230201019	BT		8	8	1	2	3	9	8	7	8	8	40	22
+Hemachandra U	2023bt0752@svce.ac.in	2127230201020	BT		4	8	1	2	3	8	7	8	8	8	39	18
+JANANI K P	2023bt0653@svce.ac.in	2127230201021	BT		7	8	2	5	3	10	8	10	10	10	48	25
+Kaviya	2023bt0436@svce.ac.in	2127230201023	BT		5	7	2	1	3	7	8	10	10	7	42	18
+Keerthana.S	2023bt0277@svce.ac.in	2127230201024	BT		4	8	4	4	4	9	9	9	10	10	47	24
+keerthika n	2023bt0943@svce.ac.in	2127230201025	BT		3	7	2	5	3	9	8	9	10	9	45	20
+KRITHIKA V	2023bt0057@svce.ac.in	2127230201026	BT		6	6	3	4	2	9	8	10	9	9	45	21
+K LAKSHANAA	2023bt0701@svce.ac.in	2127230201027	BT		2	7	3	4	3	10	10	10	10	9	49	19
+Lalithammbika S K	2023bt0008@svce.ac.in	2127230201028	BT		7	8	4	1	2	10	8	10	10	9	47	22
+Leena K	2023bt0267@svce.ac.in	2127230201029	BT		6	10	3	3	2	7	7	8	8	7	37	24
+Mahathi T	2023bt0702@svce.ac.in	2127230201030	BT		8	9	3	5	3	9	9	8	9	8	43	28
+Mohan kumar.G	2023BT0048@svce.ac.in	2127230201031	BT		4	8	0	3	2	8	7	8	8	7	38	17
+MONICA M	2023bt0643@svce.ac.in	2127230201032	BT		7	8	5	4	3	9	9	8	9	9	44	27
+NANDHAKUMARAN SUBRAMANIAN	2023BT0092@svce.ac.in	2127230201033	BT		8	11	1	5	3	8	8	9	8	8	41	28
+Neha Ramganesh	2023bt0704@svce.ac.in	2127230201034	BT		7	10	3	4	4	9	9	9	9	9	45	28
+parameshwaran	2023bt0229@svce.ac.in	2127230201035	BT		3	9	0	6	2	7	8	8	8	7	38	20
+PRABAVATHY L	2023bt0246@svce.ac.in	2127230201036	BT		3	6	2	4	3	7	7	7	6	7	34	18
+V.S.RAKSHITHA	2023BT0700@svce.ac.in	2127230201037	BT		3	10	0	7	3	10	8	10	8	7	43	23
+K Ram Prakash	2023bt0941@svce.ac.in	2127230201038	BT		6	8	0	5	3	10	7	8	8	8	41	22
+RESHMA S	2023bt0259@svce.ac.in	2127230201039	BT		5	9	3	3	3	10	9	10	9	9	47	23
+Rithika J	2023BT0750@svce.ac.in	2127230201040	BT		6	9	3	5	5	10	10	10	9	10	49	28
+Rushika S K	2023bt0756@svce.ac.in	2127230201041	BT		6	9	1	3	4	10	8	10	8	8	44	23
+RUSHIL P	2023bt0357@svce.ac.in	2127230201042	BT		6	7	2	5	3	9	7	7	6	7	36	23
+Sahana Sudhagar	2023bt0716@svce.ac.in	2127230201043	BT		6	8	4	5	3	10	9	10	10	10	49	26
+Sanjayraam P	2023bt0720@svce.ac.in	2127230201044	BT		3	9	1	6	3	10	9	10	10	10	49	22
+SANKARA NARAYANAN S	2023bt0367@svce.ac.in	2127230201045	BT		7	7	2	3	3	9	9	9	7	7	41	22
+SARAN M	2023bt0703@svce.ac.in	2127230201046	BT		5	9	1	3	3	8	7	8	7	8	38	21
+Senthil Adhiban A	2023bt0757@svce.ac.in	2127230201047	BT		5	6	1	4	2	8	8	7	8	9	40	18
+SHANJANA B	2023bt0761@svce.ac.in	2127230201048	BT		7	10	2	5	2	8	7	7	9	7	38	26
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+SHUJAH FALEHAH MARIAM	2023bt0281@svce.ac.in	2127230201050	BT		5	8	3	4	2	8	8	7	8	8	39	22
+SRINIDHI K	2023BT0358@svce.ac.in	2127230201051	BT		8	11	3	3	4	8	8	9	9	9	43	29
+Srinidhi K	2023bt0708@svce.ac.in	2127230201052	BT		6	9	3	5	4	9	8	9	8	8	42	27
+SRINIDHI VARADHARAJAN	2023bt0726@svce.ac.in	2127230201053	BT		7	8	4	3	4	10	8	10	9	10	47	26
+Srithika Rengaprabhu	2023bt0695@svce.ac.in	2127230201054	BT		6	11	1	6	3	10	8	10	10	7	45	27
+Tejaswini R	2023BT0710@svce.ac.in	2127230201055	BT		8	9	3	3	3	10	10	10	10	10	50	26
+THARUN T	2023bt0256@svce.ac.in	2127230201056	BT		9	10	3	4	4	10	8	10	10	7	45	30
+T.D.Varadhavallabha	2023bt0552@svce.ac.in	2127230201057	BT		7	5	2	8	2	10	10	9	10	10	49	24
+A Alden Michael	2023ch0924@svce.ac.in	2127230301001	CH		7	5	4	4	3	7	8	6	7	8	36	23
+Amrith Roshan N	2023CH0413@svce.ac.in	2127230301002	CH		4	8	5	4	1	8	9	8	9	8	42	22
+ANBUSELVAN B	2023ch0313@svce.ac.in	2127230301003	CH		3	5	2	3	3	7	7	7	6	6	33	16
+Anusha.R	2023ch0372@svce.ac.in	2127230301004	CH		6	8	4	3	2	8	8	7	8	7	38	23
+ARTANA C R	2023ch0672@svce.ac.in	2127230301005	CH		7	8	2	3	3	8	8	7	7	8	38	23
+Aswin karthik c	2023ch0648@svce.ac.in	2127230301006	CH		5	6	5	5	1	6	5	5	6	6	28	22
+Bhala Sundaresan	2023ch0713@svce.ac.in	2127230301008	CH		6	5	3	4	4	9	9	9	8	9	44	22
+DEEPA S	2023ch0380@svce.ac.in	2127230301009	CH		4	4	1	6	3	7	7	7	7	7	35	18
+Dharshitha R	2023ch0389@svce.ac.in	2127230301010	CH		4	5	3	5	3	10	10	8	10	10	48	20
+Dhiraj K	2023ch0339@svce.ac.in	2127230301011	CH		5	10	1	4	4	10	9	8	10	10	47	24
+Gnanashekar. S	2023ch0335@svce.ac.in	2127230301012	CH		9	10	3	6	3	10	8	9	9	8	44	31
+GUNALAN K	2023CH0301@svce.ac.in	2127230301013	CH		3	5	1	5	0	7	5	9	8	7	36	14
+V Haripriya	2023ch0398@svce.ac.in	2127230301014	CH		8	8	4	6	2	10	10	10	10	10	50	28
+Jai Karthik Ayyanar	2023ch0429@svce.ac.in	2127230301016	CH		4	9	1	2	3	8	6	10	9	8	41	19
+Jayashree S	2023ch0402@svce.ac.in	2127230301017	CH		5	10	2	2	5	10	8	10	10	10	48	24
+KAVIYA ELANGO	2023CH0245@svce.ac.in	2127230301018	CH		6	9	2	6	4	9	10	10	10	10	49	27
+kola hemkar	2023ch0638@svce.ac.in	2127230301019	CH		3	7	3	5	3	7	7	6	7	6	33	21
+Krithika Rajendran	2023ch0687@svce.ac.in	2127230301020	CH		6	11	2	5	3	8	7	8	8	8	39	27
+MADHAVAN S	2023ch0682@svce.ac.in	2127230301021	CH		9	10	3	5	1	8	7	9	9	10	43	28
+R MADHAVAN	2023ch0287@svce.ac.in	2127230301022	CH		7	6	2	3	3	7	4	7	8	8	34	21
+M Meenakshi	2023ch0365@svce.ac.in	2127230301023	CH		6	7	3	1	1	8	6	9	9	10	42	18
+Menagadevi I	2023ch0072@svce.ac.in	2127230301024	CH		5	6	1	5	4	8	6	9	9	9	41	21
+Monish S	2023ch0657@svce.ac.in	2127230301025	CH		3	9	1	2	1	6	6	7	7	7	33	16
+Mridula S	2023ch0052@svce.ac.in	2127230301026	CH		6	11	1	4	3	8	8	9	8	10	43	25
+Mugunthan T	2023CH0404@svce.ac.in	2127230301027	CH		2	6	0	5	1	9	7	10	10	9	45	14
+Murugan	2023ch0233@svce.ac.in	2127230301028	CH		8	7	3	6	2	9	10	10	10	9	48	26
+NANDHA BALAN T CHE	2023ch0670@svce.ac.in	2127230301029	CH		4	5	4	4	1	8	9	8	10	9	44	18
+NANDHINI N	2023ch0431@svce.ac.in	2127230301030	CH		6	8	1	1	3	7	7	10	10	9	43	19
+Pranav A	2023ch0645@svce.ac.in	2127230301031	CH		6	7	3	3	1	10	9	10	10	10	49	20
+Pranav Kumar S	2023ch0649@svce.ac.in	2127230301032	CH		4	6	2	3	3	10	8	10	10	10	48	18
+PRAVEENA	2023CH0278@svce.ac.in	2127230301033	CH		5	6	3	6	2	9	8	7	9	8	41	22
+Rishi puranthar	2023ch0533@svce.ac.in	2127230301034	CH		6	8	1	3	4	9	8	7	9	7	40	22
+Roshan S	2023ch0874@svce.ac.in	2127230301035	CH		3	3	1	6	3	8	7	8	9	8	40	16
+Sakthi S	2023ch0354@svce.ac.in	2127230301036	CH		5	7	3	5	3	8	8	8	9	7	40	23
+SANJAY VISHAL K	2023ch0296@svce.ac.in	2127230301037	CH		3	7	1	1	0	2	2	2	7	7	20	12
+Santhosh P	2023ch0290@svce.ac.in	2127230301038	CH		7	7	1	0	1	5	4	5	6	6	26	16
+Sarvesh Rajesh Neela	2023ch0802@svce.ac.in	2127230301039	CH		4	7	2	3	4	9	7	9	10	8	43	20
+B S SATHYABALAN	2023ch0639@svce.ac.in	2127230301040	CH		4	4	0	3	3	4	6	4	6	6	26	14
+Sharanth P	2023ch0019@svce.ac.in	2127230301041	CH		6	10	3	3	3	8	6	6	8	7	35	25
+Shreya Crescentia V	2023ch0646@svce.ac.in	2127230301042	CH		8	12	3	4	4	9	9	8	10	8	44	31
+SREE VARSHA G	2023ch0686@svce.ac.in	2127230301043	CH		6	7	1	3	4	8	8	9	10	8	43	21
+S.Sriharini	2023ch0388@svce.ac.in	2127230301044	CH		4	11	2	3	2	8	8	9	8	9	42	22
+SRIKRISHNAN SESHAGIRI	2023ch0630@svce.ac.in	2127230301045	CH		4	8	1	4	1	10	9	9	8	10	46	18
+Srishta M J	2023ch0671@svce.ac.in	2127230301046	CH		5	9	2	3	4	10	9	9	10	10	48	23
+Sudarshan N	2023ch0635@svce.ac.in	2127230301047	CH		6	7	5	7	3	10	9	10	10	10	49	28
+Sudhirtha.U	2023ch0683@svce.ac.in	2127230301048	CH		2	11	2	2	4	5	2	5	5	2	19	21
+sunil jothi.k	2023ch0918@svce.ac.in	2127230301049	CH		3	7	2	2	3	5	2	5	5	2	19	17
+THARUN P	2023ch0428@svce.ac.in	2127230301050	CH		4	4	2	4	4	10	9	10	9	9	47	18
+Tharun P	2023ch0377@svce.ac.in	2127230301051	CH		4	7	3	5	3	7	8	7	7	7	36	22
+THARUN RAJ VK	2023ch0872@svce.ac.in	2127230301052	CH		5	9	3	2	2	8	8	7	7	7	37	21
+vishal shanmugam	2023ch0850@svce.ac.in	2127230301053	CH		4	6	1	3	0	7	7	4	7	6	31	14
+Viswa M.H	2023ch0307@svce.ac.in	2127230301054	CH		6	8	3	3	3	6	8	7	7	7	35	23
+DIVYA JYOTHI.S	2023CH0961@svce.ac.in	2127230301301	CH		1	6	1	2	1	6	7	5	7	6	31	11
+ARAVINDKUMAR U	2023ce0707@svce.ac.in	2127230401001	CE		3	10	1	3	1	8	5	10	7	10	40	18
+balaji s	2023ce0917@svce.ac.in	2127230401002	CE		3	3	1	5	3	2	0	10	5	0	17	15
+BHAKYA LAKSHMI B	2023ce0737@svce.ac.in	2127230401003	CE		5	15	2	3	2	2	0	7	5	0	14	27
+Dhanush Aadhavan	2023ce0397@svce.ac.in	2127230401004	CE		6	12	3	4	0	8	6	8	8	5	35	25
+JITHENDAR KRRISH S	2023CE0322@svce.ac.in	2127230401005	CE		8	16	4	3	4	2	2	5	5	0	14	35
+S KAARTHIC VENKATESH	2023ce0937@svce.ac.in	2127230401006	CE		6	14	2	3	4	8	9	9	8	8	42	29
+Kabilan G	2023ce0393@svce.ac.in	2127230401007	CE		4	17	2	3	2	8	8	9	8	9	42	28
+kabilan.k	2023ce0755@svce.ac.in	2127230401008	CE		4	8	2	3	4	7	7	8	8	9	39	21
+KAMALESHWARAN R	2023ce0347@svce.ac.in	2127230401009	CE		4	10	2	2	3	7	7	7	8	4	33	21
+R.KAVINKUMAR	2023ce0352@svce.ac.in	2127230401010	CE		5	8	1	5	1	5	3	5	5	1	19	20
+keerthivasan A	2023ce0886@svce.ac.in	2127230401011	CE		5	7	3	4	2	8	7	8	8	9	40	21
+Kesava Prakash S	2023ce0401@svce.ac.in	2127230401012	CE		6	12	2	5	3	6	6	7	8	7	34	28
+Kishorkkumar Haribaabhu	2023ce0721@svce.ac.in	2127230401013	CE		6	14	3	6	3	10	8	9	10	10	47	32
+KOTTESHWARI V	2023ce0248@svce.ac.in	2127230401014	CE		4	10	1	3	0	8	8	7	10	8	41	18
+A.Muthamilarasan	2023ce0527@svce.ac.in	2127230401015	CE		3	7	3	3	2	0	0	0	0	0	0	18
+ROOBAN YOGA	2023ce0754@svce.ac.in	2127230401017	CE		3	5	2	3	2	6	5	6	10	7	34	15
+S.M.Sanjay	2023ce0930@svce.ac.in	2127230401018	CE		3	12	1	3	4	8	7	7	8	10	40	23
+Naraen Kartick A	2023ce0866@svce.ac.in	2127230401018	CE		6	10	5	4	3	8	7	7	8	10	40	28
+srilekha p	2023ce0254@svce.ac.in	2127230401019	CE		3	16	2	8	1	7	7	7	9	8	38	30
+J srivasan	2023ce0303@svce.ac.in	2127230401020	CE		5	7	2	3	1	8	8	9	10	9	44	18
+Sumaiya.R	2023ce0289@svce.ac.in	2127230401021	CE		5	12	2	5	4	7	8	7	8	9	39	28
+sunil kumar v	2023ce0425@svce.ac.in	2127230401022	CE		5	7	2	4	2	8	8	8	8	7	39	20
+Thendralarasu M	2023ce0408@svce.ac.in	2127230401023	CE		2	13	1	1	1	8	9	7	8	7	39	18
+Viveka M	2023ce0355@svce.ac.in	2127230401024	CE		4	7	0	2	3	7	7	9	8	7	38	16
+Abishek Shrihari S	2023ce0972@svce.ac.in	2127230401301	CE		5	15	2	5	2	8	8	8	7	8	39	29
+John sajin J	2023ce0985@svce.ac.in	2127230401302	CE		4	8	4	4	1	8	7	9	8	8	40	21
+PRASANNAKUMAR V	2023ce0979@svce.ac.in	2127230401303	CE		3	10	1	4	2	7	8	7	8	7	37	20
+Aadhish N	2023cs0516@svce.ac.in	2127230501001	CS		4	8	1	6	3	7	7	7	8	7	36	22
+Aaryan M	2023cs0044@svce.ac.in	2127230501002	CS		7	12	4	10	3	8	9	9	9	10	45	36
+Abhinaya V	2023cs0073@svce.ac.in	2127230501003	CS		7	13	3	7	3	8	8	8	9	9	42	33
+ABIJITH P	2023cs0447@svce.ac.in	2127230501004	CS		4	10	4	7	2	7	8	8	8	8	39	27
+Abinaya	2023cs0076@svce.ac.in	2127230501005	CS		5	10	4	9	2	7	7	8	8	8	38	30
+V. Abisheka Priyan	2023cs0491@svce.ac.in	2127230501006	CS		6	11	2	9	1	6	7	8	8	8	37	29
+Abishika G	2023cs0843@svce.ac.in	2127230501007	CS		5	8	2	4	3	7	8	8	8	8	39	22
+K.Adithi	2023cs0896@svce.ac.in	2127230501008	CS		5	13	2	8	4	9	10	10	10	10	49	32
+Ajay	2023cs0477@svce.ac.in	2127230501009	CS		2	6	1	6	2	7	7	7	7	6	34	17
+Akilan S	2023cs0515@svce.ac.in	2127230501010	CS		5	8	0	5	3	7	7	6	7	6	33	21
+Amirthavarshini J	2023cs0253@svce.ac.in	2127230501011	CS		6	8	3	5	1	8	8	7	9	8	40	23
+AMIZHDHINI P	2023cs0320@svce.ac.in	2127230501012	CS		5	9	2	7	3	7	8	8	8	7	38	26
+Amritha Varsshini A	2023cs0469@svce.ac.in	2127230501013	CS		3	9	1	5	3	8	9	8	9	10	44	21
+ANTONY ABISHEK A	2023cs0104@svce.ac.in	2127230501014	CS		5	13	3	5	3	7	7	8	8	8	38	29
+Aravindhan L	2023cs0225@svce.ac.in	2127230501015	CS		6	7	3	7	1	8	9	8	10	9	44	24
+Arivunithi R	2023cs0066@svce.ac.in	2127230501016	CS		8	11	3	7	3	8	8	8	8	8	40	32
+Arshad Ahmed J	2023cs0466@svce.ac.in	2127230501017	CS		7	9	3	6	3	9	9	9	9	9	45	28
+Arthi	2023cs0503@svce.ac.in	2127230501018	CS		5	8	1	5	4	7	8	9	8	8	40	23
+arun vellayan srinivasan	2023cs0628@svce.ac.in	2127230501019	CS		6	6	4	5	3	9	9	9	9	9	45	24
+ASHWIN M	2023cs0324@svce.ac.in	2127230501020	CS		4	6	2	6	1	7	8	8	7	7	37	19
+Baarath Arumugaraja	2023cs0772@svce.ac.in	2127230501021	CS		6	7	2	6	4	7	8	8	8	7	38	25
+BALAJI E	2023cs0174@svce.ac.in	2127230501022	CS		3	9	0	7	3	8	7	7	8	8	38	22
+Balamurugan G	2023cs0448@svce.ac.in	2127230501023	CS		8	8	1	8	3	8	8	8	8	7	39	28
+BENSON SAMUEL K V	2023cs0068@svce.ac.in	2127230501024	CS		4	10	4	7	3	9	9	9	9	9	45	28
+BHISHMA KUMAR A	2023cs0459@svce.ac.in	2127230501025	CS		6	3	4	5	3	8	8	8	8	7	39	21
+CHAITANYA H	2023cs0505@svce.ac.in	2127230501026	CS		6	8	2	7	4	9	9	7	9	10	44	27
+Dayaalan K T	2023cs0559@svce.ac.in	2127230501027	CS		7	9	3	5	2	9	8	8	9	10	44	26
+DEEPAN K R	2023cs0483@svce.ac.in	2127230501028	CS		8	11	4	6	2	7	8	7	8	8	38	31
+Deepika M	2023cs0805@svce.ac.in	2127230501029	CS		4	5	0	5	2	7	7	9	9	8	40	16
+Dhaksha Kalidoss	2023cs0181@svce.ac.in	2127230501030	CS		7	13	3	9	2	9	9	8	9	10	45	34
+Dhakshan T	2023cs0462@svce.ac.in	2127230501031	CS		4	6	2	5	3	8	7	8	7	7	37	20
+Dhanethiren P	2023cs0498@svce.ac.in	2127230501032	CS		6	8	3	9	4	9	8	8	9	10	44	30
+Dharunaganesh Balamurugan Sree	2023cs0446@svce.ac.in	2127230501033	CS		5	6	5	6	3	7	7	7	7	7	35	25
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+Dhinakar P	2023cs0166@svce.ac.in	2127230501034	CS		6	12	3	6	4	8	8	8	8	7	39	31
+Dhinesh C	2023cs0486@svce.ac.in	2127230501035	CS		6	11	1	8	3	7	7	8	8	8	38	29
+dimbu naga satya surya maram	2023cs0117@svce.ac.in	2127230501036	CS		5	6	3	5	3	8	8	9	9	8	42	22
+Divya Bharathi R	2023cs0098@svce.ac.in	2127230501037	CS		3	6	2	5	1	8	8	9	9	8	42	17
+Divyadharshini S	2023cs0522@svce.ac.in	2127230501038	CS		7	6	1	8	3	8	8	9	9	8	42	25
+Fuzayl Ameen	2023cs0148@svce.ac.in	2127230501039	CS		9	11	4	8	3	9	9	9	9	9	45	35
+Ganapatiramanan A	2023cs0586@svce.ac.in	2127230501040	CS		6	11	2	7	4	8	8	9	8	7	40	30
+R GAURAV DHARSHAN	2023cs0820@svce.ac.in	2127230501041	CS		4	8	1	8	3	8	9	8	8	8	41	24
+GOKUL  HARISH BR	2023cs0464@svce.ac.in	2127230501042	CS		3	4	4	2	2	5	6	5	7	8	31	15
+GOPINATH A	2023cs0504@svce.ac.in	2127230501043	CS		4	9	1	4	2	7	7	7	7	9	37	20
+GOWTHAM K	2023cs0442@svce.ac.in	2127230501044	CS		2	6	3	9	0	5	7	5	7	5	29	20
+Guru Sankara Arasu I	2023cs0286@svce.ac.in	2127230501045	CS		3	8	3	4	2	5	6	5	7	4	27	20
+Hariis P	2023cs0127@svce.ac.in	2127230501046	CS		6	12	4	9	1	7	8	7	8	10	40	32
+Harish K	2023cs0440@svce.ac.in	2127230501047	CS		7	9	2	6	4	7	8	6	7	6	34	28
+Harishkarthi v	2023cs0920@svce.ac.in	2127230501048	CS		4	7	1	6	3	7	7	7	7	7	35	21
+S V Haritha	2023cs0438@svce.ac.in	2127230501049	CS		4	8	2	9	3	7	8	6	7	7	35	26
+Harshinee Umasankar	2023cs0496@svce.ac.in	2127230501050	CS		8	13	3	8	3	9	9	9	7	10	44	35
+Hemagirish E	2023cs0476@svce.ac.in	2127230501051	CS		6	9	2	7	3	8	8	8	7	8	39	27
+Hewin Sheraj	2023cs0119@svce.ac.in	2127230501052	CS		5	11	1	8	4	9	8	8	7	8	40	29
+Indhumathi A P	2023cs0080@svce.ac.in	2127230501053	CS		5	11	1	7	4	8	8	7	7	8	38	28
+Jahnavi G	2023cs0311@svce.ac.in	2127230501054	CS		6	6	2	7	3	8	7	9	8	8	40	24
+G jai harish	2023cs0457@svce.ac.in	2127230501055	CS		3	8	1	7	2	8	8	7	7	8	38	21
+JANAGIRAM K	2023cs0489@svce.ac.in	2127230501056	CS		5	11	1	7	3	0	0	0	0	0	0	27
+Janani H	2023cs0454@svce.ac.in	2127230501057	CS		8	9	3	9	3	9	9	9	7	8	42	32
+Janani M	2023cs0315@svce.ac.in	2127230501058	CS		3	8	2	5	2	4	4	8	4	5	25	20
+JANANI S	2023cs0291@svce.ac.in	2127230501059	CS		4	9	5	7	3	6	7	7	7	7	34	28
+Janani shree K S	2023cs0173@svce.ac.in	2127230501060	CS		5	5	5	6	5	6	7	7	7	7	34	26
+JANANI  T	2023cs0309@svce.ac.in	2127230501061	CS		6	12	3	7	1	8	8	8	8	10	42	29
+Jeevanram R	2023cs0511@svce.ac.in	2127230501062	CS		2	8	3	6	3	6	8	7	9	10	40	22
+JOHAN A	2023cs0284@svce.ac.in	2127230501063	CS		5	6	2	6	4	8	8	9	9	9	43	23
+S Kaarthikeyan	2023cs0492@svce.ac.in	2127230501064	CS		5	5	1	5	1	9	8	7	7	8	39	17
+Kabartinaa S	2023cs0025@svce.ac.in	2127230501065	CS		7	11	2	6	3	7	7	9	8	7	38	29
+Kabenesh BV	2023cs0102@svce.ac.in	2127230501066	CS		5	5	0	2	2	7	7	8	8	7	37	14
+Kamalam K	2023cs0188@svce.ac.in	2127230501067	CS		7	12	1	8	2	9	9	9	8	10	45	30
+Kanimozhi H	2023cs0112@svce.ac.in	2127230501068	CS		7	9	0	5	3	7	7	7	7	9	37	24
+kannishka	2023cs0016@svce.ac.in	2127230501069	CS		4	10	2	6	2	7	8	9	9	8	41	24
+M I Kavhein Narayan	2023cs0499@svce.ac.in	2127230501070	CS		5	8	4	6	4	8	8	6	9	10	41	27
+Keerthana G	2023cs0815@svce.ac.in	2127230501071	CS		6	9	3	3	2	10	9	9	10	10	48	23
+Keerthi Vasan R M	2023cs0493@svce.ac.in	2127230501072	CS		7	8	2	5	3	8	8	7	8	6	37	25
+S. Kevin Christopher	2023cs0143@svce.ac.in	2127230501073	CS		7	9	3	8	4	10	10	10	10	9	49	31
+Kirthivaasan.M.S	2023cs0449@svce.ac.in	2127230501074	CS		5	9	4	7	2	8	8	6	6	7	35	27
+Krithick Kumar	2023cs0584@svce.ac.in	2127230501075	CS		7	10	4	8	3	8	7	6	7	7	35	32
+Lakshna Tarunya Y	2023cs0563@svce.ac.in	2127230501076	CS		7	11	3	8	4	8	8	6	7	7	36	33
+Madhav	2023cs0441@svce.ac.in	2127230501077	CS		8	10	5	9	3	8	8	7	8	8	39	35
+Madhushree SN	2023cs0624@svce.ac.in	2127230501078	CS		5	8	4	8	4	9	10	10	10	9	48	29
+Mahalakshmi p	2023cs0460@svce.ac.in	2127230501079	CS		5	9	4	4	3	8	8	7	7	8	38	25
+Manikandan A	2023cs0217@svce.ac.in	2127230501080	CS		5	7	1	7	1	7	6	6	7	8	34	21
+Manisha N	2023cs0175@svce.ac.in	2127230501081	CS		6	10	1	5	2	7	7	6	8	7	35	24
+MANOJ B	2023cs0067@svce.ac.in	2127230501082	CS		7	8	3	7	4	9	8	7	8	7	39	29
+MAYENOOSH.S	2023cs0465@svce.ac.in	2127230501083	CS		5	7	2	4	3	8	7	7	8	7	37	21
+H Meenatchi	2023cs0108@svce.ac.in	2127230501084	CS		4	10	2	10	3	8	7	7	7	8	37	29
+Megha Rajeevan	2023cs0948@svce.ac.in	2127230501085	CS		3	5	3	6	2	9	10	10	10	9	48	19
+Meyyappan Dm	2023cs0455@svce.ac.in	2127230501086	CS		6	12	4	4	3	8	7	7	8	7	37	29
+MOHAMMED IBRAHIM S	2023cs0159@svce.ac.in	2127230501087	CS		4	6	4	4	2	7	6	7	7	8	35	20
+Monica S	2023cs0021@svce.ac.in	2127230501088	CS		6	10	2	7	4	7	6	7	7	6	33	29
+Monish K	2023cs0035@svce.ac.in	2127230501089	CS		6	12	4	8	1	8	7	7	7	7	36	31
+Monisha R	2023cs0518@svce.ac.in	2127230501090	CS		4	9	2	5	2	8	8	7	7	7	37	22
+Muthiah Kasi	2023cs0445@svce.ac.in	2127230501092	CS		5	9	3	7	3	9	8	8	9	10	44	27
+MUTHUVEERAN D	2023cs0935@svce.ac.in	2127230501093	CS		1	6	4	4	1	7	7	7	7	7	35	16
+Nagappan VRA	2023cs0437@svce.ac.in	2127230501094	CS		8	9	2	5	4	8	10	9	9	8	44	28
+Nandana	2023cs0877@svce.ac.in	2127230501095	CS		8	12	5	9	4	7	8	7	7	7	36	38
+NEHA VISHNU VIJAYAN	2023cs0616@svce.ac.in	2127230501096	CS		4	5	2	3	2	7	8	9	8	8	40	16
+Nethaji pandian s	2023cs0923@svce.ac.in	2127230501097	CS		5	6	2	4	3	7	8	8	8	7	38	20
+Nithiyanandam S	2023cs0262@svce.ac.in	2127230501098	CS		5	10	2	8	3	8	7	9	8	9	41	28
+NITHYA V	2023cs0004@svce.ac.in	2127230501099	CS		4	8	2	6	2	7	7	9	8	8	39	22
+Padmaja	2023cs0471@svce.ac.in	2127230501100	CS		5	4	1	5	2	8	9	9	9	8	43	17
+Padmaroshini S	2023cs0204@svce.ac.in	2127230501101	CS		6	6	4	8	2	8	8	9	8	8	41	26
+PAVITHRA P	2023cs0456@svce.ac.in	2127230501102	CS		7	11	2	9	3	8	8	9	8	8	41	32
+PONNURU SRI AASHISH	2023CS0472@svce.ac.in	2127230501103	CS		6	8	2	5	1	8	9	8	9	9	43	22
+Prabakaran A	2023cs0097@svce.ac.in	2127230501104	CS		7	14	2	9	3	8	7	7	7	8	37	35
+Pragadeesh B	2023cs0451@svce.ac.in	2127230501105	CS		6	7	2	7	2	9	8	8	9	9	43	24
+Prajan	2023cs0497@svce.ac.in	2127230501106	CS		4	6	3	5	4	8	7	7	8	7	37	22
+Pranao N S	2023cs0767@svce.ac.in	2127230501107	CS		8	11	3	8	4	8	7	7	8	8	38	34
+Prathikshaa B	2023cs0020@svce.ac.in	2127230501108	CS		5	12	3	5	1	8	7	8	7	8	38	26
+J.Prince Raj	2023cs0113@svce.ac.in	2127230501109	CS		6	11	1	10	3	9	8	7	9	8	41	31
+Prithvi Rajan D	2023cs0763@svce.ac.in	2127230501110	CS		5	9	1	7	3	8	7	7	7	7	36	25
+Raakesh S	2023CS0478@svce.ac.in	2127230501111	CS		3	6	1	2	2	7	6	7	8	7	35	14
+RAGUL P	2023cs0220@svce.ac.in	2127230501112	CS		2	4	1	2	2	8	7	6	7	5	33	11
+RAJA GOPA P	2023cs0945@svce.ac.in	2127230501113	CS		7	7	3	4	3	8	7	7	7	5	34	24
+RAJALAKSHMI S	2023cs0514@svce.ac.in	2127230501114	CS		8	9	3	8	4	8	9	8	7	5	37	32
+Rajat Kumar	2023cs0949@svce.ac.in	2127230501115	CS		4	5	3	7	2	9	9	8	9	10	45	21
+Rajsuvetha V	2023cs0468@svce.ac.in	2127230501116	CS		3	3	4	6	3	8	8	6	5	2	29	19
+RAMANAN G	2023cs0444@svce.ac.in	2127230501117	CS		2	6	2	6	3	8	8	6	6	5	33	19
+S.RANJIT	2023cs0510@svce.ac.in	2127230501118	CS		5	3	1	5	4	8	7	6	8	9	38	18
+rithiksuman	2023CS0506@svce.ac.in	2127230501119	CS		6	7	3	5	3	8	8	6	7	5	34	24
+rohith p	2023cs0453@svce.ac.in	2127230501120	CS		7	8	2	4	1	6	5	5	5	6	27	22
+Roshini S	2023cs0479@svce.ac.in	2127230501121	CS		6	7	4	5	3	6	5	5	5	6	27	25
+Sachin G	2023cs0517@svce.ac.in	2127230501122	CS		8	9	2	7	4	9	7	8	8	9	41	30
+SADHANA S	2023cs0814@svce.ac.in	2127230501123	CS		8	10	4	9	2	8	8	8	8	8	40	33
+SAIFUDDIN PAPA S	2023cs0487@svce.ac.in	2127230501124	CS		2	10	1	5	3	7	7	8	7	7	36	21
+Sanjai M	2023cs0879@svce.ac.in	2127230501126	CS		3	11	0	7	5	8	7	8	8	8	39	26
+SANJETH S	2023cs0852@svce.ac.in	2127230501127	CS		2	12	1	5	2	9	9	8	9	9	44	22
+Sanjith L	2023cs0495@svce.ac.in	2127230501128	CS		7	8	2	6	2	8	7	8	8	8	39	25
+Saranya E	2023cs0154@svce.ac.in	2127230501129	CS		3	8	3	8	2	8	8	9	8	8	41	24
+Sarath Chandran.M	2023cs0139@svce.ac.in	2127230501130	CS		9	8	2	6	3	10	10	9	9	10	48	28
+Sarvesh Ragav B	2023cs0485@svce.ac.in	2127230501131	CS		7	7	0	7	2	9	10	9	10	10	48	23
+RM sarvesh	2023cs0521@svce.ac.in	2127230501132	CS		4	4	0	5	1	8	8	7	7	7	37	14
+Sashwanth V S	2023cs0439@svce.ac.in	2127230501133	CS		8	7	2	6	4	9	9	8	9	8	43	27
+S.Sathyan	2023cs0128@svce.ac.in	2127230501134	CS		7	12	3	8	4	8	7	8	7	8	38	34
+SHAAM SUNDER V	2023cs0501@svce.ac.in	2127230501135	CS		6	13	2	9	3	8	8	8	8	8	40	33
+Shanmathi Prasanna B	2023cs0236@svce.ac.in	2127230501136	CS		7	15	2	8	2	8	7	7	7	7	36	34
+Sharmile S	2023cs0193@svce.ac.in	2127230501137	CS		5	11	4	7	3	9	9	9	9	9	45	30
+SHARVESH R	2023cs0494@svce.ac.in	2127230501138	CS		7	10	1	7	3	8	7	7	7	8	37	28
+M.Shashank	2023cs0753@svce.ac.in	2127230501139	CS		6	8	1	8	3	9	9	9	8	9	44	26
+N S Shashank	2023cs0443@svce.ac.in	2127230501140	CS		9	8	3	8	3	9	9	8	9	9	44	31
+Shiva Harni.K	2023cs0452@svce.ac.in	2127230501141	CS		5	4	2	6	4	8	8	8	9	8	41	21
+Shivsaran S	2023cs0149@svce.ac.in	2127230501142	CS		8	9	3	7	4	8	8	7	8	8	39	31
+Shree Kheerthi Agrathaa N	2023cs0120@svce.ac.in	2127230501143	CS		8	14	2	8	2	9	9	9	9	10	46	34
+SHREENIDHI R	2023cs0130@svce.ac.in	2127230501145	CS		6	11	4	7	3	7	8	8	9	9	41	31
+Shrinidhi Dasaraty	2023cs0523@svce.ac.in	2127230501146	CS		6	8	2	6	3	8	8	9	9	10	44	25
+sidharth s	2023cs0018@svce.ac.in	2127230501147	CS		8	14	4	10	3	8	8	7	9	9	41	39
+SRISURYA M	2023cs0519@svce.ac.in	2127230501148	CS		6	5	2	6	3	6	7	8	8	8	37	22
+Sruthika B S	2023cs0292@svce.ac.in	2127230501149	CS		5	14	3	6	3	6	6	7	8	7	34	31
+Stenish Roger S	2023cs0480@svce.ac.in	2127230501150	CS		7	7	2	6	3	8	8	6	9	8	39	25
+Subhakshan K V	2023cs0050@svce.ac.in	2127230501151	CS		5	12	2	6	2	8	8	6	9	8	39	27
+sudish	2023cs0508@svce.ac.in	2127230501152	CS		7	13	4	6	5	8	7	8	7	8	38	35
+Sumith Lanyraj	2023cs0520@svce.ac.in	2127230501153	CS		4	5	0	4	1	7	6	8	8	7	36	14
+Sunil daran D	2023cs0481@svce.ac.in	2127230501154	CS		5	6	3	5	3	6	7	8	8	6	35	22
+sunil sukumaran	2023cs0475@svce.ac.in	2127230501155	CS		3	10	4	5	2	9	10	8	8	8	43	24
+SUNJANA MANASSVI V P	2023cs0857@svce.ac.in	2127230501156	CS		6	8	2	5	3	7	7	7	8	6	35	24
+SWETHA P	2023cs0185@svce.ac.in	2127230501157	CS		3	10	2	7	1	7	7	7	7	7	35	23
+Tanish M	2023cs0450@svce.ac.in	2127230501158	CS		7	10	2	9	1	6	8	7	8	10	39	29
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+Tarun Kumar R	2023cs0524@svce.ac.in	2127230501159	CS		7	11	2	5	4	10	9	9	9	10	47	29
+Thamilarasan S	2023cs0243@svce.ac.in	2127230501160	CS		3	10	2	3	4	7	6	8	9	7	37	22
+Thamizh Selvan P	2023cs0114@svce.ac.in	2127230501161	CS		5	13	2	9	4	7	8	7	8	8	38	33
+Tharun Jeevan R	2023cs0507@svce.ac.in	2127230501162	CS		5	9	2	3	3	7	6	8	8	6	35	22
+Thenmathi	2023cs0034@svce.ac.in	2127230501163	CS		6	7	2	6	1	7	7	6	7	7	34	22
+G Thirukumaran	2023cs0031@svce.ac.in	2127230501164	CS		4	11	2	7	5	8	9	9	9	10	45	29
+Thirumurugan.S	2023cs0484@svce.ac.in	2127230501165	CS		6	12	2	7	3	7	8	9	8	9	41	30
+T.R THIRUNAVUKARASU	2023CS0463@svce.ac.in	2127230501166	CS		4	7	1	5	3	9	9	8	7	9	42	20
+J S Vaisshnaveey	2023cs0513@svce.ac.in	2127230501167	CS		8	8	3	6	3	8	9	7	8	8	40	28
+Varshitha M	2023cs0171@svce.ac.in	2127230501168	CS		4	13	3	7	2	9	9	9	9	10	46	29
+Vasanth .k	2023cs0509@svce.ac.in	2127230501169	CS		4	7	1	4	0	8	7	8	7	7	37	16
+Vasantha Bhavishya	2023cs0138@svce.ac.in	2127230501170	CS		4	10	1	8	3	7	8	8	8	8	39	26
+VELU RAHUL L	2023cs0566@svce.ac.in	2127230501171	CS		6	10	4	7	4	7	8	9	8	8	40	31
+Venkatakrishnan AJ	2023cs0512@svce.ac.in	2127230501172	CS		4	7	2	6	1	9	8	8	9	9	43	20
+A V Vidhya Bharathi	2023cs0118@svce.ac.in	2127230501173	CS		6	8	4	7	4	8	9	7	8	7	39	29
+VIKASHINI.V	2023cs0167@svce.ac.in	2127230501175	CS		6	8	2	7	1	8	9	7	9	9	42	24
+A.P.Vimalkanth	2023cs0482@svce.ac.in	2127230501176	CS		4	2	3	4	2	8	7	7	8	9	39	15
+Vineeth I	2023cs0461@svce.ac.in	2127230501177	CS		4	13	3	6	4	7	8	9	9	9	42	30
+VishaalG	2023cs0027@svce.ac.in	2127230501178	CS		6	9	3	4	3	8	7	7	7	9	38	25
+Vishal K R	2023cs0343@svce.ac.in	2127230501179	CS		8	10	2	7	3	8	8	9	8	9	42	30
+vishalakshi pl	2023cs0862@svce.ac.in	2127230501180	CS		4	8	1	5	1	7	9	9	8	8	41	19
+Vishva K	2023cs0488@svce.ac.in	2127230501181	CS		5	10	1	6	2	9	9	9	9	9	45	24
+Yatish Balaji. G	2023cs0474@svce.ac.in	2127230501182	CS		5	4	3	2	1	9	9	8	8	10	44	15
+Yogesh G	2023cs0500@svce.ac.in	2127230501183	CS		4	6	2	3	1	5	5	7	6	6	29	16
+YUVARANJAN S	2023cs0041@svce.ac.in	2127230501184	CS	#REF!	5	14	1	8	1	6	6	8	8	7	35	29
+Ayush Nytik Joshi	2023cs0963@svce.ac.in	2127230501301	CS		7	8	3	5	5	10	8	8	10	10	46	28
+DIVYASRI A	2023cs0966@svce.ac.in	2127230501303	CS		3	4	2	5	4	7	8	7	8	9	39	18
+Madhubalan L	2023cs0995@svce.ac.in	2127230501304	CS		5	6	1	6	0	5	5	6	6	4	26	18
+MATHAN BALAJI A	2023cs0958@svce.ac.in	2127230501305	CS		3	8	1	7	1	6	6	7	6	7	32	20
+Mhadhurra Chandran	2023cs0956@svce.ac.in	2127230501306	CS		5	6	1	8	2	8	9	9	9	10	45	22
+Nithin Athithya P	2023cs0984@svce.ac.in	2127230501307	CS		1	6	0	5	2	8	7	6	6	7	34	14
+ROHIT ADITHYA S V	2023cs0962@svce.ac.in	2127230501308	CS		6	9	3	7	4	8	8	8	8	10	42	29
+s.vignesh raj	2023cs0986@svce.ac.in	2127230501309	CS		2	6	0	8	1	8	7	8	6	8	37	17
+adharsh	2023ad0239@svce.ac.in	2127230502001	AD		3	7	2	1	1	7	9	7	7	9	39	14
+N Aditya	2023ad0661@svce.ac.in	2127230502002	AD		7	11	3	8	2	9	9	8	9	10	45	31
+Akash V	2023ad0699@svce.ac.in	2127230502003	AD		7	13	0	7	2	10	9	9	10	9	47	29
+Akshara B	2023ad0663@svce.ac.in	2127230502004	AD		8	12	3	8	4	10	10	8	10	10	48	35
+AKSHAYA M	2023ad0200@svce.ac.in	2127230502005	AD		5	12	2	6	4	10	10	9	9	10	48	29
+ALAGU MANIKANDAN S	2023ad0007@svce.ac.in	2127230502006	AD		4	13	1	8	2	9	9	9	9	10	46	28
+Angeline Jenisha V	2023ad0212@svce.ac.in	2127230502007	AD		5	13	2	10	2	9	8	8	10	8	43	32
+ANJALAIDEVI C AI&DS	2023ad0274@svce.ac.in	2127230502008	AD		4	13	2	6	3	7	6	7	7	6	33	28
+Anjali E	2023ad0418@svce.ac.in	2127230502009	AD		3	9	2	8	2	7	7	8	7	6	35	24
+Aravintth T	2023ad0910@svce.ac.in	2127230502010	AD		5	12	3	6	3	8	8	7	8	9	40	29
+Arjun M	2023ad0659@svce.ac.in	2127230502011	AD		9	11	4	2	3	8	10	8	7	7	40	29
+Ashika Haseen	2023ad0110@svce.ac.in	2127230502012	AD		7	9	2	5	3	8	9	10	8	9	44	26
+Aswath S	2023ad0885@svce.ac.in	2127230502013	AD		4	7	2	7	1	7	7	7	8	8	37	21
+Avvudaiyappan	2023ad0878@svce.ac.in	2127230502014	AD		4	14	2	6	3	0	0	0	0	0	0	29
+Balaji B	2023ad0196@svce.ac.in	2127230502015	AD		8	11	3	9	4	7	8	8	9	8	40	35
+Balakrishnan.R	2023ad0681@svce.ac.in	2127230502016	AD		4	14	1	7	1	9	8	7	6	10	40	27
+S Balasaraswathi	2023ad0652@svce.ac.in	2127230502017	AD		3	13	2	6	2	7	9	7	8	8	39	26
+Bharath H	2023ad0203@svce.ac.in	2127230502018	AD		5	14	2	6	1	7	7	7	7	8	36	28
+Bhuvanesh R	2023ad0144@svce.ac.in	2127230502019	AD		5	13	2	7	1	7	8	9	8	7	39	28
+Bhuvaneshwaran B	2023ad0359@svce.ac.in	2127230502020	AD		2	11	1	5	1	7	6	9	7	6	35	20
+Chandru A	2023ad0345@svce.ac.in	2127230502021	AD		6	9	1	4	2	10	9	9	8	10	46	22
+Dawan Babu K	2023ad0162@svce.ac.in	2127230502022	AD		3	12	2	8	2	8	7	9	9	9	42	27
+Devananth V	2023ad0632@svce.ac.in	2127230502023	AD		6	11	3	6	3	8	7	9	9	9	42	29
+DHARMA DHARSHAN G	2023ad0882@svce.ac.in	2127230502024	AD		7	11	1	4	2	6	6	9	8	5	34	25
+DHARSAN P	2023ad0275@svce.ac.in	2127230502025	AD		4	9	0	7	4	9	8	10	10	10	47	24
+Dhayan K	2023ad0680@svce.ac.in	2127230502026	AD		1	7	2	7	2	6	6	9	8	5	34	19
+Dhikshitha S	2023ad0669@svce.ac.in	2127230502027	AD		7	16	1	7	2	10	10	9	10	10	49	33
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+Dinesh G	2023ad0088@svce.ac.in	2127230502028	AD		5	12	2	5	3	6	7	9	8	5	35	27
+Divyashree M	2023ad0133@svce.ac.in	2127230502029	AD		5	13	2	9	3	8	8	8	7	7	38	32
+Fathima afraah M	2023ad0061@svce.ac.in	2127230502030	AD		4	10	2	6	1	9	7	7	8	8	39	23
+Gokul A	2023ad0706@svce.ac.in	2127230502031	AD		9	11	2	4	4	10	9	9	8	9	45	30
+goku k	2023ad0674@svce.ac.in	2127230502032	AD		4	8	2	3	4	0	0	0	0	0	0	21
+Gowtham K	2023ad0952@svce.ac.in	2127230502033	AD		1	10	2	1	1	9	7	7	8	8	39	15
+Haarini R	2023ad0059@svce.ac.in	2127230502034	AD		4	9	1	6	3	9	6	8	8	10	41	23
+Harighanesh A	2023ad0667@svce.ac.in	2127230502035	AD		4	13	1	4	2	8	7	8	8	8	39	24
+HARIHARAN K	2023ad0036@svce.ac.in	2127230502036	AD		7	13	1	2	2	8	7	8	7	8	38	25
+hariharan.s	2023ad0861@svce.ac.in	2127230502037	AD		5	9	1	4	3	9	8	7	9	8	41	22
+HARINI K	2023ad0651@svce.ac.in	2127230502038	AD		9	14	4	7	2	8	8	10	9	9	44	36
+Harini V	2023ad0655@svce.ac.in	2127230502039	AD		8	15	3	8	3	10	10	10	10	10	50	37
+HARISH RAJ S	2023ad0631@svce.ac.in	2127230502040	AD		3	13	3	6	3	7	7	6	7	8	35	28
+HARISH S	2023ad0473@svce.ac.in	2127230502041	AD		4	13	2	5	3	8	8	7	7	8	38	27
+Harish S	2023ad0230@svce.ac.in	2127230502042	AD		7	12	3	9	3	10	10	9	9	10	48	34
+C Harshita Solaichi	2023ad0691@svce.ac.in	2127230502043	AD		6	13	3	7	5	9	7	9	7	8	40	34
+HEMALATHA S	2023ad0210@svce.ac.in	2127230502044	AD		6	14	1	7	2	8	7	6	7	8	36	30
+Indris Prakash	2023ad0916@svce.ac.in	2127230502045	AD		6	11	3	5	4	8	8	8	9	9	42	29
+Iniyan Ram A	2023ad0141@svce.ac.in	2127230502046	AD		8	12	3	6	4	0	0	0	0	0	0	33
+Jai Kishore AP	2023ad0660@svce.ac.in	2127230502047	AD		4	11	1	5	2	7	7	7	8	0	29	23
+Jai Krishna Prasath D	2023ad0676@svce.ac.in	2127230502048	AD		9	18	2	10	2	8	9	7	7	8	39	41
+V.JANANI	2023ad0109@svce.ac.in	2127230502049	AD		5	10	3	3	4	6	8	8	6	8	36	25
+Jeevitha P	2023ad0849@svce.ac.in	2127230502050	AD		5	11	1	5	2	8	7	6	7	8	36	24
+JEYASURYA S	2023ad0634@svce.ac.in	2127230502051	AD		4	13	3	2	3	4	5	6	5	5	25	25
+Jishva Thiyagarajan	2023ad0690@svce.ac.in	2127230502052	AD		8	11	3	2	1	9	8	7	8	0	32	25
+KARTHIK SINGARAM.MR	2023ad0853@svce.ac.in	2127230502053	AD		3	10	1	7	1	9	8	9	8	8	42	22
+KARTHIKEYAN K AI&DS	2023ad0235@svce.ac.in	2127230502054	AD		6	9	0	7	3	10	9	10	10	10	49	25
+R B Karthikeyan	2023ad0855@svce.ac.in	2127230502055	AD		5	9	1	5	3	8	7	8	8	6	37	23
+Kausik T	2023ad0065@svce.ac.in	2127230502056	AD		6	12	3	7	1	9	9	10	9	10	47	29
+KAVINIDHI R P	2023ad0334@svce.ac.in	2127230502057	AD		8	12	3	8	3	9	9	9	9	9	45	34
+Kavya K P	2023ad0636@svce.ac.in	2127230502058	AD		6	10	3	6	0	9	8	10	9	9	45	25
+Krishna venkat	2023ad0898@svce.ac.in	2127230502059	AD		6	11	3	4	2	10	9	10	10	10	49	26
+LAKSHANAA A	2023ad0326@svce.ac.in	2127230502060	AD		5	11	2	9	2	10	9	10	9	9	47	29
+j Lakshmana perumal	2023ad0890@svce.ac.in	2127230502061	AD		5	9	1	7	3	8	8	6	6	8	36	25
+Lakshmi Narayanan K	2023ad0089@svce.ac.in	2127230502062	AD		5	14	2	7	4	10	9	9	9	10	47	32
+LATHIKA S P	2023ad0030@svce.ac.in	2127230502063	AD		6	17	2	8	3	6	9	9	10	9	43	36
+Mayuri B	2023ad0422@svce.ac.in	2127230502064	AD		7	14	0	7	3	8	9	10	10	10	47	31
+Michelle Jeffrin	2023ad0085@svce.ac.in	2127230502065	AD		5	12	1	8	2	9	9	9	9	9	45	28
+MOHITH KUMAR G	2023ad0664@svce.ac.in	2127230502066	AD		4	13	1	9	2	8	8	8	7	8	39	29
+MUKESH S	2023ad0641@svce.ac.in	2127230502067	AD		6	11	3	6	3	10	9	9	9	9	46	29
+Nakshathra L	2023ad0042@svce.ac.in	2127230502068	AD		7	13	4	9	3	7	8	6	10	8	39	36
+NIHIL P RAYEN P	2023ad0216@svce.ac.in	2127230502070	AD		8	14	4	8	4	9	8	8	8	9	42	38
+Nitish	2023ad0637@svce.ac.in	2127230502071	AD		8	11	0	4	3	8	8	7	8	7	38	26
+NITYAA S	2023ad0093@svce.ac.in	2127230502072	AD		5	14	1	9	2	8	9	8	7	8	40	31
+Pavanya Kannan	2023ad0224@svce.ac.in	2127230502073	AD		6	11	4	6	3	10	9	9	9	9	46	30
+Prakash M	2023ad0010@svce.ac.in	2127230502074	AD		5	14	3	8	2	7	7	7	7	9	37	32
+Preethi R	2023ad0668@svce.ac.in	2127230502075	AD		4	13	4	5	1	9	9	10	10	10	48	27
+Priyanka S	2023ad0177@svce.ac.in	2127230502076	AD		7	12	2	5	2	7	6	7	7	7	34	28
+Raghavendhar R	2023ad0222@svce.ac.in	2127230502077	AD		8	13	2	8	5	7	7	8	10	7	39	36
+Raghul Sah VRT	2023ad0666@svce.ac.in	2127230502078	AD		8	17	2	8	3	8	8	7	10	8	41	38
+Rakshana N	2023ad0146@svce.ac.in	2127230502079	AD		6	16	2	6	4	8	9	9	10	6	42	34
+RAMASOCKALINGAM M	2023ad0902@svce.ac.in	2127230502080	AD		5	10	2	2	1	9	7	6	7	7	36	20
+Reshma Raji	2023ad0176@svce.ac.in	2127230502081	AD		7	10	3	9	3	7	7	8	7	9	38	32
+Rohith S	2023ad0876@svce.ac.in	2127230502082	AD		4	12	0	7	2	7	8	7	10	8	40	25
+Rohitram JV	2023ad0182@svce.ac.in	2127230502083	AD		7	8	3	5	1	8	7	7	10	9	41	24
+RUPESH A	2023ad0647@svce.ac.in	2127230502084	AD		3	10	3	6	2	7	7	8	10	7	39	24
+Sabaresh B	2023ad0677@svce.ac.in	2127230502085	AD		7	17	1	6	2	9	8	10	10	10	47	33
+sai aakash v	2023ad0644@svce.ac.in	2127230502086	AD		6	8	3	6	2	7	7	9	10	8	41	25
+SAI SHRIKAR	2023ad0163@svce.ac.in	2127230502087	AD		9	13	3	7	1	9	8	9	9	8	43	33
+sai sriram s	2023ad0665@svce.ac.in	2127230502088	AD		3	8	3	4	3	9	10	10	10	10	49	21
+Sakthivel S	2023ad0040@svce.ac.in	2127230502089	AD		5	15	3	9	2	9	8	10	9	7	43	34
+SANJAY D	2023ad0078@svce.ac.in	2127230502090	AD		7	12	1	8	3	8	8	10	8	8	42	31
+SANJAY K	2023ad0662@svce.ac.in	2127230502091	AD		5	12	2	8	2	8	8	9	8	9	42	29
+Sanjay V	2023ad0091@svce.ac.in	2127230502092	AD		7	13	2	4	1	9	9	8	9	10	45	27
+Sanliya Joshi	2023ad0650@svce.ac.in	2127230502093	AD		5	13	4	8	3	7	8	8	8	6	37	33
+Sarukesh.A	2023ad0640@svce.ac.in	2127230502094	AD		5	8	3	5	0	8	8	7	8	10	41	21
+Shamkumar S	2023ad0384@svce.ac.in	2127230502095	AD		7	13	2	6	3	9	8	8	9	9	43	31
+SHIVAKARTHIK S	2023ad0107@svce.ac.in	2127230502096	AD		8	14	2	7	4	10	9	9	9	10	47	35
+Shriram Narasimhan	2023ad0633@svce.ac.in	2127230502097	AD		4	12	0	7	3	10	9	10	9	10	48	26
+Siddharth JK	2023ad0693@svce.ac.in	2127230502098	AD		6	10	1	4	1	9	9	9	8	9	44	22
+Sivakarthick K	2023ad0685@svce.ac.in	2127230502099	AD		6	12	3	6	2	0	0	0	0	0	0	29
+SRI HARI V	2023ad0656@svce.ac.in	2127230502100	AD		5	6	1	3	4	8	8	8	8	7	39	19
+SUBASH CHANDRA BOSE S	2023ad0329@svce.ac.in	2127230502101	AD		5	13	2	6	2	9	8	8	10	10	45	28
+Subbramaniyan S	2023ad0684@svce.ac.in	2127230502102	AD		4	12	0	6	4	8	7	8	8	7	38	26
+T S Sudeshwar	2023ad0658@svce.ac.in	2127230502103	AD		3	13	1	6	1	9	9	8	8	8	42	24
+K SUDHARSAN SAI	2023ad0689@svce.ac.in	2127230502104	AD		4	12	4	7	3	8	8	8	8	9	41	30
+Sushmitha	2023ad0022@svce.ac.in	2127230502105	AD		5	10	2	9	2	8	8	7	7	7	37	28
+Swetha M	2023ad0280@svce.ac.in	2127230502106	AD		4	12	1	6	3	10	9	8	10	9	46	26
+TEJASWINI K	2023ad0046@svce.ac.in	2127230502107	AD		6	15	3	10	4	10	10	9	9	9	47	38
+Thanneermalai S	2023ad0889@svce.ac.in	2127230502108	AD		6	7	1	4	4	6	7	7	7	6	33	22
+Tharun G	2023AD0629@svce.ac.in	2127230502109	AD		6	10	2	3	2	5	5	5	5	3	23	23
+Thejas Avila Margret YP	2023ad0642@svce.ac.in	2127230502110	AD		7	10	3	6	0	8	7	9	9	9	42	26
+Vaishnavi Dinakaran	2023ad0675@svce.ac.in	2127230502111	AD		7	9	2	4	3	7	5	6	0	5	23	25
+Vandana E	2023ad0013@svce.ac.in	2127230502112	AD		7	11	2	7	1	8	7	8	8	10	41	28
+VARSHA G R	2023ad0028@svce.ac.in	2127230502113	AD		9	14	4	6	2	9	9	10	9	10	47	35
+VIGNESWARAN S	2023ad0618@svce.ac.in	2127230502114	AD		4	11	2	9	2	5	5	5	5	3	23	28
+Vishal R	2023ad0679@svce.ac.in	2127230502115	AD		5	9	2	3	5	5	5	5	5	3	23	24
+VISHNU K	2023ad0870@svce.ac.in	2127230502116	AD		5	9	0	7	5	7	7	8	8	7	37	26
+Vishnu Prasad P N	2023ad0043@svce.ac.in	2127230502117	AD		8	12	2	7	4	10	10	10	10	10	50	33
+Vishwa A	2023ad0673@svce.ac.in	2127230502118	AD		6	9	3	5	3	8	8	9	8	7	40	26
+Vishwa.B	2023ad0864@svce.ac.in	2127230502119	AD		4	5	0	2	0	9	8	9	8	7	41	11
+Yamini KKR	2023ad0164@svce.ac.in	2127230502120	AD		6	14	3	5	3	10	10	8	10	10	48	31
+yashwant kumar	2023ad0762@svce.ac.in	2127230502121	AD		4	8	0	2	1	9	9	9	10	9	46	15
+Yeseswini.S	2023ad0553@svce.ac.in	2127230502122	AD		4	13	4	4	2	7	7	9	7	9	39	27
+Yokesh kumar.G	2023ad0908@svce.ac.in	2127230502123	AD		5	10	2	6	4	8	7	9	8	7	39	27
+hari prasath y	2023ad0987@svce.ac.in	2127230502301	AD		3	9	1	5	1	9	7	7	9	9	41	19
+THARUN K	2023ad0957@svce.ac.in	2127230502302	AD		4	10	3	6	2	9	7	8	10	8	42	25
+ABU SATHIK AFRIDI S	2023ee0381@svce.ac.in	2127230601001	EE		3	11	2	7	5	9	10	9	7	9	44	28
+Anand D	2023ee0760@svce.ac.in	2127230601002	EE		3	7	0	5	2	9	7	7	8	6	37	17
+ANBILRAJAN V	2023EE0396@svce.ac.in	2127230601003	EE		5	6	2	5	3	9	7	7	8	6	37	21
+ANISHA O M S	2023ee0017@svce.ac.in	2127230601004	EE		7	14	2	9	1	8	8	8	8	8	40	33
+Antony Xavio Immanuel W	2023ee0011@svce.ac.in	2127230601005	EE		7	9	2	7	4	8	8	8	8	8	40	29
+Ashvatha	2023ee0925@svce.ac.in	2127230601006	EE		5	10	3	4	1	8	8	9	8	9	42	23
+P.BALASRIDHAR	2023EE0743@svce.ac.in	2127230601007	EE		6	6	0	0	3	0	0	0	0	0	0	15
+Bhanu Poojitha M	2023ee0709@svce.ac.in	2127230601008	EE		5	11	4	7	4	8	8	8	8	8	40	31
+Bhuvan VR	2023ee0678@svce.ac.in	2127230601010	EE		6	9	4	5	1	8	8	8	8	7	39	25
+Chandrasekar R	2023ee0134@svce.ac.in	2127230601011	EE		3	9	1	5	3	8	8	8	8	7	39	21
+Deepthi MG	2023ee0735@svce.ac.in	2127230601012	EE		6	10	2	5	3	8	8	8	8	10	42	26
+Dharani D	2023ee0306@svce.ac.in	2127230601013	EE		4	7	0	2	3	8	7	8	8	9	40	16
+DHARSHA	2023ee0111@svce.ac.in	2127230601014	EE		8	11	2	6	1	0	0	0	0	0	0	28
+Dharshini M	2023ee0272@svce.ac.in	2127230601015	EE		2	10	2	4	3	6	6	5	6	5	28	21
+Dharshini R	2023ee0260@svce.ac.in	2127230601016	EE		2	11	1	4	3	0	0	0	0	0	0	21
+DHAYANITHI G K	2023ee0081@svce.ac.in	2127230601017	EE		6	6	2	2	3	8	7	7	7	7	36	19
+Dinesh T	2023ee0390@svce.ac.in	2127230601018	EE		5	8	1	5	2	9	7	6	8	6	36	21
+DIVYABHARATHI.D	2023ee0715@svce.ac.in	2127230601019	EE		4	6	1	4	3	8	7	7	8	8	38	18
+GOPI V	2023EE0947@svce.ac.in	2127230601020	EE		4	4	1	4	3	9	7	7	8	6	37	16
+Harini D	2023ee0395@svce.ac.in	2127230601021	EE		6	8	3	6	2	8	8	7	7	8	38	25
+S.Harini	2023ee0809@svce.ac.in	2127230601022	EE		5	8	2	2	2	7	7	8	8	7	37	19
+S HARISH	2023ee0490@svce.ac.in	2127230601023	EE		2	5	4	3	4	7	7	7	7	10	38	18
+TR Hemachander	2023ee0340@svce.ac.in	2127230601024	EE		7	5	1	3	2	7	8	7	8	9	39	18
+Hemalekha V	2023ee0209@svce.ac.in	2127230601025	EE		5	10	3	6	3	8	8	7	8	10	41	27
+ISHAVAR PAUL A	2023ee0125@svce.ac.in	2127230601026	EE		5	10	2	5	4	7	7	8	7	10	39	26
+jaikishan j	2023ee0751@svce.ac.in	2127230601027	EE		5	7	2	4	4	0	0	0	0	0	0	22
+JANANI B	2023ee0219@svce.ac.in	2127230601028	EE		4	8	2	6	3	8	7	6	7	9	37	23
+Janelle Rebecca J	2023ee0208@svce.ac.in	2127230601029	EE		5	8	2	4	3	9	8	8	10	9	44	22
+Jayapradeep K G	2023ee0912@svce.ac.in	2127230601030	EE		7	10	4	5	2	8	8	8	8	9	41	28
+jayashri m	2023ee0939@svce.ac.in	2127230601031	EE		1	9	3	1	0	8	8	7	8	9	40	14
+R.Jayasudha	2023ee0323@svce.ac.in	2127230601032	EE		3	7	2	5	5	10	9	8	9	9	45	22
+Jeevan Prasanna A L V	2023ee0723@svce.ac.in	2127230601033	EE		8	14	1	4	0	9	9	7	8	8	41	27
+KAMESH	2023ee0725@svce.ac.in	2127230601035	EE		4	4	1	3	3	9	9	7	8	8	41	15
+kanishka	2023ee0087@svce.ac.in	2127230601036	EE		3	8	1	5	1	9	9	7	8	8	41	18
+Kathiravan S	2023ee0745@svce.ac.in	2127230601037	EE		5	12	3	2	2	9	9	6	8	9	41	24
+Kaushik.A	2023ee0265@svce.ac.in	2127230601038	EE		5	11	2	2	2	9	9	7	9	8	42	22
+kavin M	2023ee0370@svce.ac.in	2127230601039	EE		3	7	2	6	5	9	9	7	8	8	41	23
+Kaviya S	2023ee0269@svce.ac.in	2127230601040	EE		3	7	1	5	2	10	9	8	8	10	45	18
+Kishore S	2023ee0161@svce.ac.in	2127230601041	EE		8	14	3	3	3	8	7	8	8	8	39	31
+Koushik Aditya V	2023ee0157@svce.ac.in	2127230601042	EE		5	13	2	6	3	8	7	8	0	8	31	29
+LAKSHAN VIDHYUTH L B	2023ee0712@svce.ac.in	2127230601043	EE		4	10	1	6	4	8	8	8	8	8	40	25
+Madhumitha K R	2023ee0180@svce.ac.in	2127230601044	EE		4	7	3	3	1	8	8	8	8	8	40	18
+MADHUMITHA R	2023ee0748@svce.ac.in	2127230601045	EE		6	10	2	4	3	8	8	8	9	10	43	25
+Mahathi	2023ee0884@svce.ac.in	2127230601046	EE		5	7	1	4	4	9	8	8	8	10	43	21
+Manimaran M	2023ee0744@svce.ac.in	2127230601047	EE		5	8	0	4	0	7	7	8	8	7	37	17
+MITHUN R	2023ee0728@svce.ac.in	2127230601048	EE		5	9	4	3	3	8	8	8	8	7	39	24
+Mohamed Shameem M	2023ee0411@svce.ac.in	2127230601049	EE		3	11	3	5	3	8	8	7	8	8	39	25
+Mukesh Madhavan S	2023ee0155@svce.ac.in	2127230601050	EE		5	10	2	2	3	7	7	7	7	8	36	22
+Mukund A	2023ee0014@svce.ac.in	2127230601051	EE		9	10	2	7	1	7	8	7	0	6	28	29
+NAMRITH M.S	2023ee0626@svce.ac.in	2127230601052	EE		5	4	0	1	2	8	6	6	8	7	35	12
+Nazira A	2023ee0736@svce.ac.in	2127230601053	EE		4	6	1	3	1	7	7	7	6	9	36	15
+Nimal.S	2023ee0927@svce.ac.in	2127230601054	EE		7	6	2	2	1	9	7	9	0	10	35	18
+Nishal S	2023EE0718@svce.ac.in	2127230601056	EE		8	9	1	5	3	8	7	9	8	9	41	26
+NITHIN VC	2023ee0892@svce.ac.in	2127230601057	EE		5	5	2	1	3	8	7	8	8	9	40	16
+Nivetha	2023ee0692@svce.ac.in	2127230601058	EE		4	10	0	4	2	9	9	6	9	9	42	20
+Palanikumar S	2023ee0160@svce.ac.in	2127230601059	EE		6	9	3	7	2	9	7	9	0	10	35	27
+parkavi k	2023ee0331@svce.ac.in	2127230601060	EE		2	7	0	1	2	7	7	7	7	6	34	12
+Pavithra M R	2023ee0105@svce.ac.in	2127230601061	EE		5	4	0	4	3	6	6	6	7	5	30	16
+PRARTHANA.G	2023ee0179@svce.ac.in	2127230601062	EE		5	11	2	7	3	7	8	8	6	7	36	28
+Priyadharshan AN	2023ee0719@svce.ac.in	2127230601063	EE		5	6	1	7	3	8	7	8	8	7	38	22
+RAHUL S	2023EE0742@svce.ac.in	2127230601065	EE		6	10	2	6	4	8	7	6	9	8	38	28
+RAMANAN P B	2023ee0526@svce.ac.in	2127230601066	EE		6	11	2	7	5	8	7	6	8	8	37	31
+Ramkumar Kuppan	2023ee0746@svce.ac.in	2127230601067	EE		8	7	1	4	2	8	8	7	9	8	40	22
+RAVINA R	2023ee0387@svce.ac.in	2127230601068	EE		4	7	1	7	2	7	7	6	8	6	34	21
+Renuga devi S	2023ee0848@svce.ac.in	2127230601069	EE		5	9	3	2	2	9	9	7	9	9	43	21
+Rohith V	2023ee0698@svce.ac.in	2127230601070	EE		6	8	4	6	3	8	8	8	8	9	41	27
+RUBAN KUMAR M	2023ee0214@svce.ac.in	2127230601071	EE		3	10	3	5	3	8	7	8	0	7	30	24
+SANGAVI.D	2023ee0717@svce.ac.in	2127230601072	EE		5	9	4	4	4	8	8	7	6	9	38	26
+SANJAI PRASATH .S	2023EE0929@svce.ac.in	2127230601073	EE		4	5	2	5	3	7	7	7	7	7	35	19
+shanjay ram s	2023ee0741@svce.ac.in	2127230601075	EE		8	13	4	5	4	8	8	7	8	9	40	34
+Sharvesh R	2023ee0247@svce.ac.in	2127230601076	EE		7	13	1	5	4	10	8	8	8	10	44	30
+M Shree Nivedita	2023ee0694@svce.ac.in	2127230601077	EE		3	14	4	6	1	10	9	9	9	10	47	28
+R Shreya	2023ee0732@svce.ac.in	2127230601078	EE		7	8	4	6	3	8	8	7	8	9	40	28
+Shruthi S	2023ee0711@svce.ac.in	2127230601079	EE		7	10	3	6	2	9	9	7	9	9	43	28
+SMIRRTHI S G	2023ee0195@svce.ac.in	2127230601081	EE		5	12	1	6	2	7	7	6	8	4	32	26
+Sreeman Manikandan	2023ee0211@svce.ac.in	2127230601083	EE		5	9	2	3	4	8	7	6	8	10	39	23
+Sriram.P	2023ee0432@svce.ac.in	2127230601084	EE		2	6	1	1	3	8	8	7	8	9	40	13
+srivathi y	2023ee0904@svce.ac.in	2127230601085	EE		5	9	3	4	3	4	5	6	5	2	22	24
+subash	2023ee0733@svce.ac.in	2127230601086	EE		5	10	3	4	1	7	7	7	7	10	38	23
+Sundaramoorthy A	2023ee0738@svce.ac.in	2127230601087	EE		2	6	2	2	0	7	5	5	7	5	29	12
+SURYA B	2023ee0082@svce.ac.in	2127230601088	EE		7	10	2	3	4	6	6	8	7	6	33	26
+Swathi P	2023ee0249@svce.ac.in	2127230601089	EE		5	11	2	4	3	7	7	6	5	2	27	25
+THAMIZH SELVAN	2023AD0724@svce.ac.in	2127230601090	AD		0	0	0	0	0	0	0	0	0	0	0	0
+THAMIZH SELVAN	2023AD0999@svce.ac.in	2127230601090	AD		1	0	0	0	0	0	0	0	0	0	0	1
+THAMIZHENTHI V EEE	2023ee0931@svce.ac.in	2127230601091	EE		5	11	2	6	3	6	6	5	5	5	27	27
+Thamizhinban	2023ee0922@svce.ac.in	2127230601092	EE		8	10	3	3	2	7	7	6	7	6	33	26
+Vaishali B	2023ee0349@svce.ac.in	2127230601093	EE		4	8	0	4	3	8	8	7	7	8	38	19
+VAISHNAVI.S	2023ee0070@svce.ac.in	2127230601094	EE		3	7	1	6	1	8	8	7	7	8	38	18
+S.VARSHA	2023ee0954@svce.ac.in	2127230601095	EE		3	6	1	5	1	8	8	7	7	8	38	16
+Vaseekaran S	2023ee0213@svce.ac.in	2127230601096	EE		7	10	3	6	2	7	7	6	7	8	35	28
+Vijay Adithya V	2023ee0351@svce.ac.in	2127230601097	EE		4	11	4	6	3	6	6	5	5	5	27	28
+VINEETH KUMAR P	2023ee0255@svce.ac.in	2127230601098	EE		7	11	1	7	3	6	6	5	7	7	31	29
+vinoth kumar.R	2023ee0136@svce.ac.in	2127230601099	EE		6	8	2	4	3	8	8	7	5	10	38	23
+VIRUTHIKA S EEE	2023ee0897@svce.ac.in	2127230601100	EE		4	12	2	6	4	9	10	9	8	9	45	28
+Vishnuppriyan.C	2023ee0740@svce.ac.in	2127230601101	EE		3	8	1	5	2	7	8	7	7	8	37	19
+AKASH KUMAR S	2023ee0965@svce.ac.in	2127230601301	EE		1	6	2	6	4	9	9	8	9	8	43	19
+Esakkimuthu M	2023ee0994@svce.ac.in	2127230601302	EE		0	9	2	4	1	8	7	8	8	8	39	16
+Harish B N	2023ee0964@svce.ac.in	2127230601303	EE		3	10	2	6	3	9	9	8	8	8	42	24
+JAYASURYA S	2023ee0983@svce.ac.in	2127230601304	EE		4	7	2	2	3	7	8	8	8	8	39	18
+Meyyalagan T	2023ee0989@svce.ac.in	2127230601305	EE		3	8	1	5	1	7	7	8	8	8	38	18
+B.S.NAVEEN HARISH	2023ee0971@svce.ac.in	2127230601306	EE		4	7	2	4	1	9	10	7	8	9	43	18
+shriram .P	2023ee0968@svce.ac.in	2127230601307	EE		4	3	1	4	0	7	8	7	7	8	37	12
+SWATHI P V	2023ee0992@svce.ac.in	2127230601308	EE		2	7	2	4	2	7	7	7	6	6	33	17
+Thirumurugan K	2023ee0978@svce.ac.in	2127230601309	EE		2	7	1	5	3	8	7	7	7	7	36	18
+Abinaya P	2023ec0029@svce.ac.in	2127230701001	EC		6	12	3	8	1	3	3	5	6	0	17	30
+Abishek M	2023ec0542@svce.ac.in	2127230701002	EC		4	8	3	9	3	9	10	9	9	10	47	27
+ABISHEK T	2023ec0037@svce.ac.in	2127230701003	EC		7	13	3	6	2	8	8	8	8	8	40	31
+ACHUTHAN B	2023ec0049@svce.ac.in	2127230701004	EC		5	13	2	5	2	7	7	8	7	8	37	27
+Adhitya M	2023ec0071@svce.ac.in	2127230701005	EC		9	16	2	5	4	9	10	9	9	9	46	36
+Adithya A	2023ec0545@svce.ac.in	2127230701006	EC		5	8	1	2	2	7	7	8	7	7	36	18
+AKASH RAJA T	2023ec0595@svce.ac.in	2127230701007	EC		8	9	2	6	2	0	0	3	5	0	8	27
+Amsavardhan J K	2023ec0581@svce.ac.in	2127230701008	EC		4	10	2	7	4	5	5	6	6	3	25	27
+Antony Louis J	2023ec0096@svce.ac.in	2127230701009	EC		6	10	3	3	2	7	7	8	7	6	35	24
+ARJUN SATHISH K K	2023ec0135@svce.ac.in	2127230701011	EC		6	10	3	4	3	8	8	9	9	10	44	26
+ARJUN SIVAKUMAR	2023ec0610@svce.ac.in	2127230701012	EC		3	8	2	4	2	7	8	7	7	5	34	19
+Arun D	2023ec0759@svce.ac.in	2127230701013	EC		4	11	0	2	1	7	7	7	7	4	32	18
+ARUN Y	2023EC0186@svce.ac.in	2127230701014	EC		5	15	3	5	4	8	7	8	8	7	38	32
+Ashika.L.S	2023ec0077@svce.ac.in	2127230701015	EC		8	15	0	6	4	9	9	9	10	10	47	33
+Ashwin J	2023ec0525@svce.ac.in	2127230701016	EC		1	6	1	4	2	7	6	8	7	7	35	14
+ASHWINKUMAR.S	2023ec0400@svce.ac.in	2127230701017	EC		3	9	2	7	2	8	8	8	7	7	38	23
+Balaji R S	2023ec0604@svce.ac.in	2127230701018	EC		4	11	3	6	2	9	9	9	9	8	44	26
+BALAJI S	2023ec0205@svce.ac.in	2127230701019	EC		6	12	1	6	3	9	9	9	8	9	44	28
+Bawadharani Sree R	2023ec0565@svce.ac.in	2127230701020	EC		6	12	2	8	3	8	9	8	9	8	42	31
+Bharani T	2023ec0005@svce.ac.in	2127230701021	EC		7	13	1	6	1	9	9	9	8	8	43	28
+Bharathraj R	2023ec0327@svce.ac.in	2127230701023	EC		5	9	3	8	3	9	9	8	8	9	43	28
+DARSHAN R	2023EC0084@svce.ac.in	2127230701024	EC		6	10	0	5	3	7	8	8	7	8	38	24
+S.DEEPA SREE	2023ec0555@svce.ac.in	2127230701025	EC		7	12	1	6	2	7	8	7	8	8	38	28
+s.p.devdaksan	2023ec0571@svce.ac.in	2127230701026	EC		7	6	4	4	1	8	8	8	9	8	41	22
+Dharsha M	2023ec0539@svce.ac.in	2127230701027	EC		6	7	3	4	2	8	7	8	8	9	40	22
+Dharshini.S	2023ec0583@svce.ac.in	2127230701028	EC		7	8	0	2	2	7	8	7	7	8	37	19
+DHARSHINII P	2023ec0597@svce.ac.in	2127230701029	EC		8	9	1	6	2	8	7	6	6	6	33	26
+DHEEPAK K C	2023ec0544@svce.ac.in	2127230701030	EC		5	6	2	4	0	8	7	8	8	7	38	17
+DIVYA R	2023EC0218@svce.ac.in	2127230701031	EC		3	6	1	3	0	7	6	6	6	6	31	13
+GANDHA KUMAR G	2023ec0613@svce.ac.in	2127230701032	EC		5	10	2	5	1	6	7	6	6	6	31	23
+GIRIDHARAN S N	2023ec0330@svce.ac.in	2127230701033	EC		6	8	4	8	2	9	8	8	8	9	42	28
+Gopika.D	2023EC0611@svce.ac.in	2127230701034	EC		3	7	0	3	3	7	8	8	8	6	37	16
+GOWTHAM M	2023ec0419@svce.ac.in	2127230701035	EC		2	5	0	2	3	0	0	6	6	0	12	12
+HARI KESAVAN	2023ec0549@svce.ac.in	2127230701036	EC		5	8	1	2	1	7	8	8	8	7	38	17
+Harini C	2023ec0147@svce.ac.in	2127230701037	EC		8	13	2	6	3	9	10	9	9	9	46	32
+Harini R	2023ec0589@svce.ac.in	2127230701038	EC		7	10	1	5	2	8	8	7	8	8	39	25
+Harini S	2023ec0129@svce.ac.in	2127230701039	EC		3	9	3	8	2	8	9	9	9	8	43	25
+Harrini R	2023ec0575@svce.ac.in	2127230701040	EC		4	10	0	6	3	8	8	8	9	8	41	23
+Harshinivarsa S.K	2023ec0047@svce.ac.in	2127230701041	EC		4	14	2	8	3	8	8	8	9	9	42	31
+Harshitha B	2023ec0540@svce.ac.in	2127230701042	EC		5	7	0	4	1	7	7	6	8	7	35	17
+Harshitha S	2023ec0858@svce.ac.in	2127230701043	EC		7	11	2	5	1	7	8	6	10	10	41	26
+Himavarshini K R	2023ec0730@svce.ac.in	2127230701044	EC		6	9	4	7	3	7	8	7	8	6	36	29
+Hrisikesh S B	2023ec0548@svce.ac.in	2127230701045	EC		3	9	0	5	2	8	7	7	10	10	42	19
+JAI AADITHYA M	2023ec0749@svce.ac.in	2127230701046	EC		8	11	3	7	5	8	9	8	10	9	44	34
+JANARTHANAN N	2023ec0573@svce.ac.in	2127230701047	EC		5	10	3	5	4	7	8	7	8	8	38	27
+Jaswin.B	2023ec0172@svce.ac.in	2127230701048	EC		4	9	1	6	2	8	8	7	8	9	40	22
+Jayaguru Ra	2023ec0124@svce.ac.in	2127230701049	EC		4	8	1	4	1	6	7	7	6	8	34	18
+Jayavarshini K	2023ec0122@svce.ac.in	2127230701050	EC		7	6	3	7	2	8	9	8	8	7	40	25
+Jeeva S	2023ec0055@svce.ac.in	2127230701051	EC		6	10	1	4	2	6	7	6	7	7	33	23
+Jeevanantham S	2023ec0090@svce.ac.in	2127230701052	EC		5	10	3	5	3	7	8	7	8	8	38	26
+JEGATHEESH N	2023ec0543@svce.ac.in	2127230701053	EC		6	9	0	6	3	9	8	8	8	7	40	24
+S kalaimagal	2023EC0201@svce.ac.in	2127230701055	EC		6	11	0	6	3	7	8	8	8	8	39	26
+KALPANAPRIYADHARSHINI A	2023ec0593@svce.ac.in	2127230701056	EC		5	10	2	4	3	8	8	9	7	7	39	24
+Kandaswamy M	2023ec0547@svce.ac.in	2127230701057	EC		4	8	1	1	1	7	7	8	8	7	37	15
+Karthikeyan A	2023ec0562@svce.ac.in	2127230701058	EC		8	13	3	6	3	8	8	7	8	7	38	33
+Karthikeyan K	2023ec0569@svce.ac.in	2127230701059	EC		6	11	0	4	4	8	7	7	7	8	37	25
+Karunya D	2023ec0240@svce.ac.in	2127230701060	EC		5	11	2	7	3	7	7	8	7	7	36	28
+Kavya P	2023ec0819@svce.ac.in	2127230701061	EC		5	7	3	6	3	8	8	8	9	8	41	24
+KEERTHIVASAN B	2023ec0627@svce.ac.in	2127230701062	EC		2	7	0	3	2	5	3	6	6	3	23	14
+Kesava G	2023ec0860@svce.ac.in	2127230701063	EC		2	10	4	2	0	4	6	6	6	5	27	18
+KISHORE A	2023ec0106@svce.ac.in	2127230701064	EC		7	11	2	7	1	9	9	10	10	10	48	28
+Kishore M	2023ec0062@svce.ac.in	2127230701065	EC		4	14	2	7	3	8	7	8	7	8	38	30
+Krishna Prashad P	2023ec0567@svce.ac.in	2127230701066	EC		6	9	2	3	3	8	8	9	8	9	42	23
+Lakshanaa A M	2023ec0557@svce.ac.in	2127230701067	EC		5	11	4	5	3	9	9	10	9	10	47	28
+Lakshmi Narayanan S	2023ec0528@svce.ac.in	2127230701068	EC		3	5	1	6	1	7	6	6	6	6	31	16
+LEESHANTH N	2023ec0194@svce.ac.in	2127230701070	EC		5	12	1	4	3	6	6	7	6	7	32	25
+LOHITH ASHWA S	2023ec0530@svce.ac.in	2127230701071	EC		6	8	2	5	4	9	9	6	8	9	41	25
+LOKESH M	2023ec0003@svce.ac.in	2127230701072	EC		4	10	2	6	3	8	8	8	8	8	40	25
+LOKKESH V	2023ec0609@svce.ac.in	2127230701073	EC		5	10	1	6	2	3	4	3	5	3	18	24
+Mahalakshmi B	2023ec0169@svce.ac.in	2127230701074	EC		9	11	1	8	3	9	8	8	8	9	42	32
+MAHESHWER T U	2023ec0426@svce.ac.in	2127230701075	EC		4	6	0	3	3	5	4	5	5	3	22	16
+Mithun Kanna U	2023ec0206@svce.ac.in	2127230701076	EC		6	9	3	5	2	9	8	7	8	8	40	25
+Moghith Kumaran J	2023ec0137@svce.ac.in	2127230701077	EC		5	8	2	5	2	8	8	7	8	8	39	22
+Mohamed Aashiq J	2023ec0867@svce.ac.in	2127230701078	EC		4	5	2	6	2	9	9	9	9	9	45	19
+MOHAMED ASIF A	2023ec0603@svce.ac.in	2127230701079	EC		4	6	1	4	1	8	7	7	8	7	37	16
+R.MONISH RAJ	2023ec0621@svce.ac.in	2127230701080	EC		3	9	2	6	3	8	8	8	7	8	39	23
+MUHAMMAD ARSHAD K	2023ec0168@svce.ac.in	2127230701081	EC		3	9	4	4	1	8	7	7	7	7	36	21
+Muhilan S	2023ec0228@svce.ac.in	2127230701082	EC		3	11	3	6	2	8	8	8	9	8	41	25
+MUKESH K	2023ec0197@svce.ac.in	2127230701083	EC		6	15	2	7	3	6	6	6	6	5	29	33
+S Nandita	2023ec0572@svce.ac.in	2127230701085	EC		6	10	4	5	4	9	9	8	10	10	46	29
+Naresh kumar R	2023ec0620@svce.ac.in	2127230701086	EC		4	11	3	6	2	9	8	8	8	9	42	26
+nareshbala.B	2023ec0263@svce.ac.in	2127230701087	EC		3	10	3	1	1	4	3	4	4	3	18	18
+NAWIN A	2023ec0560@svce.ac.in	2127230701088	EC		8	11	3	6	2	9	8	9	8	9	43	30
+Niranjan V	2023ec0585@svce.ac.in	2127230701089	EC		4	5	2	6	3	8	8	8	7	7	38	20
+Kaamesh	2023ec0578@svce.ac.in	2127230701090	EC		0	0	0	1	0	0	0	0	0	0	0	1
+Nivetha Harshini J	2023ec0536@svce.ac.in	2127230701091	EC		6	11	3	7	3	9	10	9	9	7	44	30
+Nivethalakshmi C B	2023ec0002@svce.ac.in	2127230701092	EC		2	9	3	6	0	7	7	8	8	7	37	20
+Oviya	2023ec0054@svce.ac.in	2127230701093	EC		6	13	4	4	4	8	8	8	8	8	40	31
+Priyadharshini PB	2023ec0556@svce.ac.in	2127230701094	EC		7	10	1	2	2	7	8	8	7	7	37	22
+Parthiban.v	2023ec0551@svce.ac.in	2127230701095	EC		5	9	4	6	5	9	8	8	9	9	43	29
+PARTHIBBHAN A	2023ec0045@svce.ac.in	2127230701096	EC		6	5	4	7	3	7	7	8	8	8	38	25
+Pavan P	2023ec0554@svce.ac.in	2127230701097	EC		9	8	2	4	4	9	9	9	9	10	46	27
+Pavin Kishore N	2023ec0619@svce.ac.in	2127230701098	EC		5	9	5	5	4	7	7	7	8	8	37	28
+Pavithra M	2023ec0015@svce.ac.in	2127230701099	EC		3	10	3	8	2	7	7	8	8	7	37	26
+Poojasree V	2023ec0944@svce.ac.in	2127230701100	EC		7	8	2	4	1	8	8	7	9	8	40	22
+Pradeep Kumar .V	2023ec0241@svce.ac.in	2127230701101	EC		6	7	1	4	2	6	7	6	7	6	32	20
+Prajeeth S	2023ec0561@svce.ac.in	2127230701102	EC		6	8	3	4	1	5	7	6	7	6	31	22
+Pranav V Krishnan	2023ec0123@svce.ac.in	2127230701103	EC		6	11	5	5	4	8	8	7	8	6	37	31
+Pranay V	2023ec0564@svce.ac.in	2127230701104	EC		5	8	1	7	2	9	8	7	9	9	42	23
+PRAVEEN VASUDEVAN	2023EC0126@svce.ac.in	2127230701105	EC		6	12	2	6	2	7	8	8	8	10	41	28
+preethi	2023ec0094@svce.ac.in	2127230701106	EC		3	8	3	5	2	1	1	2	8	0	12	21
+Preethika R	2023ec0596@svce.ac.in	2127230701107	EC		7	14	3	7	5	8	9	8	8	8	41	36
+PRISHA JOTHI J	2023ec0268@svce.ac.in	2127230701108	EC		6	10	3	6	3	8	8	9	8	9	42	28
+Priyadharshini R	2023ec0938@svce.ac.in	2127230701109	EC		2	12	0	5	5	8	8	8	9	8	41	24
+purvaja.k	2023ec0550@svce.ac.in	2127230701110	EC		7	9	2	9	4	8	9	9	9	8	43	31
+Ragavardhini R	2023cs0558@svce.ac.in	2127230701111	CS		5	10	4	9	4	7	8	7	8	7	37	32
+Raghul M	2023ec0580@svce.ac.in	2127230701112	EC		5	9	5	7	4	9	9	9	8	9	44	30
+Ragul M	2023ec0221@svce.ac.in	2127230701113	EC		4	12	3	5	2	8	7	7	9	7	38	26
+Rahul	2023ec0895@svce.ac.in	2127230701114	EC		7	12	1	4	3	8	9	8	8	8	41	27
+Ram Pranesh S L	2023ec0612@svce.ac.in	2127230701115	EC		6	14	0	6	1	8	7	7	7	7	36	27
+Ramya V	2023ec0215@svce.ac.in	2127230701116	EC		8	9	3	8	1	8	8	8	8	8	40	29
+Rayeesha Bhat P	2023ec0142@svce.ac.in	2127230701117	EC		5	13	4	7	4	8	8	8	7	8	39	33
+Rejoe Ruphavathi J	2023ec0252@svce.ac.in	2127230701118	EC		6	12	3	7	4	8	7	8	9	8	40	32
+Rithvik R	2023ec0579@svce.ac.in	2127230701119	EC		7	13	3	4	2	8	8	8	8	7	39	29
+ROGHITHKANNAN G	2023EC0606@svce.ac.in	2127230701120	EC		3	9	2	5	3	9	8	8	10	10	45	22
+Rohith Kanna S	2023ec0574@svce.ac.in	2127230701121	EC		7	12	4	7	5	9	8	8	10	10	45	35
+SADHASIVAM V	2023ec0075@svce.ac.in	2127230701122	EC		7	9	0	3	2	6	2	8	7	0	23	21
+Sai Raksheedha S	2023ec0541@svce.ac.in	2127230701123	EC		6	11	3	6	5	8	9	8	9	7	41	31
+SAKTHI PANAYAPPAN P	2023ec0064@svce.ac.in	2127230701124	EC		5	10	3	9	2	2	5	6	7	4	24	29
+Sakthi Purushothaman	2023ec0534@svce.ac.in	2127230701125	EC		7	8	3	6	4	9	9	8	9	8	43	28
+SAKTHIVEL S	2023ec0165@svce.ac.in	2127230701126	EC		2	11	2	7	3	8	6	7	7	7	35	25
+P G Sam Shashikiran	2023ec0304@svce.ac.in	2127230701127	EC		5	5	2	3	0	8	7	7	6	6	34	15
+Sanjana Praveen Kumar	2023ec0531@svce.ac.in	2127230701128	EC		8	12	2	6	3	7	8	9	9	8	41	31
+M.SANTHOSH	2023EC0696@svce.ac.in	2127230701129	EC		6	11	2	7	4	7	8	8	9	9	41	30
+Sathya Priya P S	2023ec0625@svce.ac.in	2127230701130	EC		4	3	1	2	4	8	7	8	7	8	38	14
+Sethukarasi M	2023ec0588@svce.ac.in	2127230701131	EC		6	9	0	5	1	9	9	8	8	8	42	21
+SHAGUL S	2023ec0414@svce.ac.in	2127230701132	EC		3	9	0	3	1	8	7	6	7	6	34	16
+SHARVA JAYAN M J	2023ec0599@svce.ac.in	2127230701133	EC		5	10	1	5	1	8	7	7	9	8	39	22
+SHIVANI R	2023ec0532@svce.ac.in	2127230701134	EC		8	11	3	6	3	9	9	8	9	8	43	31
+Shree Dharshan S	2023ec0605@svce.ac.in	2127230701135	EC		9	12	1	6	3	8	8	7	9	8	40	31
+Shree Varshini M	2023ec0577@svce.ac.in	2127230701136	EC		7	9	2	5	3	8	8	8	8	8	40	26
+Shrikanth N M	2023ec0145@svce.ac.in	2127230701137	EC		5	11	3	7	3	8	8	7	8	7	38	29
+Shriram Kumar  V	2023ec0881@svce.ac.in	2127230701138	EC		7	12	3	4	3	9	9	8	9	8	43	29
+SOPHIA V	2023ec0591@svce.ac.in	2127230701139	EC		6	12	4	4	2	8	8	8	8	8	40	28
+sriman D	2023ec0587@svce.ac.in	2127230701140	EC		5	10	1	4	4	8	7	8	8	7	38	24
+Srinidhi S	2023ec0758@svce.ac.in	2127230701141	EC		7	13	2	6	3	8	9	8	7	9	41	31
+SRIVATSAN S  P	2023ec0033@svce.ac.in	2127230701142	EC		5	12	1	4	4	7	7	7	7	7	35	26
+srivatshan s	2023ec0622@svce.ac.in	2127230701143	EC		7	12	0	5	2	7	6	6	7	6	32	26
+Sudesh Pillai	2023ec0614@svce.ac.in	2127230701144	EC		6	9	4	4	5	8	8	8	8	8	40	28
+Sudhan S	2023ec0535@svce.ac.in	2127230701145	EC		9	16	3	7	3	8	8	8	8	8	40	38
+Sudharshan P	2023ec0607@svce.ac.in	2127230701146	EC		9	9	3	4	5	7	7	7	7	7	35	30
+SUGI SIVAM S	2023ec0060@svce.ac.in	2127230701147	EC		5	10	3	7	4	7	7	7	7	7	35	29
+Sundaresh K	2023ec0297@svce.ac.in	2127230701148	EC		4	9	1	6	2	6	6	6	6	6	30	22
+SURENDER SAH K	2023ec0617@svce.ac.in	2127230701149	EC		2	9	3	2	4	7	8	6	8	7	36	20
+Surya K	2023ec0546@svce.ac.in	2127230701150	EC		7	14	3	5	3	8	8	7	9	8	40	32
+TAMILSIRPY T	2023ec0919@svce.ac.in	2127230701151	EC		8	9	1	1	2	7	6	6	7	6	32	21
+Tanisha S	2023EC0026@svce.ac.in	2127230701152	EC		7	14	3	6	3	8	8	6	9	8	39	33
+Tejaswi.S	2023ec9576@svce.ac.in	2127230701153	EC		6	10	4	2	4	8	8	7	7	5	35	26
+THAMIZH ELAKKIYA A B	2023ec0598@svce.ac.in	2127230701154	EC		5	11	1	6	1	1	0	8	7	0	16	24
+Thanushree J	2023ec0537@svce.ac.in	2127230701155	EC		8	11	4	5	3	8	7	6	8	8	37	31
+thishan b	2023ec0907@svce.ac.in	2127230701156	EC		6	6	1	5	2	7	1	5	7	1	21	20
+toushik	2023ec0502@svce.ac.in	2127230701158	EC		7	8	2	5	2	7	8	8	8	6	37	24
+UDHAYAKUMAR S	2023ec0183@svce.ac.in	2127230701159	EC		6	15	1	7	3	7	6	7	8	8	36	32
+VANMATHI SAMIKKANNU	2023ec0868@svce.ac.in	2127230701160	EC		5	10	0	5	2	8	8	7	8	8	39	22
+VARDHINI B	2023ec0529@svce.ac.in	2127230701161	EC		5	12	3	5	2	8	9	7	8	9	41	27
+Venkat Sri Charan U	2023ec0435@svce.ac.in	2127230701162	EC		5	7	2	5	4	8	7	7	9	8	39	23
+Vickkraman K	2023ec0538@svce.ac.in	2127230701163	EC		4	11	1	7	4	0	0	0	0	0	0	27
+VINAYAGAMURTHI E	2023ec0189@svce.ac.in	2127230701164	EC		4	7	0	5	3	7	6	5	6	7	31	19
+Vishal Sundaram	2023ec0602@svce.ac.in	2127230701165	EC		7	9	1	4	3	8	9	8	9	9	43	24
+P. Vishnnu	2023ec0582@svce.ac.in	2127230701166	EC		5	7	4	6	4	9	9	9	8	8	43	26
+VISHNOOPRIYEN S	2023ec0600@svce.ac.in	2127230701167	EC		3	4	2	5	5	8	9	7	8	8	40	19
+VISHNUPRASATH V	2023ec0317@svce.ac.in	2127230701168	EC		5	12	2	7	4	8	8	8	8	7	39	30
+VISHVANTH K	2023ec0302@svce.ac.in	2127230701169	EC		3	13	2	7	2	8	8	8	8	8	40	27
+Viswa R	2023ec0592@svce.ac.in	2127230701170	EC		7	10	3	4	3	7	8	7	8	7	37	27
+Yajnesh Juttu Sundaram	2023ec0570@svce.ac.in	2127230701171	EC		6	12	2	6	3	9	9	8	9	9	44	29
+YESHWANT V	2023ec0887@svce.ac.in	2127230701172	EC		3	10	3	1	3	8	8	8	8	8	40	20
+Yogeshwaran K	2023ec0590@svce.ac.in	2127230701173	EC		4	11	1	5	3	4	5	4	3	3	19	24
+Yogeswaren S	2023ec0101@svce.ac.in	2127230701174	EC		8	15	4	6	4	8	8	8	8	8	40	37
+YUGAL KISHORE E	2023ec0568@svce.ac.in	2127230701175	EC		7	12	3	3	4	8	9	8	9	8	42	29
+AKBAR BASHA G	2023ec0975@svce.ac.in	2127230701301	EC		6	4	3	6	2	8	7	7	8	7	37	21
+Chidhambaraam P	2023ec0969@svce.ac.in	2127230701302	EC		3	11	2	4	2	8	7	7	9	7	38	22
+HARSHATH S	2023ec0982@svce.ac.in	2127230701303	EC		4	8	3	6	2	8	8	8	8	9	41	23
+LOKESH G A	2023ec0990@svce.ac.in	2127230701304	EC		3	9	0	5	0	7	7	7	8	8	37	17
+SIVAA S M	2023ec0991@svce.ac.in	2127230701305	EC		2	5	1	0	1	4	4	5	6	3	22	9
+Tharun s	2023ec0996@svce.ac.in	2127230701306	EC		2	6	0	3	1	4	5	4	5	3	21	12
+V.Saikiran	2023EC0974@svce.ac.in	2127230701308	EC		2	9	2	3	2	7	8	7	8	8	38	18
+VIKNESHWARAN M	2023ec1002@svce.ac.in	2127230701701	EC		6	10	1	2	4	8	7	8	7	8	38	23
+Abdul Wahab Basheer F	2023it0058@svce.ac.in	2127230801001	IT		5	14	3	9	3	9	8	9	9	9	44	34
+Adarsh S	2023it0839@svce.ac.in	2127230801002	IT		6	8	1	7	1	8	8	8	8	8	40	23
+AKASH S	2023it0156@svce.ac.in	2127230801003	IT		7	6	1	6	3	8	7	8	8	10	41	23
+akshaya k	2023it0842@svce.ac.in	2127230801004	IT		5	4	3	8	0	8	7	7	7	8	37	20
+D Allan Sam Jeyaraj	2023it0779@svce.ac.in	2127230801005	IT		6	12	3	6	2	9	8	8	7	9	41	29
+Anand R	2023it0835@svce.ac.in	2127230801006	IT		3	8	1	5	4	5	5	8	7	4	29	21
+ANIRUDH N	2023it0789@svce.ac.in	2127230801007	IT		7	14	5	9	3	8	8	8	8	10	42	38
+Anushiya M	2023it0928@svce.ac.in	2127230801008	IT		2	6	3	5	1	6	8	7	7	7	35	17
+Anuvarshini A	2023it0781@svce.ac.in	2127230801009	IT		4	11	2	8	4	6	8	7	7	7	35	29
+Arunprakash S	2023it0810@svce.ac.in	2127230801010	IT		3	8	4	7	3	8	7	7	8	8	38	25
+Ashwini PV	2023it0798@svce.ac.in	2127230801011	IT		4	8	3	3	3	9	8	8	8	8	41	21
+Aswin Kumar K	2023it0911@svce.ac.in	2127230801012	IT		4	5	2	7	1	8	9	8	8	8	41	19
+Aswin S	2023it0776@svce.ac.in	2127230801013	IT		8	6	2	3	2	8	9	8	8	8	41	21
+Balaji Sekar	2023it0780@svce.ac.in	2127230801014	IT		3	3	1	5	3	9	8	8	9	8	42	15
+Bavadharini M	2023it0871@svce.ac.in	2127230801015	IT		7	12	3	3	3	9	9	9	9	9	45	28
+Bershay R	2023it0079@svce.ac.in	2127230801016	IT		8	11	3	8	2	9	9	9	8	9	44	32
+Chandrasekar S	2023it0192@svce.ac.in	2127230801017	IT		10	14	3	9	4	8	8	8	8	8	40	40
+Chidambaranathan R	2023it0804@svce.ac.in	2127230801018	IT		4	6	4	3	4	9	8	9	8	9	43	21
+Devasena C A S	2023it0899@svce.ac.in	2127230801019	IT		4	6	2	5	2	10	9	9	8	10	46	19
+Dhanesh Sivadeep P V	2023it0227@svce.ac.in	2127230801020	IT		8	9	2	9	3	7	7	7	9	5	35	31
+dhanesh v	2023it0242@svce.ac.in	2127230801021	IT		6	11	1	9	1	10	8	9	10	8	45	28
+Dharaneesh V	2023it0915@svce.ac.in	2127230801022	IT		5	6	3	3	0	9	9	10	7	9	44	17
+Dharanish A	2023it0152@svce.ac.in	2127230801023	IT		2	12	2	7	3	9	9	8	9	8	43	26
+Dhinesh Ragavendar R	2023it0905@svce.ac.in	2127230801024	IT		3	8	2	8	3	10	9	10	10	10	49	24
+Dinesh karthik L	2023it0797@svce.ac.in	2127230801025	IT		7	9	3	6	3	10	9	10	10	10	49	28
+Diviya Shri S D	2023it0832@svce.ac.in	2127230801026	IT		4	8	1	4	3	9	9	8	7	7	40	20
+GOKHULA ANAND S	2023it0012@svce.ac.in	2127230801027	IT		6	7	3	8	3	10	9	7	8	8	42	27
+GOKULA VARSHINI R	2023it0873@svce.ac.in	2127230801028	IT		3	9	2	8	1	10	8	7	8	9	42	23
+Hamrithasree R	2023it0623@svce.ac.in	2127230801029	IT		4	5	1	8	2	8	7	8	7	8	38	20
+HARI KRISHNAA G	2023it0158@svce.ac.in	2127230801030	IT		6	6	4	9	2	8	8	8	7	7	38	27
+HARINI K	2023it0294@svce.ac.in	2127230801031	IT		6	3	2	6	1	8	8	8	7	7	38	18
+Harish Raj Kumar A	2023it0847@svce.ac.in	2127230801032	IT		5	10	3	4	4	7	8	9	7	7	38	26
+Harisha Sivakumar	2023it0121@svce.ac.in	2127230801033	IT		5	9	2	6	4	9	8	8	7	7	39	26
+Hemadri R	2023it0846@svce.ac.in	2127230801034	IT		5	2	2	3	4	7	7	8	7	7	36	16
+Hemanath B	2023it0836@svce.ac.in	2127230801035	IT		6	12	2	6	3	9	8	8	8	9	42	29
+Infant Rohith A	2023it0921@svce.ac.in	2127230801036	IT		4	8	0	5	1	6	4	4	7	2	23	18
+Ishana S	2023it0782@svce.ac.in	2127230801037	IT		6	8	1	3	2	8	8	8	8	8	40	20
+Iyappan N	2023it0818@svce.ac.in	2127230801038	IT		7	9	3	5	2	9	8	8	8	9	42	26
+Janani R T	2023it0024@svce.ac.in	2127230801039	IT		5	10	1	7	2	7	8	8	7	9	39	25
+Jayaraghav V	2023it0768@svce.ac.in	2127230801040	IT		6	12	1	8	2	8	8	8	7	9	40	29
+John Bellarmine G A	2023it0150@svce.ac.in	2127230801041	IT		8	12	2	8	3	8	8	8	7	9	40	33
+Jothilakshmi	2023it0187@svce.ac.in	2127230801042	IT		7	7	4	8	3	9	8	8	8	8	41	29
+KAMALI K	2023it0261@svce.ac.in	2127230801043	IT		6	11	2	9	1	9	7	8	8	8	40	29
+KANISKA DEVI B	2023it0803@svce.ac.in	2127230801044	IT		5	8	1	7	2	7	8	8	8	8	39	23
+Karnan S	2023it0223@svce.ac.in	2127230801045	IT		4	9	3	7	1	8	7	8	8	8	39	24
+Kishor G	2023it0900@svce.ac.in	2127230801046	IT		7	6	1	4	3	7	5	7	7	6	32	21
+Krithika	2023it0056@svce.ac.in	2127230801047	IT		6	9	3	5	4	9	9	9	8	7	42	27
+KRITHIKA S	2023it0830@svce.ac.in	2127230801048	IT		4	3	2	5	3	10	9	8	7	10	44	17
+Kumaran K.S	2023it0771@svce.ac.in	2127230801049	IT		5	6	3	5	2	8	8	5	6	7	34	21
+L Lingesh	2023it0069@svce.ac.in	2127230801050	IT		6	7	2	7	4	7	5	7	7	6	32	26
+A.lother	2023it0933@svce.ac.in	2127230801051	IT		5	5	3	5	2	7	5	7	7	6	32	20
+Madhumitha B	2023it0039@svce.ac.in	2127230801052	IT		3	10	2	8	3	8	8	8	8	8	40	26
+Manikandan D	2023it0894@svce.ac.in	2127230801053	IT		5	8	1	6	3	8	9	7	7	7	38	23
+MANISHA T	2023it0769@svce.ac.in	2127230801054	IT		4	10	3	6	3	7	9	7	7	7	37	26
+Manoj S	2023it0321@svce.ac.in	2127230801055	IT		4	7	1	4	2	7	6	6	6	6	31	18
+Maruthu B	2023it0202@svce.ac.in	2127230801056	IT		5	6	2	5	2	10	7	7	7	8	39	20
+Megahdarshini J	2023it0337@svce.ac.in	2127230801057	IT		4	12	2	8	2	7	7	7	7	7	35	28
+Meghavarshini S	2023it0063@svce.ac.in	2127230801058	IT		9	13	1	9	4	10	9	8	10	10	47	36
+MOHANAKRISHNAN K	2023it0103@svce.ac.in	2127230801059	IT		7	5	1	8	3	7	7	7	7	7	35	24
+Mothish N	2023it0807@svce.ac.in	2127230801060	IT		5	5	3	5	2	0	0	0	0	0	0	20
+mounish. j	2023it0270@svce.ac.in	2127230801061	IT		8	5	2	5	3	7	7	7	7	7	35	23
+U.Muthu Devishni Mala	2023it0914@svce.ac.in	2127230801062	IT		3	7	0	7	3	10	9	9	10	10	48	20
+Mythili K	2023it0032@svce.ac.in	2127230801063	IT		3	6	3	8	2	7	8	7	8	8	38	22
+Naveen s	2023it0038@svce.ac.in	2127230801064	IT		8	10	1	8	1	8	7	7	8	7	37	28
+NEHA	2023it0140@svce.ac.in	2127230801065	IT		5	10	4	7	2	7	7	6	8	6	34	28
+Nethra	2023it0840@svce.ac.in	2127230801066	IT		5	4	1	4	1	10	9	8	7	10	44	15
+M.Nithila	2023it0838@svce.ac.in	2127230801067	IT		6	12	3	7	3	8	7	7	8	7	37	31
+V NITHISRI	2023it0880@svce.ac.in	2127230801068	IT		4	5	2	5	3	8	7	7	10	8	40	19
+Padmajaa P	2023it0095@svce.ac.in	2127230801069	IT		8	6	2	8	3	10	9	8	7	10	44	27
+Pavithra.V	2023it0184@svce.ac.in	2127230801070	IT		2	5	3	4	2	8	8	7	7	7	37	16
+prakash R	2023it0394@svce.ac.in	2127230801071	IT		4	6	2	6	1	8	7	6	8	6	35	19
+Pranav AV	2023it0812@svce.ac.in	2127230801072	IT		7	11	2	7	3	10	8	7	10	9	44	30
+Praveen Palanivel	2023it0777@svce.ac.in	2127230801073	IT		5	14	2	8	3	8	7	8	8	7	38	32
+Praveen R	2023it0817@svce.ac.in	2127230801074	IT		8	8	1	6	3	8	8	8	8	9	41	26
+Rahul K	2023it0773@svce.ac.in	2127230801075	IT		5	14	2	7	4	6	7	8	8	8	37	32
+Rajalakshmi A	2023IT0787@svce.ac.in	2127230801076	IT		2	10	3	7	3	7	8	8	8	9	40	25
+RAMKISHORE A V	2023it0083@svce.ac.in	2127230801077	IT		4	8	1	8	1	9	7	8	8	7	39	22
+Ritulau	2023it0806@svce.ac.in	2127230801078	IT		5	12	3	6	1	8	8	8	8	7	39	27
+Sachin Krishnaa S	2023it0801@svce.ac.in	2127230801079	IT		6	10	2	8	4	9	8	8	8	8	41	30
+Sana	2023it0799@svce.ac.in	2127230801080	IT		5	9	1	6	5	7	8	7	7	7	36	26
+Sanjana Madankumar	2023it0765@svce.ac.in	2127230801081	IT		8	10	2	4	3	8	9	9	9	10	45	27
+Sewak	2023it0231@svce.ac.in	2127230801082	IT		4	6	2	1	3	0	0	0	0	0	0	16
+SHAHUL S A	2023it0190@svce.ac.in	2127230801083	IT		8	8	3	10	1	8	7	8	8	8	39	30
+Shajini A	2023it0009@svce.ac.in	2127230801084	IT		8	10	5	8	3	8	7	8	8	7	38	34
+Shamitha Ka	2023it0823@svce.ac.in	2127230801085	IT		3	7	2	5	1	8	8	8	7	7	38	18
+Shiyam	2023it0199@svce.ac.in	2127230801086	IT		7	8	2	4	1	8	8	8	8	7	39	22
+Shreya V	2023it0178@svce.ac.in	2127230801087	IT		7	7	2	9	4	9	9	8	8	8	42	29
+Shri Shivesh V S	2023it0310@svce.ac.in	2127230801088	IT		3	11	4	7	3	8	8	8	8	7	39	28
+Shri Vignesh S	2023it0784@svce.ac.in	2127230801089	IT		5	7	3	7	3	9	8	8	7	8	40	25
+Sivamanickam G	2023it0153@svce.ac.in	2127230801090	IT		5	5	1	6	5	9	8	8	8	8	41	22
+Smirithi P	2023it0829@svce.ac.in	2127230801091	IT		2	11	3	5	4	10	10	9	9	10	48	25
+sri ananya inukurthi	2023it0053@svce.ac.in	2127230801092	IT		5	12	1	7	3	10	10	9	9	10	48	28
+SRIHARE VIGNESH K	2023it0786@svce.ac.in	2127230801093	IT		4	5	2	4	2	9	10	9	9	10	47	17
+Stefan K	2023it0170@svce.ac.in	2127230801094	IT		7	8	1	9	5	9	10	9	9	10	47	30
+subiksha m	2023it0791@svce.ac.in	2127230801095	IT		5	5	4	5	3	9	10	8	9	10	46	22
+Swathi A	2023it0006@svce.ac.in	2127230801096	IT		7	15	5	9	3	9	10	8	9	10	46	39
+THANGANILA	2023it0074@svce.ac.in	2127230801097	IT		7	6	2	4	1	7	10	8	9	10	44	20
+Thanuja M	2023it0232@svce.ac.in	2127230801098	IT		5	6	1	3	2	9	10	8	9	10	46	17
+VARSHA K	2023it0151@svce.ac.in	2127230801100	IT		4	9	2	9	2	10	10	9	9	10	48	26
+Varshaa K S	2023it0226@svce.ac.in	2127230801101	IT		9	7	1	8	1	8	7	7	8	8	38	26
+Varshini M	2023it0827@svce.ac.in	2127230801102	IT		7	10	3	8	3	10	10	8	9	10	47	31
+Venkateswaran A	2023it0131@svce.ac.in	2127230801103	IT		3	7	1	6	4	7	5	6	7	6	31	21
+Vishal V	2023it0308@svce.ac.in	2127230801105	IT		8	12	1	8	4	7	6	6	7	6	32	33
+Yatheeshram SM	2023it0415@svce.ac.in	2127230801106	IT		6	7	2	4	2	7	6	7	7	6	33	21
+Yugan T	2023it0869@svce.ac.in	2127230801107	IT		7	7	3	8	4	10	10	8	9	10	47	29
+DUSHIYANTH B.T	2023IT0993@svce.ac.in	2127230801301	IT		7	10	1	7	2	5	5	6	6	5	27	27
+NITHISH RAJAN E	2023it0977@svce.ac.in	2127230801302	IT		4	8	1	4	3	4	4	4	4	2	18	20
+nithishkumar	2023it0999@svce.ac.in	2127230801303	IT		5	2	0	4	2	5	5	6	6	5	27	13
+Monish Ram J	2023it1003@svce.ac.in	2127230801701	IT		5	7	2	4	3	10	10	8	9	10	47	21
+C.M.AADHAV THARSHAN	2023me0856@svce.ac.in	2127231001001	ME		4	5	3	5	2	10	9	10	10	10	49	19
+Abishak k	2023me0299@svce.ac.in	2127231001002	ME		4	7	2	5	3	10	8	10	10	8	46	21
+Abishek Hallen Raj M D	2023me0364@svce.ac.in	2127231001003	ME		7	7	3	3	3	10	8	8	9	6	41	23
+Akash GS	2023me0764@svce.ac.in	2127231001004	ME		6	8	1	3	4	10	9	10	10	9	48	22
+AKSHAY V	2023me0316@svce.ac.in	2127231001005	ME		5	7	3	4	3	10	9	9	9	10	47	22
+Aswanth M	2023me0934@svce.ac.in	2127231001006	ME		6	10	1	2	4	10	9	9	9	10	47	23
+Badrinath B	2023me0383@svce.ac.in	2127231001007	ME		5	10	2	3	2	10	8	10	10	9	47	22
+Balaji S	2023me0906@svce.ac.in	2127231001008	ME		3	8	2	5	3	10	8	10	10	9	47	21
+BARATH KUMAR.M	2023me0191@svce.ac.in	2127231001009	ME		3	7	0	5	4	8	6	8	6	5	33	19
+S. B. BARATH SRIRAM	2023me0796@svce.ac.in	2127231001010	ME		6	8	1	6	2	9	8	9	9	8	43	23
+BHARATH RAJH  A	2023me0788@svce.ac.in	2127231001011	ME		3	7	2	4	3	8	9	9	10	8	44	19
+BHARATHI S	2023ME0373@svce.ac.in	2127231001012	ME		6	8	2	4	4	7	7	7	8	9	38	24
+DEEPAK KUMAR A	2023me0828@svce.ac.in	2127231001013	ME		5	7	0	7	2	0	0	0	0	0	0	21
+Dhanush Kumar S	2023me0361@svce.ac.in	2127231001014	ME		6	11	4	0	1	7	5	5	6	4	27	22
+FRAGERLEE RUCETIN JOEL K	2023me0410@svce.ac.in	2127231001015	ME		4	11	3	5	3	7	8	5	8	8	36	26
+GAYATHRI R	2023me0251@svce.ac.in	2127231001016	ME		4	10	1	4	2	8	8	6	9	8	39	21
+Gowrav K	2023me0109@svce.ac.in	2127231001017	ME		5	8	1	4	3	7	7	8	7	7	36	21
+Guhan M S	2023me0926@svce.ac.in	2127231001018	ME		6	11	3	3	2	4	0	8	7	3	22	25
+Harish M	2023me0774@svce.ac.in	2127231001019	ME		5	5	3	5	4	8	10	9	10	10	47	22
+Illayavendhan A	2023me0845@svce.ac.in	2127231001020	ME		5	7	3	2	3	7	8	8	9	10	42	20
+Irfan Sajith L	2023me0376@svce.ac.in	2127231001021	ME		7	8	3	7	4	7	8	8	9	10	42	29
+JEEVAKARUNA S	2023me0325@svce.ac.in	2127231001022	ME		3	8	2	4	3	8	8	8	10	8	42	20
+JETHNIEL BRYAN CYNTHAN PAUL S	2023me0800@svce.ac.in	2127231001023	ME		6	8	3	3	2	8	10	8	9	10	45	22
+Johan Raj J	2023me0356@svce.ac.in	2127231001024	ME		4	5	2	3	2	8	9	7	9	9	42	16
+KAMALESH A N B	2023me0778@svce.ac.in	2127231001025	ME		1	9	2	3	2	8	7	9	9	8	41	17
+Kaustubha Kumar Manchi	2023ME0785@svce.ac.in	2127231001026	ME		7	6	2	6	2	9	9	9	8	9	44	23
+Kiran G	2023me0409@svce.ac.in	2127231001027	ME		5	6	1	6	1	9	8	8	7	8	40	19
+KRISHNAKUMAR A	2023me0375@svce.ac.in	2127231001028	ME		1	8	4	5	0	8	7	7	8	9	39	18
+LOGESH K	2023me0813@svce.ac.in	2127231001029	ME		7	9	1	4	3	9	8	8	8	8	41	24
+MADHAN MOHAN M	2023me0875@svce.ac.in	2127231001030	ME		4	6	3	2	4	8	9	9	8	7	41	19
+Maharajan S	2023me0811@svce.ac.in	2127231001031	ME		4	11	3	5	3	7	9	7	7	7	37	26
+Namrattha M R	2023me0826@svce.ac.in	2127231001032	ME		7	9	1	5	3	9	8	8	8	7	40	25
+narendharan m	2023me0305@svce.ac.in	2127231001034	ME		5	6	0	4	4	8	8	10	8	10	44	19
+Nithissh	2023me0891@svce.ac.in	2127231001036	ME		3	7	3	4	0	10	7	10	8	7	42	17
+Padmalaya seshadri B	2023me0909@svce.ac.in	2127231001037	ME		5	6	1	2	1	9	7	10	9	7	42	15
+Priyan S	2023me0328@svce.ac.in	2127231001038	ME		2	9	4	4	2	10	8	10	9	10	47	21
+Raghav.A.R	2023me0841@svce.ac.in	2127231001039	ME		5	7	1	3	2	10	9	10	9	10	48	18
+Rutheeshtaa Su	2023me0344@svce.ac.in	2127231001040	ME		7	9	0	4	4	10	9	10	10	10	49	24
+Sai Kishore M S	2023me0770@svce.ac.in	2127231001041	ME		6	10	2	5	3	10	8	8	9	10	45	26
+M.Sanjay	2023me0348@svce.ac.in	2127231001042	ME		6	6	2	4	2	8	8	10	8	10	44	20
+sarvesh J	2023ME0360@svce.ac.in	2127231001043	ME		6	6	3	3	2	9	7	9	8	7	40	20
+SHARATH VS	2023me0766@svce.ac.in	2127231001045	ME		8	8	1	3	2	8	8	9	8	7	40	22
+SOMASUNDHARM SC	2023me0342@svce.ac.in	2127231001046	ME		4	7	1	2	4	7	6	7	6	7	33	18
+Srikanth M	2023me0883@svce.ac.in	2127231001047	ME		5	4	3	4	3	9	8	7	8	8	40	19
+Sriram G	2023me0816@svce.ac.in	2127231001048	ME		7	9	4	4	2	6	8	8	8	7	37	26
+Sudarshan Manoharan	2023me0822@svce.ac.in	2127231001049	ME		8	4	5	4	4	9	8	9	10	9	45	25
+M sujit	2023me0893@svce.ac.in	2127231001050	ME		2	8	1	2	2	7	7	7	8	8	37	15
+Survesh DK	2023me0936@svce.ac.in	2127231001051	ME		2	8	1	4	2	7	7	8	8	8	38	17
+SUSHIL S	2023me0824@svce.ac.in	2127231001052	ME		5	5	1	4	4	7	5	7	5	5	29	19
+SWAMINATH P G	2023me0775@svce.ac.in	2127231001053	ME		6	7	2	3	3	10	10	9	10	10	49	21
+Tamilselvan P	2023me0298@svce.ac.in	2127231001054	ME		4	4	1	6	1	7	4	9	8	5	33	16
+Thilak raj S	2023me0403@svce.ac.in	2127231001055	ME		5	6	3	5	3	10	8	9	9	8	44	22
+Adithya Jha	2023me0981@svce.ac.in	2127231001301	ME		1	6	2	2	3	9	8	9	10	10	46	14
+HARIHARAN P	2023me0976@svce.ac.in	2127231001302	ME		2	9	1	1	4	8	7	9	9	9	42	17
+kabilan	2023me0988@svce.ac.in	2127231001303	ME		2	7	1	1	1	0	0	0	0	0	0	12
+Santhoshkumar A	2023me0980@svce.ac.in	2127231001304	ME		3	4	1	4	4	10	8	9	9	10	46	16
+sivaraman s	2023me0998@svce.ac.in	2127231001305	ME		3	6	1	3	0	10	7	9	9	10	45	13
+S Aakash Rajan	2023mn0913@svce.ac.in	2127231002001	MN		4	8	3	2	3	5	4	4	4	4	21	20
+Abarna Chawwla	2023mn0406@svce.ac.in	2127231002002	MN		5	7	3	6	3	7	7	7	8	10	39	24
+Abhinav.B	2023mn0837@svce.ac.in	2127231002003	MN		3	5	2	2	3	2	2	2	2	0	8	15
+AKASH  M R	2023mn0421@svce.ac.in	2127231002004	MN		5	10	1	5	2	6	7	6	6	6	31	23
+Anirudh R	2023mn0608@svce.ac.in	2127231002006	MN		7	10	3	5	3	8	6	7	7	9	37	28
+S Aravamuthan	2023mn0792@svce.ac.in	2127231002007	MN		5	9	2	3	4	9	9	9	9	9	45	23
+BALAMURUGESH G	2023mn0264@svce.ac.in	2127231002008	MN		5	9	1	6	4	7	7	6	6	6	32	25
+S BHARAT	2023mn0834@svce.ac.in	2127231002009	MN		3	11	4	5	4	0	0	0	0	0	0	27
+DANISH JERAN S	2023mn0295@svce.ac.in	2127231002010	MN		8	11	3	5	3	10	8	10	10	9	47	30
+DEEPAK N MN	2023mn0417@svce.ac.in	2127231002011	MN		7	9	0	4	2	0	0	0	0	0	0	22
+Elavazhagan S	2023mn0293@svce.ac.in	2127231002012	MN		8	14	4	4	2	8	6	8	8	7	37	32
+Gowtham R	2023mn0424@svce.ac.in	2127231002013	MN		7	10	2	3	3	10	8	9	9	9	45	25
+Harish RagavendarM	2023mn0312@svce.ac.in	2127231002014	MN		5	7	2	4	0	8	7	8	8	7	38	18
+Harshith B	2023mn0350@svce.ac.in	2127231002015	MN		3	12	1	5	2	10	10	9	9	10	48	23
+Indhumathi C	2023mn0318@svce.ac.in	2127231002016	MN		3	8	2	4	3	8	6	8	8	6	36	20
+JAYA SURYA S G	2023mn0300@svce.ac.in	2127231002017	MN		6	11	2	4	4	10	7	9	9	7	42	27
+JEREMIAH JOSEPH RAJA B	2023MN0266@svce.ac.in	2127231002018	MN		7	10	1	4	2	7	7	7	9	8	38	24
+Kevin edison A	2023mn0283@svce.ac.in	2127231002019	MN		6	12	3	2	4	9	9	7	9	10	44	27
+Lithesh C	2023mn0271@svce.ac.in	2127231002020	MN		6	9	3	6	2	9	9	7	8	9	42	26
+MANOJ G S	2023mn0601@svce.ac.in	2127231002021	MN		4	7	1	2	1	7	8	7	7	7	36	15
+Mugunthan	2023mn0423@svce.ac.in	2127231002022	MN		6	9	2	5	3	9	9	8	8	9	43	25
+navin kumar.s	2023mn0793@svce.ac.in	2127231002023	MN		4	9	3	3	5	7	7	7	8	7	36	24
+A P M Nazeem Zaahid	2023mn0794@svce.ac.in	2127231002024	MN		8	9	2	1	2	8	9	7	9	8	41	22
+NIVETHA S	2023mn0416@svce.ac.in	2127231002025	MN		2	10	3	4	4	9	9	7	9	10	44	23
+PRIYADHARSHAN R	2023MN0833@svce.ac.in	2127231002026	MN		8	12	2	5	1	8	8	9	9	10	44	28
+Rakshitha	2023mn0378@svce.ac.in	2127231002027	MN		1	8	4	1	1	9	8	9	9	10	45	15
+Ramkumar G	2023mn0399@svce.ac.in	2127231002028	MN		5	7	2	3	2	8	7	7	8	8	38	19
+RAMKUMAR R	2023mn0392@svce.ac.in	2127231002029	MN		2	9	1	3	2	8	7	7	7	9	38	17
+Sanjay Charan S	2023mn0790@svce.ac.in	2127231002030	MN		6	13	1	5	3	9	8	9	8	10	44	28
+Sanjay Shanmugam	2023mn0951@svce.ac.in	2127231002031	MN		6	11	0	7	3	8	9	9	9	9	44	27
+SANTHOSHKUMAR.K	2023mn0391@svce.ac.in	2127231002032	MN		1	9	1	2	3	6	7	6	7	7	33	16
+K.Sarvesh	2023mn0859@svce.ac.in	2127231002033	MN		6	8	1	4	3	7	7	6	7	7	34	22
+SATHYA S K	2023mn0338@svce.ac.in	2127231002034	MN		6	10	3	5	2	7	6	7	7	6	33	26
+SEYED MOHAMED MF	2023mn0363@svce.ac.in	2127231002035	MN		5	6	1	4	4	7	6	6	7	7	33	20
+sheik mohamed fareeth.A	2023mn0808@svce.ac.in	2127231002036	MN		2	9	1	3	2	7	6	7	7	6	33	17
+stewart immanuel A	2023mn0314@svce.ac.in	2127231002037	MN		4	11	3	5	3	8	6	8	8	8	38	26
+Sudhesi j	2023mn0374@svce.ac.in	2127231002038	MN		4	9	3	4	2	7	6	8	7	7	35	22
+Thamizharasan U	2023mn0333@svce.ac.in	2127231002039	MN		8	11	2	4	2	7	6	6	7	7	33	27
+Thanga Saravanan.M	2023mn0382@svce.ac.in	2127231002040	MN		5	10	2	6	3	7	6	0	7	6	26	26
+Thanushka B	2023mn0412@svce.ac.in	2127231002041	MN		3	8	2	3	2	8	8	9	8	8	41	18
+Tharun P	2023mn0420@svce.ac.in	2127231002042	MN		4	6	1	2	1	0	0	0	0	0	0	14
+THRIYAMBAK.C	2023MN0851@svce.ac.in	2127231002043	MN		6	7	2	4	0	0	5	0	0	0	5	19
+vasanth.R	2023MN0132@svce.ac.in	2127231002044	MN		1	5	2	6	1	0	0	0	0	0	0	15
+VIGNESH R	2023mn0362@svce.ac.in	2127231002045	MN		5	7	2	3	1	0	0	0	0	0	0	18
+VIJAY R	2023mn0821@svce.ac.in	2127231002046	MN		6	15	1	3	2	10	9	10	10	10	49	27
+Vishnu Charan.V	2023mn0795@svce.ac.in	2127231002047	MN		4	8	1	2	0	9	7	8	8	6	38	15
+Yashwanth H G	2023mn0341@svce.ac.in	2127231002048	MN		5	9	1	3	3	8	7	9	8	8	40	21
+DHANESWAR	2023MN0960@svce.ac.in	2127231002301	MN		2	4	1	2	2	8	6	8	8	6	36	11
+Bhagya Shree	2023BT0903@svce.ac.in	2127230201006	BT	0	0	0	0	0	0	0	0	0	0	0	0	0
+KAMESH R	2023BT0099@svce.ac.in	2127230201022	BT	0	0	0	0	0	0	0	0	0	0	0	0	0
+DHARUN R	2023CS0997@svce.ac.in	2127230501302	CS	0	0	0	0	0	0	0	0	0	0	0	0	0
+VIGNESH S	2023CS0458@svce.ac.in	2127230501174	CS	0	0	0	0	0	0	0	0	0	0	0	0	0
+SONAA MEYYAPPAN	2023EE0739@svce.ac.in	2127230601082	EE	0	0	0	0	0	0	0	0	0	0	0	0	0
+VIJAYKUMAR R	2023IT0371@svce.ac.in	2127230801104	IT	0	0	0	0	0	0	0	0	0	0	0	0	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+					\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0
+\.
+
+
+--
+-- Data for Name: student_transfers; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.student_transfers (id, student_id, from_hr_id, to_hr_id, admin_id, transfer_reason, transferred_at) FROM stdin;
+18	5c71628e-d3d9-4811-b021-998b2b388e6d	6a497e8f-dd59-4675-b85e-34a93e32d4b0	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 04:51:37.253
+19	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	6a497e8f-dd59-4675-b85e-34a93e32d4b0	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 04:51:37.262
+20	719d8448-c347-417f-b320-5489e3976132	6a497e8f-dd59-4675-b85e-34a93e32d4b0	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 04:51:37.27
+21	bd69e8de-814b-4b14-a390-891d73d3438e	6a497e8f-dd59-4675-b85e-34a93e32d4b0	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 04:51:37.276
+22	39ec48de-2e94-40bf-a7a9-41b90a37df05	6a497e8f-dd59-4675-b85e-34a93e32d4b0	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 04:51:37.283
+23	3bb6e4bd-7b9d-4613-a3fc-84f888f9cd42	e4d9b090-495e-4d82-9c3e-d8048154ccd6	db338578-8876-4dec-a6d5-2d0094828b16	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 05:19:04.692
+24	4a45f5b3-531b-4d4d-8f8c-22dafad93229	e4d9b090-495e-4d82-9c3e-d8048154ccd6	db338578-8876-4dec-a6d5-2d0094828b16	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 05:19:04.7
+25	b2889d4c-2f58-4c09-a37a-9eb6ff98bb81	e4d9b090-495e-4d82-9c3e-d8048154ccd6	db338578-8876-4dec-a6d5-2d0094828b16	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 05:19:04.706
+26	36e7e3f2-2f0c-4f5a-acf8-ea35a514656a	e4d9b090-495e-4d82-9c3e-d8048154ccd6	db338578-8876-4dec-a6d5-2d0094828b16	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 05:19:04.712
+27	65883298-b905-46cf-b270-acc84d7f838c	e4d9b090-495e-4d82-9c3e-d8048154ccd6	db338578-8876-4dec-a6d5-2d0094828b16	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 05:19:04.718
+28	03fa8173-d5ce-477d-8813-a8e61bdc0e55	990d6c56-fa9b-4848-8696-21e832fbcfd3	ce6d53c7-d3d3-401f-be95-013fa81fd707	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:28:27.452
+29	30d250dc-3e68-4ef9-a01b-868cd6798153	990d6c56-fa9b-4848-8696-21e832fbcfd3	ce6d53c7-d3d3-401f-be95-013fa81fd707	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:28:27.461
+30	983d604d-e045-4ab6-bd69-b4d6b38adb06	990d6c56-fa9b-4848-8696-21e832fbcfd3	ce6d53c7-d3d3-401f-be95-013fa81fd707	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:28:27.468
+31	f77cb046-1218-4edf-9c74-2180509f828b	990d6c56-fa9b-4848-8696-21e832fbcfd3	ce6d53c7-d3d3-401f-be95-013fa81fd707	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:28:27.474
+32	42d92e7a-a1dc-4c04-8fe2-0fd94bdb1443	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3bdac905-7cfa-4a31-85de-39ec2f854afd	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:44:37.507
+33	582a2700-7ed4-4c5b-adc2-00805984ba09	e4d9b090-495e-4d82-9c3e-d8048154ccd6	3bdac905-7cfa-4a31-85de-39ec2f854afd	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:44:37.52
+34	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	a0df520f-d839-4acf-b594-7cad857eeaa7	3bdac905-7cfa-4a31-85de-39ec2f854afd	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:54:12.76
+35	5c71628e-d3d9-4811-b021-998b2b388e6d	a0df520f-d839-4acf-b594-7cad857eeaa7	3bdac905-7cfa-4a31-85de-39ec2f854afd	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 05:54:12.769
+36	719d8448-c347-417f-b320-5489e3976132	a0df520f-d839-4acf-b594-7cad857eeaa7	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:04:13.716
+37	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	6a497e8f-dd59-4675-b85e-34a93e32d4b0	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:04:13.725
+38	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	2920b45c-0ce6-4dec-8766-3892322ff1b0	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:07:05.785
+39	c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	246e2354-457e-4112-af52-025952cca149	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:07:05.792
+40	c1673388-cdfa-47d3-986c-eceb6031693b	246e2354-457e-4112-af52-025952cca149	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:09:05.035
+41	ba890160-2fc3-4e71-8601-ffc154fa51f2	246e2354-457e-4112-af52-025952cca149	2920b45c-0ce6-4dec-8766-3892322ff1b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:09:05.044
+42	546eb85c-485b-4b8c-a4aa-71351fe8ecc8	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	a0df520f-d839-4acf-b594-7cad857eeaa7	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:11:17.766
+43	d20c3150-2af1-442d-bb13-0b8b1effdf99	246e2354-457e-4112-af52-025952cca149	a0df520f-d839-4acf-b594-7cad857eeaa7	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:11:17.773
+44	bd69e8de-814b-4b14-a390-891d73d3438e	a0df520f-d839-4acf-b594-7cad857eeaa7	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:21:16.464
+45	39ec48de-2e94-40bf-a7a9-41b90a37df05	a0df520f-d839-4acf-b594-7cad857eeaa7	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:21:16.472
+46	41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	c9d7022f-7e84-4876-a4fa-beda27a31cd5	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:21:16.479
+47	3d07a508-5a30-4547-b02e-eb1a4cc78c23	c9d7022f-7e84-4876-a4fa-beda27a31cd5	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:21:16.484
+48	d9678115-2e09-4bd2-bb1c-5c4c465b4c16	c9d7022f-7e84-4876-a4fa-beda27a31cd5	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:21:16.49
+49	41b3e4cd-1ffe-43c2-b7a1-a302b8aefe20	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:27:56.611
+50	1e3f2e84-d2b7-4d91-b173-2ce30503c135	2920b45c-0ce6-4dec-8766-3892322ff1b0	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:27:56.62
+51	3a3f8598-6244-438e-9bd2-ad004d3d4b8f	2920b45c-0ce6-4dec-8766-3892322ff1b0	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:27:56.628
+52	f3aff576-c4ce-4294-9ce6-2f07a64b2736	246e2354-457e-4112-af52-025952cca149	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:41:25.405
+53	c1673388-cdfa-47d3-986c-eceb6031693b	2920b45c-0ce6-4dec-8766-3892322ff1b0	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:41:25.414
+54	c1673388-cdfa-47d3-986c-eceb6031693b	5e31574a-8f3c-46c7-8f2e-fbd603c057a0	e4d9b090-495e-4d82-9c3e-d8048154ccd6	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:46:29.87
+55	ba890160-2fc3-4e71-8601-ffc154fa51f2	2920b45c-0ce6-4dec-8766-3892322ff1b0	e4d9b090-495e-4d82-9c3e-d8048154ccd6	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:46:29.879
+56	bb6335ce-3a63-4955-824b-61380ba0bb27	1222491e-2d54-48f0-9552-8d2a28af1c4f	e4d9b090-495e-4d82-9c3e-d8048154ccd6	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:46:29.885
+57	60a6b4af-b68c-4be2-b170-4dbb075a4cf1	3bdac905-7cfa-4a31-85de-39ec2f854afd	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 06:51:52.685
+58	5cec8765-2310-4e4b-a145-6c52295e3acf	964b9c92-19e6-4140-8be6-a64973f93bfa	efa89ff0-babb-47d8-9694-afcbe18d049e	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 06:53:07.147
+59	30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	0cc1387b-56c9-4ce6-a994-e1cf59c24632	e4d9b090-495e-4d82-9c3e-d8048154ccd6	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:53:30.194
+60	cbf02b07-cb7c-4393-8942-2cf6b06768e5	0cc1387b-56c9-4ce6-a994-e1cf59c24632	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:58:28.686
+61	f9e203e4-91cb-4363-a68f-c6fddb659248	0cc1387b-56c9-4ce6-a994-e1cf59c24632	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 06:58:28.696
+62	58a10c53-f356-47b6-ab20-5d02b48a9b20	458250d8-e65f-4171-9e11-3a6dff72a848	24421caf-3a14-4681-b9f9-f237f956d8d4	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:28:55.548
+63	3d5bcc19-91c9-4c2c-98cb-832e2b362dda	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	24421caf-3a14-4681-b9f9-f237f956d8d4	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:28:55.558
+64	bc6e780a-8715-418a-8678-99a56144eb89	8c1d8564-6890-42e8-b25f-456e6ee88396	24421caf-3a14-4681-b9f9-f237f956d8d4	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:28:55.565
+65	bd69e8de-814b-4b14-a390-891d73d3438e	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 07:30:39.662
+66	89fb7844-ef4d-4d7c-b5d3-8d99eac3ce71	cd263764-71e2-4ead-87a3-0c5e9aff9828	a0df520f-d839-4acf-b594-7cad857eeaa7	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 07:30:58.351
+67	73528f23-8053-4ac2-84d8-0220e7e90c90	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	2447e995-8cd8-431b-80fd-2654f0b2298b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:33:48.969
+68	a06028cc-b930-4d88-9680-49407552bf0e	1222491e-2d54-48f0-9552-8d2a28af1c4f	2447e995-8cd8-431b-80fd-2654f0b2298b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:33:48.976
+69	4936e1ef-ea2a-4463-a331-f8254d903601	1222491e-2d54-48f0-9552-8d2a28af1c4f	2447e995-8cd8-431b-80fd-2654f0b2298b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:34:42.961
+70	30993443-fe2a-4153-b01d-8954d067ddc8	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	2447e995-8cd8-431b-80fd-2654f0b2298b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:34:42.969
+71	c1673388-cdfa-47d3-986c-eceb6031693b	e4d9b090-495e-4d82-9c3e-d8048154ccd6	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:42:20.254
+72	16cc8606-5683-4b62-b9ca-2a050d4421f3	246e2354-457e-4112-af52-025952cca149	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:42:20.271
+73	ed146e19-1056-490a-a4f5-7bd3cc0a5a4f	1222491e-2d54-48f0-9552-8d2a28af1c4f	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:42:20.281
+74	4febad14-2825-43f7-b20c-46a2c524981c	1222491e-2d54-48f0-9552-8d2a28af1c4f	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:42:20.294
+75	e3b63cc6-5eaf-4135-a0ab-8717eeaa8917	246e2354-457e-4112-af52-025952cca149	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:42:20.327
+76	c1673388-cdfa-47d3-986c-eceb6031693b	fcce01c3-007c-4299-a17f-9d5f4402c6ec	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:44:33.217
+77	6ad84eb2-e148-40ba-98a5-80d3cb5aa5c3	1222491e-2d54-48f0-9552-8d2a28af1c4f	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:44:33.225
+78	7f281677-c4c1-4683-a5fb-82e2fc583317	1222491e-2d54-48f0-9552-8d2a28af1c4f	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:44:33.231
+79	4af10704-e3fa-4c73-9cf0-3ab817ada940	1222491e-2d54-48f0-9552-8d2a28af1c4f	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:44:33.236
+80	5c2c5e74-41ec-4d37-bb3d-5d76fd098794	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:44:55.737
+81	3cdc243b-1991-4aab-bc8d-3b404d065153	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:45:29.816
+82	06391f38-0b76-4f71-a34b-357913ecf0c1	55fbdf9b-b4c7-4844-babc-bba452abf569	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:45:57.094
+83	67846e25-22cd-4fea-88c5-72f3da58acb6	55fbdf9b-b4c7-4844-babc-bba452abf569	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:47:14.731
+84	dc10ab1b-7a37-44f6-b436-9f56f13ff909	55fbdf9b-b4c7-4844-babc-bba452abf569	cd263764-71e2-4ead-87a3-0c5e9aff9828	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:47:14.741
+85	39f8aa3c-7c0d-44c8-8ef4-0d0a3b10e819	51c28633-94a9-4653-bbc8-47eca7fd98c2	a3ca42d8-ab64-421a-ab67-aeb12925661e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:51:13.865
+86	56225877-f78e-4088-8c9d-15ab1bd87e69	51c28633-94a9-4653-bbc8-47eca7fd98c2	a3ca42d8-ab64-421a-ab67-aeb12925661e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:51:13.876
+87	b0fe186c-cd98-45af-b03a-36e7ccf3333e	51c28633-94a9-4653-bbc8-47eca7fd98c2	a3ca42d8-ab64-421a-ab67-aeb12925661e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:51:13.883
+88	74016b70-42ea-4ac3-b617-f712e213b73d	55fbdf9b-b4c7-4844-babc-bba452abf569	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:52:37.252
+89	515a153f-7744-4b50-81b7-4e1f3da115bf	55fbdf9b-b4c7-4844-babc-bba452abf569	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:52:37.261
+90	521466be-ed8a-43d5-91fe-a63c5b9f641a	55fbdf9b-b4c7-4844-babc-bba452abf569	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:52:37.267
+91	4ab87f11-2f55-493b-b76c-2a3866ec8770	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 07:52:37.274
+92	fdb28f34-668e-43b6-8056-ba67ab24ca39	1222491e-2d54-48f0-9552-8d2a28af1c4f	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:02:41.946
+93	1d027392-8cb4-4cf7-a072-8ea3a085ebe0	458250d8-e65f-4171-9e11-3a6dff72a848	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:02:41.956
+94	f52ac80a-a32e-4ebb-ae1d-d4f6b9ae9a6a	458250d8-e65f-4171-9e11-3a6dff72a848	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:02:41.963
+95	21eabfcf-46b5-4bf5-9e24-756bee453abd	8c1d8564-6890-42e8-b25f-456e6ee88396	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:02:41.969
+96	9b8b5d15-00c1-46fa-a241-6bf6ed998adc	458250d8-e65f-4171-9e11-3a6dff72a848	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:02:41.976
+97	05ade5c7-ae17-4558-bb5e-dd5e99f8f15a	bf71f55b-86ba-46b8-afa1-1aea09f829e1	a3ca42d8-ab64-421a-ab67-aeb12925661e	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:07:53.497
+98	62dabc83-c2be-45ac-b1de-3abb143dc0d5	8c1d8564-6890-42e8-b25f-456e6ee88396	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.563
+99	64e6390e-44e3-4b60-a29b-da402ffa4a8a	458250d8-e65f-4171-9e11-3a6dff72a848	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.573
+100	0689d3ab-98b3-4b1f-84df-b0bdfa21de11	458250d8-e65f-4171-9e11-3a6dff72a848	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.582
+101	d18b5bba-3633-45e8-a583-b9d83a566ea2	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.59
+102	48646124-2c77-4b4b-86df-6a49ee43c5cb	8c1d8564-6890-42e8-b25f-456e6ee88396	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.606
+103	5269c469-3b49-4bbd-ac19-10823c1adcdb	3bdac905-7cfa-4a31-85de-39ec2f854afd	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:15:10.614
+104	b7c744d5-ba09-4762-9fec-519fad8a9229	6f127d1b-9a45-41d4-9fcb-da121c576e16	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:21:44.916
+105	d3018481-8b17-43c8-91b3-9cdbc74181dc	6f127d1b-9a45-41d4-9fcb-da121c576e16	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:21:44.926
+106	2c5c5ea5-9b49-456f-8f9c-4c0a613d815f	6f127d1b-9a45-41d4-9fcb-da121c576e16	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:21:44.933
+107	803a0f9f-e2f6-471e-98f2-4152b192bcb4	6f127d1b-9a45-41d4-9fcb-da121c576e16	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:21:44.938
+108	803a0f9f-e2f6-471e-98f2-4152b192bcb4	5cd29d5a-169e-41db-87a2-997e5fd5301f	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:22:26.898
+109	b2729f01-8b62-4b16-a606-bd26db233b68	920b5fba-b331-4010-8858-8a5b3fb29a02	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:25:19.86
+110	b7c744d5-ba09-4762-9fec-519fad8a9229	5cd29d5a-169e-41db-87a2-997e5fd5301f	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:26:01.241
+111	f7cc4817-a6d6-4043-9d83-f098b225792f	bf71f55b-86ba-46b8-afa1-1aea09f829e1	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:26:21.071
+112	61f10cf9-5a96-4e47-9711-1100baa71fce	eea52d8e-619c-4985-9891-2b417c468095	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:27:42.942
+113	10f00b58-28ea-491b-bc12-2cf5a3365514	81f895c5-36b8-4d09-8241-80e64868fe56	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:29:03.367
+114	be7081e1-0629-4adf-8e68-0a47ecc0e0ad	6f127d1b-9a45-41d4-9fcb-da121c576e16	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:31:29.384
+115	4d7f9320-8a13-4f93-92e6-794cdabfd1ce	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:31:53.213
+116	1e3f2e84-d2b7-4d91-b173-2ce30503c135	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:31:53.221
+117	857a5785-53d9-4d0a-9592-856e7dde125c	2920b45c-0ce6-4dec-8766-3892322ff1b0	5cd29d5a-169e-41db-87a2-997e5fd5301f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 08:32:37.067
+118	857a5785-53d9-4d0a-9592-856e7dde125c	5cd29d5a-169e-41db-87a2-997e5fd5301f	5cd29d5a-169e-41db-87a2-997e5fd5301f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 08:32:42.436
+119	a9c06548-8662-4977-929e-303c76c3e2db	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:34:17.854
+120	370ee3ab-6ca4-4427-9d2a-a45f2a1686e5	eee239d8-0363-488a-80c3-0c415c7b2217	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:48:16.031
+121	aa149584-4e72-4200-8ee8-7c2933ff3fae	eea52d8e-619c-4985-9891-2b417c468095	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:51:07.957
+122	a92ff7c3-5c4c-4f74-bccc-69ee57fe7c5e	246e2354-457e-4112-af52-025952cca149	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:53:04.407
+123	6d54e318-b4e5-486a-b96e-213d099e4e73	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:53:51.935
+124	c753b9a7-d75f-4818-bdef-05f4b2f575fb	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:54:27.675
+125	b32f14a5-bf79-461a-953f-52290bc0ee41	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:55:15.228
+126	8c78cabb-901a-428d-9da8-20ad69f016d7	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:55:31.727
+127	8c78cabb-901a-428d-9da8-20ad69f016d7	c4e22006-3ed9-4250-91c8-6618d57253ed	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:55:54.38
+128	8c78cabb-901a-428d-9da8-20ad69f016d7	5cd29d5a-169e-41db-87a2-997e5fd5301f	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 08:58:36.554
+129	857a5785-53d9-4d0a-9592-856e7dde125c	5cd29d5a-169e-41db-87a2-997e5fd5301f	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:02:19.438
+130	b346998c-a243-4803-b486-0dbac551f44e	7f1fffa7-2ca2-45a1-802d-35c7b7e22215	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:05:55.355
+131	b346998c-a243-4803-b486-0dbac551f44e	c4e22006-3ed9-4250-91c8-6618d57253ed	24421caf-3a14-4681-b9f9-f237f956d8d4	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:14:37.078
+132	a2e0f3a4-5806-4250-ba3c-bcd02bc53a2c	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea	24421caf-3a14-4681-b9f9-f237f956d8d4	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:14:37.088
+133	52c7a8b4-78f9-4fb0-b966-f25c469bc2cc	0ac45005-84e5-4b25-ad6c-1e998e94a611	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:16:55.901
+134	712a89a1-933f-4087-b1ba-101e986d2c9f	a895d6bc-408f-4590-a7b2-d228d3627109	81f895c5-36b8-4d09-8241-80e64868fe56	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:21:44.583
+135	3bb6e4bd-7b9d-4613-a3fc-84f888f9cd42	db338578-8876-4dec-a6d5-2d0094828b16	81f895c5-36b8-4d09-8241-80e64868fe56	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:21:44.592
+136	0c126d35-19f2-4288-8f94-4aacd7881983	a895d6bc-408f-4590-a7b2-d228d3627109	81f895c5-36b8-4d09-8241-80e64868fe56	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:21:44.598
+137	a05012e1-4919-49cf-9d92-0ba642683ef0	eea52d8e-619c-4985-9891-2b417c468095	d6400b5f-5117-4826-8aa2-20e215edfb2b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:22:33.947
+138	0decfcd2-1182-47fe-9a74-d75d93615f83	246e2354-457e-4112-af52-025952cca149	d6400b5f-5117-4826-8aa2-20e215edfb2b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:22:45.378
+139	0b153f16-c17d-4a17-98cf-6715b40a64d9	8c1d8564-6890-42e8-b25f-456e6ee88396	d6400b5f-5117-4826-8aa2-20e215edfb2b	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:23:15.04
+140	7e3bd57a-0d7a-4a39-a30b-27dc29058f1d	cf6780cd-f597-4792-96f8-5e11206fae5e	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:23:50.235
+141	4936e1ef-ea2a-4463-a331-f8254d903601	2447e995-8cd8-431b-80fd-2654f0b2298b	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:24:12.972
+142	638dfc95-d701-4824-8e18-74135e91c599	6a497e8f-dd59-4675-b85e-34a93e32d4b0	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:24:49.118
+143	91394923-4666-4e48-83cb-a07e7f572742	e13fa7d8-959e-4caa-b474-1e839b1b7a5b	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:25:25.279
+144	877d567d-d403-46fe-a03b-2395c6ffa751	7d959ecb-3999-47cd-ae17-5aab0405cb97	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:31:54.295
+145	c45fbc24-212b-40e2-89c5-e2520ee54b2a	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:32:34.099
+146	31035a29-4799-4624-944a-2b1220720266	9b408827-9730-414a-a9ae-c8638060695c	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:33:36.337
+147	3de29801-8f0e-43e4-b063-8f29cd51c75b	9b408827-9730-414a-a9ae-c8638060695c	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:33:36.345
+148	dcd2f622-6f0b-42ca-a9e3-c0b414f3f968	9b408827-9730-414a-a9ae-c8638060695c	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:33:36.352
+149	8957fe91-2b5d-40b5-b517-7add7765754a	d6400b5f-5117-4826-8aa2-20e215edfb2b	5c9635b4-b0e1-40ac-947e-93714df4d582	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:34:56.026
+150	19040699-6cc2-45be-ac21-093f2b6b13cb	eea52d8e-619c-4985-9891-2b417c468095	5c9635b4-b0e1-40ac-947e-93714df4d582	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:35:42.712
+151	3a3f8598-6244-438e-9bd2-ad004d3d4b8f	fcce01c3-007c-4299-a17f-9d5f4402c6ec	5c9635b4-b0e1-40ac-947e-93714df4d582	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:39:40.501
+152	3a3f8598-6244-438e-9bd2-ad004d3d4b8f	5c9635b4-b0e1-40ac-947e-93714df4d582	5c9635b4-b0e1-40ac-947e-93714df4d582	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:41:17.407
+153	c2217e7b-378a-4b09-b4c7-bc84ec1948ed	674b5de7-296f-4f50-8359-9e337c508dd2	5c9635b4-b0e1-40ac-947e-93714df4d582	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:42:12.52
+154	c363894a-bd6b-4bcd-9ce5-3ff82d6ef870	2920b45c-0ce6-4dec-8766-3892322ff1b0	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:46:08.865
+155	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	2920b45c-0ce6-4dec-8766-3892322ff1b0	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:46:40.925
+156	30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	e4d9b090-495e-4d82-9c3e-d8048154ccd6	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 09:47:01.272
+157	857a5785-53d9-4d0a-9592-856e7dde125c	c4e22006-3ed9-4250-91c8-6618d57253ed	5cd29d5a-169e-41db-87a2-997e5fd5301f	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:48:38.33
+158	bee4d295-9e11-46a2-97a7-1457eb9fa02a	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:55:39.941
+159	6771ef7b-7731-4fb2-87e1-11b1e3684a2e	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9	54ad8399-936a-47f5-bfc8-db3194c32ea3	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:55:53.466
+160	a61f67d2-43b7-453e-916b-bfa40bbdf74c	efa89ff0-babb-47d8-9694-afcbe18d049e	c4e22006-3ed9-4250-91c8-6618d57253ed	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:56:52.685
+161	e82007fe-2394-4f86-888b-785fd7a27021	efa89ff0-babb-47d8-9694-afcbe18d049e	d4cf1e25-663d-48a1-806c-b1b4a72b5e34	cb4b6d40-d2ca-46be-a164-fe0e48fcc3e0	Administrative Transfer	2026-03-08 09:57:28.148
+162	4b4c247a-1503-41c1-bc7f-203a916783c1	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:00:09.253
+163	d2839665-643c-4f92-940b-56f141d31acd	51c28633-94a9-4653-bbc8-47eca7fd98c2	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:00:09.272
+164	b24243bf-9dd1-4cf7-ab29-36fa3d549f5b	51c28633-94a9-4653-bbc8-47eca7fd98c2	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:00:09.286
+165	5c71319b-3279-4bbc-b582-c419b20a9cae	51c28633-94a9-4653-bbc8-47eca7fd98c2	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:00:09.298
+166	20e9963a-ed23-4484-bf0a-e75251004a0b	920b5fba-b331-4010-8858-8a5b3fb29a02	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:00:09.316
+167	4a45f5b3-531b-4d4d-8f8c-22dafad93229	db338578-8876-4dec-a6d5-2d0094828b16	c34851b2-fce1-4c90-b896-3a1a666a841a	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:01:20.667
+168	3eaa9ac6-be26-44d2-948d-7b72bec295f3	aaec9758-627f-40bb-b8b2-e92110d36327	c34851b2-fce1-4c90-b896-3a1a666a841a	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:02:03.503
+169	6cb101f4-05e5-4a39-b29a-b0f16c1cfed9	50fa6865-037c-451b-8ecc-c4fd9bdb0334	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:02:28.114
+170	fc36cc60-f4a2-4b57-aefb-d7f8c6a083d4	50fa6865-037c-451b-8ecc-c4fd9bdb0334	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:02:28.126
+171	e934297b-ff88-4426-bc7b-7096c31d1030	50fa6865-037c-451b-8ecc-c4fd9bdb0334	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:02:28.133
+172	679c898d-9455-46d6-8893-6bdfc5dfc618	9b408827-9730-414a-a9ae-c8638060695c	539ff319-c98a-440f-9541-c0e736fe44b3	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:02:28.143
+173	52c13b7a-c16c-4e33-9e98-048dfc6862e1	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66	4df9bf27-579a-4661-a2ea-703387a2bdaf	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:05:22.421
+174	cf4a8285-f6c2-4860-8f8d-3529a1374be5	eee239d8-0363-488a-80c3-0c415c7b2217	c34851b2-fce1-4c90-b896-3a1a666a841a	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:15:55.687
+175	30c5a441-70e7-4fdc-9dcb-52fee9d4d31d	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	c34851b2-fce1-4c90-b896-3a1a666a841a	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:23:30.793
+176	2779e96d-ab5a-44c5-adef-e5557a3843de	8ef5450c-442e-440e-b14f-9b98542fd9bf	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.598
+177	e806bf21-c4bf-4e45-9b28-38bb6bc5114f	565b69ae-c54e-4f96-9d46-a31e869eccbf	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.61
+178	126fe1fe-2052-490c-bbf2-ad0de6d0b79d	4755002c-b849-46a3-8d7d-09a6f0244fe0	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.617
+179	23259f1d-418b-4d20-b658-e65abc871bdc	4755002c-b849-46a3-8d7d-09a6f0244fe0	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.625
+180	09b435e0-dd2e-4875-8017-465133c1e7b7	98996c73-8763-4ee8-bb8c-bfeaa7c791b0	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.632
+181	3aa60d21-a753-4480-a5e7-ba5115d17c80	a0df520f-d839-4acf-b594-7cad857eeaa7	d631f416-b5af-4ca2-956f-da772aff5f6f	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:32:20.639
+182	20e9963a-ed23-4484-bf0a-e75251004a0b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:41:05.917
+183	b24243bf-9dd1-4cf7-ab29-36fa3d549f5b	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	77da9640-33e1-4aba-a5fd-ff98ddfb57c4	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:41:05.927
+184	3445d8dc-afe2-48fb-ac17-a5dc9db5d729	55fbdf9b-b4c7-4844-babc-bba452abf569	e4d9b090-495e-4d82-9c3e-d8048154ccd6	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:49:04.317
+185	65883298-b905-46cf-b270-acc84d7f838c	db338578-8876-4dec-a6d5-2d0094828b16	e4d9b090-495e-4d82-9c3e-d8048154ccd6	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:49:25.902
+186	01fdc8af-d1f8-4352-b3a2-a9c161ab5971	a55a5c41-087d-4ea5-bdb1-2c7345243b0e	e4d9b090-495e-4d82-9c3e-d8048154ccd6	00000000-0000-0000-0000-000000000000	Administrative Transfer	2026-03-08 10:49:34.764
+\.
+
+
+--
+-- Data for Name: volunteer_feedbacks; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.volunteer_feedbacks (id, volunteer_id, clarity_of_instructions, hr_cooperation, organization_of_schedule, software_ease, workload_management, overall_experience, issues_faced, improvement_suggestions, additional_comments, submitted_at) FROM stdin;
+1	8333dc86-60f8-441a-b9a2-4a8b437b6bda	10	10	8	8	10	10	the lag in bringing in student was the one but not too bad 	can be improvement in terms of training before mocks	great experience , i had opportunity to gain advice for myself  places to improve 	2026-03-08 06:22:02.111
+2	d9cbf999-7160-46e4-954e-0003c2bbf469	10	10	8	10	10	10	The first interviewee had problems with the internet connection, which made it hard to communicate. Towards the end, there was some confusion, which was quickly resolved, though. 	Better scheduling	This event has been really helpful. Even as a volunteer, I learned a lot from the HR as they gave feedback to the students.	2026-03-08 07:38:12.284
+3	12b69d4d-22d9-457b-83bd-51fd6dd550b7	9	9	10	9	9	9	nothing	no , things were dealt pretty good	no	2026-03-08 07:41:24.216
+4	5ac951bd-3939-4230-b1a9-2730cd6fb272	9	9	8	10	10	10	There was no technical challenges. Everything was good.	better sceduling and group info can be given. It was good but can be improved 	everything was smooth. The waiting room volunteer coordinated very well . All the seniors from forese were very supportive and friendly . It was a great experience working. 	2026-03-08 09:06:27.26
+5	bc76a506-2d9d-48f8-bf77-fec273ffc999	10	10	10	10	10	10	no problems	The hr volunteers can be changed in a shift wise basis so they don't have to sit for long hours	no	2026-03-08 09:09:04.723
+6	850d1b00-008a-4414-9061-bc1715337a21	9	10	9	7	9	8	I was not able to add the student in the dashboard.  few students registration number were misplaced[Swapped].	Need to add the student details for getting the feedback from the HR.	Nil.	2026-03-08 09:25:59.189
+7	27379fa2-37cf-40ea-8d4e-964d771a9a5a	9	8	5	7	9	8	basically students were not allotted and the hr was waiting for 30 mins and after that the hr was not available so we were waiting for another 30-40 mins..	better scheduling 	actually good but with some minor problems and make sure next time scheduling is proper and the students are allotted properly 	2026-03-08 09:29:46.892
+8	51c9b398-5978-4fc6-8a51-ca27987eacad	10	10	9	10	9	9	NO PROBLEMS FACED	VOLUNTEERS CAN BE GIVEN WITH THE SCHEDULE  OF HR	THANKING FOR THE FORESE CLUB 	2026-03-08 09:32:53.18
+9	7c693e6b-ad8b-426e-a665-cb7673fca245	9	10	7	10	8	9	Inclusion of extra students at the end of the schedule, created inconvenience to the HR and myself.	A proper execution and schedule of students with respective timings.	A good experience overall	2026-03-08 10:23:11.767
+10	d554e134-b28e-446f-9e47-7d985391764e	8	9	8	7	9	9	A few students' names were not given to the volunteer hub dashboard as well as the HR's dashboard, which made it difficult for the HR to evaluate the students during the interview, and a few students were not present in the waiting room beforehand. It was not possible to add students to the dashboard, and it shows "registration failed".	Please make sure of the list of students who are supposed to attend the interview at the particular slot. Please inform the volunteers when we have to join the meeting, or if the meeting is canceled.	-	2026-03-08 10:30:10.427
+11	cca7dd88-8f54-40d9-b27e-68ce966b14a3	8	8	8	8	8	8	network glitches	platform features needs to be improved	-	2026-03-08 10:40:01.61
+12	e86d5b0c-0195-4ff4-8546-bb1feaff27fb	9	10	8	9	10	9	There were few technical issues in the software but those are negligible 	I have no suggestions	I would like to thank the FORESE team for the informative and amazing opportunity .	2026-03-08 10:46:29.025
+13	4a8d50e8-223a-4085-badf-b4fa8f63f47e	10	10	9	10	8	9	No issues faced.	The team support a little bit faster.	A little more good coordination with the team would really help.	2026-03-08 11:05:05.484
+14	e2050730-0a09-47ca-9c71-4d225fbeeda4	9	10	8	8	8	8	Adding of new student details was chaotic.	Could provide adding of Students access to HR volunteers too.	A very user friendly website.	2026-03-08 11:10:53.745
+15	e9ca7e0f-37da-4eff-9491-19351afbe2b5	10	10	5	5	5	8	we needed a break	schedule properly 1 day before interview\n	prepare students for interview before day	2026-03-08 11:24:28.787
+16	3e7b46a5-278b-446a-9567-3b0e4a49212d	7	6	3	9	8	5	the mainroom volunteers are not responding on the time...due to that the interviewee joining time gets delayed. and a situation is created where the HR needs to wait for 5 or 10 mins. The HR is asking us to join the next person  but as wer'e putting msg to the waiting nd main room voulnteer, they're responding after being asked a couple of times.due to thz the hr waits for a longer time nd only finished interviewing 3 interviewee out of 22 students.as an HR volunteer i waited for nearly 4 hrs in the meet, the HR joined only at 2pm. nd the waiting room volunteer got the info of thz at 1.50 pm only..so it is really hectic to stay in the meet for nearly 4 hrs without doing anything..nd i can't do anyother work other than thz as the crt timing of commencement of the meeting is not told to me properly	the main room volunteers should send the interviewee on the time. and there should be proper scheduling as many of the interviewees are waiting from 9.30 in the morning but then also they don't get a chance to get interviewed.. so the scheduling should be more clearer nd on time.	the interviews should be started on the time...overall it's a good experience.	2026-03-08 11:28:35.593
+17	4ce26e20-f54e-4b3b-a677-1e0a347c4552	9	9	8	9	9	10	I have faced no issues throughout the meeting	Everything is better	Great experience to work as a volunteer, learned a lot\n	2026-03-08 11:40:52.282
+18	535a7aaa-46f5-4290-922a-f49376145eb5	10	10	10	10	10	10	Nil	I have no comments on it because I hope this is much better 	No	2026-03-08 12:26:15.556
+19	0b2baddb-c981-4263-abdf-666c90c80d85	10	10	8	9	9	8	-	-	-	2026-03-08 13:26:01.567
+20	fcd809b0-a8c8-472e-8990-8c340761321d	10	9	8	10	10	10	The only issue faced during my shift was that I didn't know who was coming next. Otherwise there was no other problem. 	If you could let the volunteer know who is coming next to the call it would be nice. 	There are no other comments everything was nice . 	2026-03-08 15:28:23.139
+\.
+
+
+--
+-- Data for Name: volunteer_profiles; Type: TABLE DATA; Schema: public; Owner: user123
+--
+
+COPY public.volunteer_profiles (id, name, assigned_hr_id) FROM stdin;
+b9ec752c-ffc5-4df5-b2d1-67542e245d05	Ananthika	1222491e-2d54-48f0-9552-8d2a28af1c4f
+683327d9-605d-433e-9fe3-964005139e0b	Vishwanathan K	3bdac905-7cfa-4a31-85de-39ec2f854afd
+d9f54959-5bae-4baa-b191-db06f7976a64	Krishna Datta Adibatla V	0cc1387b-56c9-4ce6-a994-e1cf59c24632
+5f95ce85-7bfa-4339-9917-5c5dd316c157	Harinee S	662d4572-ecc9-4f5a-b8b6-8007c9e4aa66
+d48db17c-292c-4a69-ae58-ff91be3e8f41	Harshitha H	2aba8a8f-5d4e-439f-90a6-30a2c2e7c64a
+f5e9c1b9-6475-4848-babe-06cf999a265b	Abhimanyu Singh Bhati(2nd year)	458250d8-e65f-4171-9e11-3a6dff72a848
+8c4627b5-95fd-4094-b437-1cf342fcbe00	IK Kavin Sriniivas	24421caf-3a14-4681-b9f9-f237f956d8d4
+3f094cca-c22b-41c0-898a-bfff266aea85	Mohammed Thoufeeq S	6f127d1b-9a45-41d4-9fcb-da121c576e16
+4ce26e20-f54e-4b3b-a677-1e0a347c4552	Yuvanesh S	bf71f55b-86ba-46b8-afa1-1aea09f829e1
+6a6bd943-77de-49b9-8f9d-0791ee719fa0	S Kowshik Ganesh	4e45ee0a-7e32-4e61-9e0f-ead4bcd328c3
+052ea53a-dd98-46a4-b0fe-52d05e15f660	P yeshwanth	ac0d75bf-7077-4d50-a50d-d4b0b6a58f6b
+4627fb6d-38d9-4512-844e-7b13c14be299	Ashwant P	104e34a6-fd53-4012-a0f0-41df6842c833
+e86d5b0c-0195-4ff4-8546-bb1feaff27fb	Sampreethi S	d4cf1e25-663d-48a1-806c-b1b4a72b5e34
+d554e134-b28e-446f-9e47-7d985391764e	Harini Sharon R I	a3ca42d8-ab64-421a-ab67-aeb12925661e
+fd4bb95b-2c86-4f2b-8c27-7cb80dbef17f	Harshietaa Sounder	9ecb3c46-4943-4255-8f07-ee963f9a7b4b
+425ee31f-7e86-4f4f-8581-0a4c0889bfc6	Pragatheeshwaran	8ef5450c-442e-440e-b14f-9b98542fd9bf
+4c3d1715-9aa6-4a4c-a994-4aa1218bbdb6	Abu Sathik Afridi S	1da76e1a-a0c3-47ad-a2c5-656406fd12e2
+22568920-bdef-49ec-b347-2fe87880b5f6	K Tharun Vel(2nd year)	f383c98b-d0b0-4d26-aaa8-231ad1dc8bc3
+0cbbab04-2092-4fd5-8334-e45fdf6e220b	Krish Shah	a55a5c41-087d-4ea5-bdb1-2c7345243b0e
+fa5cbdd9-10c6-4250-9413-da37efa007ee	Surya Prakash S	5f1975ba-b40d-4a05-b28d-5195c0db7348
+535a7aaa-46f5-4290-922a-f49376145eb5	ANANYA H	c34851b2-fce1-4c90-b896-3a1a666a841a
+ef38f37b-c3a6-4f84-bad2-8321e970f3c9	P.Tharunika	db338578-8876-4dec-a6d5-2d0094828b16
+5e83a602-c4f2-455c-8862-0760b8d74682	A Aren Karthik	217ae2de-4843-400b-964c-30302c10965e
+6c9bb9ac-ce85-482c-9367-3de6a0ee5955	V.Yashitha	0d77a15a-eaec-418e-93ba-7317ea498599
+c12a0434-ef5e-4253-97fc-77aadc69ed5b	Kaaviya	864fdade-0299-4871-a060-3c55442a1355
+f4ab0b5e-cf4e-4cd6-a711-2c3371b6c57a	M.Titiksha	a895d6bc-408f-4590-a7b2-d228d3627109
+4a8d50e8-223a-4085-badf-b4fa8f63f47e	Sai Vignesh	e4d9b090-495e-4d82-9c3e-d8048154ccd6
+9209359d-918d-4573-a910-e4eabf365bbc	Hrithik G	a0df520f-d839-4acf-b594-7cad857eeaa7
+0530c686-3ef4-45d0-802d-b2b745958698	Rithik Eashwar G	6a497e8f-dd59-4675-b85e-34a93e32d4b0
+952c9087-df52-4737-bcf0-659121486278	KAILASH S(2nd year)	81f895c5-36b8-4d09-8241-80e64868fe56
+8333dc86-60f8-441a-b9a2-4a8b437b6bda	B JASHWANTH SHANKAR(2nd year)	2a227454-03a0-441c-9b10-480f36a9d715
+855898b5-356a-414c-a2e2-f4ee47031273	R.Sainethra	c9d7022f-7e84-4876-a4fa-beda27a31cd5
+e9a6253b-412f-4954-bb2d-5e3c389c0ef4	DHARSHIKA SAMPATHKUMAR(2nd year)	d6a31449-5393-444e-89c7-f8ba9d35545a
+f910702d-c82a-4022-bb4b-580e825d5c78	S Niharika	51c28633-94a9-4653-bbc8-47eca7fd98c2
+feb7a4ec-7cff-4bce-8509-ece6baa0ec11	Rishi Varma	77da9640-33e1-4aba-a5fd-ff98ddfb57c4
+d9e823e0-cadd-4710-8416-fae252a5704c	J GRISLER PAUL(2nd year)	39201be0-22a9-4afc-8bbf-9a7dd43637e6
+b7ecd00a-fb1f-4d4f-941d-eb74c2802bc5	Abdul Muhaiman Basha	42dbf0f4-4340-4d04-b344-a249cd2b25ba
+8f277682-2be0-429f-8a11-30fb8f7f94ba	Yadhunandhan K(2nd year)	6a0474b6-8bdb-4e70-9a63-4973bbfb5f66
+e2050730-0a09-47ca-9c71-4d225fbeeda4	JOVIAL JAYBURT\nPARAVALLAPIL	4df9bf27-579a-4661-a2ea-703387a2bdaf
+adb283a0-ef91-4607-b1db-0f212e85eadd	M Sabiya	1cdcde69-9c74-4f47-8da6-335a93fe0cfd
+983d2143-1b4f-440a-a09d-f56c81d17f50	Sakthi Ganesh J	4755002c-b849-46a3-8d7d-09a6f0244fe0
+41421f0c-31a3-4a3b-a089-d9b6d39dee9b	Abayambal(2nd year)	d631f416-b5af-4ca2-956f-da772aff5f6f
+d5e5945a-45b0-4c23-8373-d459d1a16273	Smruthi S	565b69ae-c54e-4f96-9d46-a31e869eccbf
+85bb0d65-9ecb-4fd7-a45b-eb518c4823c6	D Anirrudh	50fa6865-037c-451b-8ecc-c4fd9bdb0334
+adc75e26-d59a-4553-b549-6a9c7b281142	Diya Sree S	9b408827-9730-414a-a9ae-c8638060695c
+2ab3a0ca-1084-4af7-8447-c73766c44811	Sharan Suresh	539ff319-c98a-440f-9541-c0e736fe44b3
+7c693e6b-ad8b-426e-a665-cb7673fca245	Prabhanjan V A	6f3f0a3c-1029-44f0-8a4e-38c4a6a462b6
+60ec4266-b1e3-4bb3-a3f4-b60c7764ad9a	Harinarayanan S	246e2354-457e-4112-af52-025952cca149
+7b1d637b-3477-459d-afb7-d96d2b185e5d	Sahana Srinath	2447e995-8cd8-431b-80fd-2654f0b2298b
+7a1b11d8-8720-49ca-9dc5-476a9a424456	Harshiitha	1b1b8af5-3154-4f9c-93b0-87c59f3d36f9
+3e7b46a5-278b-446a-9567-3b0e4a49212d	Agnes Hepsiba S	c4e22006-3ed9-4250-91c8-6618d57253ed
+fcd809b0-a8c8-472e-8990-8c340761321d	Sucharitha	6a9107b1-6b87-42c5-8994-967a28c2b0d1
+a3d7608a-3e6b-41de-afe1-d83bd9c06ba8	Sarulatha G	52535048-47f2-42cb-91ec-65a4824c9908
+97c88bbe-de06-43da-b840-59bf09e5736a	Sathya Shree T R	ed4d75f8-d2ba-4a8b-bb15-3f4b5ae77b5a
+28f5d1b6-3b66-46db-a03c-91b9d649d6dc	Yaathra P	74a0f6ca-e9d4-48ce-80b4-463ce6f06489
+92530483-2e55-4633-801b-33068777dece	Shruthika Antoinette	44f338a5-56b0-4ad1-8258-79826e1445b3
+29570303-2e89-4309-a176-89d8fe5e11d9	Priyanka.P	a694622b-3ba8-4c82-bd05-08d8bfd5af50
+5ac951bd-3939-4230-b1a9-2730cd6fb272	Aishwarya S	8dc2e306-0b99-47f4-ab15-7e64121bdd0e
+75243657-2d47-4521-83c2-16226cf30f1e	Akhshaya Murugan	a16f26ae-83b3-4288-ba7d-7efb541104c4
+27379fa2-37cf-40ea-8d4e-964d771a9a5a	Ashwin Kumar (2nd year)	ce6d53c7-d3d3-401f-be95-013fa81fd707
+51c9b398-5978-4fc6-8a51-ca27987eacad	R Devesh	990d6c56-fa9b-4848-8696-21e832fbcfd3
+d9cbf999-7160-46e4-954e-0003c2bbf469	S Reya	9f8c9585-6650-4d4a-85d2-0fc5e3d20fea
+12b69d4d-22d9-457b-83bd-51fd6dd550b7	Kalpanapriyadharshini	2920b45c-0ce6-4dec-8766-3892322ff1b0
+850d1b00-008a-4414-9061-bc1715337a21	E Dharanivel	bd05543d-88b0-4ba2-af9c-3a21a2aee8d3
+0b2baddb-c981-4263-abdf-666c90c80d85	Bala Aravinthan.G	e5cabf10-53a9-430a-a64c-34eaa3fffdb5
+bc76a506-2d9d-48f8-bf77-fec273ffc999	P. A. Olive Ashrita	e13fa7d8-959e-4caa-b474-1e839b1b7a5b
+e4a1e93d-df96-4d06-98cd-2c2ff225bbcc	Sooraj.D	f54d422e-19f7-404d-9c36-4fe0d4c0bbe5
+7388a8a6-8510-4d41-bff4-32791b8ec647	Jagabattula Subhash Tapasvi	eea52d8e-619c-4985-9891-2b417c468095
+f53fff0e-4467-4ecd-8c0f-83d5053150c3	Sowmiya R(2nd year)	55fbdf9b-b4c7-4844-babc-bba452abf569
+02481999-8975-4df9-abe1-f9eb6d3b4a34	A Mathimalar	d6400b5f-5117-4826-8aa2-20e215edfb2b
+dcc94a38-bfd8-44a8-bcb1-6fe752136882	Uma Ramanathan	fcce01c3-007c-4299-a17f-9d5f4402c6ec
+cca7dd88-8f54-40d9-b27e-68ce966b14a3	Jesu Rupesh A	aaec9758-627f-40bb-b8b2-e92110d36327
+6aaef626-2c8a-4de2-8667-5553d4b8b47f	Aradhana V	8c1d8564-6890-42e8-b25f-456e6ee88396
+e2576d7e-38da-4faa-966e-9b0fbb52f590	Vanthana R(2nd year)	5e31574a-8f3c-46c7-8f2e-fbd603c057a0
+ec5d2aa5-3432-4332-87a2-e5df041e101b	Aadithya R	3bb7ac61-b27f-4979-b200-79ff470f486f
+b91a398f-64d4-4afb-a4e4-d8eb4811bc5c	Harshitha R	964b9c92-19e6-4140-8be6-a64973f93bfa
+aacc975e-bcab-425b-b665-9e20c628af95	Adinath R	38236c5f-2faa-4940-aa37-60a206f3be14
+82b347cd-200d-4a2b-9f5d-53e59d13866f	T BARSHANA RANI(2nd year)	0ac45005-84e5-4b25-ad6c-1e998e94a611
+6ff368e9-7c6e-4c68-ae53-aee0925beb65	ANUPRIYA D	674b5de7-296f-4f50-8359-9e337c508dd2
+3cc7da2b-0993-45d8-b897-0150221476b3	Thangaraja D	cd263764-71e2-4ead-87a3-0c5e9aff9828
+099bf757-0cb3-4e4c-838b-8585feaca9bc	VAISHNAVI CHITRAA M(2nd year)	5772f06a-bf47-407f-b92e-74bf4a85aead
+d7498189-5bd4-4a94-a177-fc1d9d4d95e6	Madhusree I	eee239d8-0363-488a-80c3-0c415c7b2217
+89e9f262-9267-440c-b139-4807fdd1936c	Madhushalani S	dc83d654-7865-4342-9437-16bfcb075e6a
+1ad5d812-2541-4510-a69d-9f6fbd7b770a	P.Parimala Krishna	cf6780cd-f597-4792-96f8-5e11206fae5e
+e9ca7e0f-37da-4eff-9491-19351afbe2b5	Surendar	7d959ecb-3999-47cd-ae17-5aab0405cb97
+6006a985-8e1e-49f5-accb-957f9af35428	Meenatshi P	6b65b0e5-ad3f-4756-a04d-f15f072ab740
+f48650e2-4091-4021-a596-4987b8c7cd2c	Subash Krishna K	5c9635b4-b0e1-40ac-947e-93714df4d582
+d187c76f-382c-4fee-84aa-69eaae09e124	Sharukesh P	f0541e9f-0cc9-4a5a-a074-fc34ffab6f36
+323065de-d86d-47ee-838b-69e9dc6ef1c4	S.Shruthikaa	efa89ff0-babb-47d8-9694-afcbe18d049e
+81c6f0bb-2675-46d8-897e-bab7d796d256	Shreenidhi C(2nd year)	920b5fba-b331-4010-8858-8a5b3fb29a02
+f7e111d5-d366-4220-add8-83c41fe7dd99	Vanishri(2nd year)	54ad8399-936a-47f5-bfc8-db3194c32ea3
+d355909d-d3d5-49f0-a00a-88ed836c401b	Sriharini S	98996c73-8763-4ee8-bb8c-bfeaa7c791b0
+1de88450-10ee-48d2-b1fb-8673d1304e86	Jandhyala Amrutha	7f1fffa7-2ca2-45a1-802d-35c7b7e22215
+e206b17c-50f8-4b46-a94c-5e48b1d82190	Jaideep L	\N
+6fac4c06-6ec4-43db-ba50-7d0e7e19fcf8	Sanjitha	649453fd-ef30-42d1-8d2a-94c26237e814
+25a42377-2253-4634-9457-33f397c24e26	GAYATRI V	\N
+4f9c5ebf-c0dc-4fa9-a288-2b53bc490d6e	shruthikaa	efa89ff0-babb-47d8-9694-afcbe18d049e
+235d1d72-a678-4e53-8830-f4775e59f49f	Nethra R	\N
+\.
+
+
+--
+-- Name: HrAssignment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user123
+--
+
+SELECT pg_catalog.setval('public."HrAssignment_id_seq"', 1446, true);
+
+
+--
+-- Name: evaluations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user123
+--
+
+SELECT pg_catalog.setval('public.evaluations_id_seq', 640, true);
+
+
+--
+-- Name: feedbacks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user123
+--
+
+SELECT pg_catalog.setval('public.feedbacks_id_seq', 28, true);
+
+
+--
+-- Name: student_transfers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user123
+--
+
+SELECT pg_catalog.setval('public.student_transfers_id_seq', 186, true);
+
+
+--
+-- Name: volunteer_feedbacks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user123
+--
+
+SELECT pg_catalog.setval('public.volunteer_feedbacks_id_seq', 20, true);
+
+
+--
+-- Name: HrAssignment HrAssignment_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."HrAssignment"
+    ADD CONSTRAINT "HrAssignment_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: Student Student_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."Student"
+    ADD CONSTRAINT "Student_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: User User_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."User"
+    ADD CONSTRAINT "User_pkey" PRIMARY KEY (id);
+
+
+--
+-- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public._prisma_migrations
+    ADD CONSTRAINT _prisma_migrations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: evaluations evaluations_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT evaluations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: feedbacks feedbacks_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.feedbacks
+    ADD CONSTRAINT feedbacks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: hr_profiles hr_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.hr_profiles
+    ADD CONSTRAINT hr_profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: notifications notifications_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pipeline_profiles pipeline_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.pipeline_profiles
+    ADD CONSTRAINT pipeline_profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: student_transfers student_transfers_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers
+    ADD CONSTRAINT student_transfers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: volunteer_feedbacks volunteer_feedbacks_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_feedbacks
+    ADD CONSTRAINT volunteer_feedbacks_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: volunteer_profiles volunteer_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_profiles
+    ADD CONSTRAINT volunteer_profiles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: HrAssignment_hrId_idx; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE INDEX "HrAssignment_hrId_idx" ON public."HrAssignment" USING btree ("hrId");
+
+
+--
+-- Name: HrAssignment_hrId_order_key; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE UNIQUE INDEX "HrAssignment_hrId_order_key" ON public."HrAssignment" USING btree ("hrId", "order");
+
+
+--
+-- Name: HrAssignment_studentId_idx; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE INDEX "HrAssignment_studentId_idx" ON public."HrAssignment" USING btree ("studentId");
+
+
+--
+-- Name: Student_registerNumber_key; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE UNIQUE INDEX "Student_registerNumber_key" ON public."Student" USING btree ("registerNumber");
+
+
+--
+-- Name: User_username_key; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE UNIQUE INDEX "User_username_key" ON public."User" USING btree (username);
+
+
+--
+-- Name: evaluations_studentId_hrId_key; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE UNIQUE INDEX "evaluations_studentId_hrId_key" ON public.evaluations USING btree ("studentId", "hrId");
+
+
+--
+-- Name: feedbacks_hrId_idx; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE INDEX "feedbacks_hrId_idx" ON public.feedbacks USING btree ("hrId");
+
+
+--
+-- Name: volunteer_feedbacks_volunteer_id_idx; Type: INDEX; Schema: public; Owner: user123
+--
+
+CREATE INDEX volunteer_feedbacks_volunteer_id_idx ON public.volunteer_feedbacks USING btree (volunteer_id);
+
+
+--
+-- Name: HrAssignment HrAssignment_hrId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."HrAssignment"
+    ADD CONSTRAINT "HrAssignment_hrId_fkey" FOREIGN KEY ("hrId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: HrAssignment HrAssignment_studentId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public."HrAssignment"
+    ADD CONSTRAINT "HrAssignment_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES public."Student"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: evaluations evaluations_hrId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT "evaluations_hrId_fkey" FOREIGN KEY ("hrId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: evaluations evaluations_studentId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.evaluations
+    ADD CONSTRAINT "evaluations_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES public."Student"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: feedbacks feedbacks_hrId_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.feedbacks
+    ADD CONSTRAINT "feedbacks_hrId_fkey" FOREIGN KEY ("hrId") REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: hr_profiles hr_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.hr_profiles
+    ADD CONSTRAINT hr_profiles_id_fkey FOREIGN KEY (id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: notifications notifications_receiver_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.notifications
+    ADD CONSTRAINT notifications_receiver_id_fkey FOREIGN KEY (receiver_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: pipeline_profiles pipeline_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.pipeline_profiles
+    ADD CONSTRAINT pipeline_profiles_id_fkey FOREIGN KEY (id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: student_transfers student_transfers_admin_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers
+    ADD CONSTRAINT student_transfers_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: student_transfers student_transfers_from_hr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers
+    ADD CONSTRAINT student_transfers_from_hr_id_fkey FOREIGN KEY (from_hr_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: student_transfers student_transfers_student_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers
+    ADD CONSTRAINT student_transfers_student_id_fkey FOREIGN KEY (student_id) REFERENCES public."Student"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: student_transfers student_transfers_to_hr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.student_transfers
+    ADD CONSTRAINT student_transfers_to_hr_id_fkey FOREIGN KEY (to_hr_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: volunteer_feedbacks volunteer_feedbacks_volunteer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_feedbacks
+    ADD CONSTRAINT volunteer_feedbacks_volunteer_id_fkey FOREIGN KEY (volunteer_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: volunteer_profiles volunteer_profiles_assigned_hr_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_profiles
+    ADD CONSTRAINT volunteer_profiles_assigned_hr_id_fkey FOREIGN KEY (assigned_hr_id) REFERENCES public.hr_profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+
+--
+-- Name: volunteer_profiles volunteer_profiles_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: user123
+--
+
+ALTER TABLE ONLY public.volunteer_profiles
+    ADD CONSTRAINT volunteer_profiles_id_fkey FOREIGN KEY (id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
